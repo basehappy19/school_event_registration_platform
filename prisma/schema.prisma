@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AdminRole {
+  ADMIN
+  SUPER_ADMIN
+}
+
+model AdminUser {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  avatar    String?
+  role      AdminRole @default(ADMIN)
+  createdAt DateTime  @default(now())
+}
+
+enum LoginStatus {
+  SUCCESS
+  FAILED
+}
+
+model AdminLoginLog {
+  id           String      @id @default(cuid())
+  emailAttempt String
+  ipAddress    String?
+  userAgent    String?
+  status       LoginStatus
+  createdAt    DateTime    @default(now())
+}
+
+model StudentProfile {
+  studentId  String         @id
+  nationalId String
+  prefix     String
+  firstName  String
+  lastName   String
+  grade      String
+  room       String
+  number     String
+
+  registrations Registration[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  isPublished Boolean  @default(false)
+
+  quotas        ProjectQuota[]
+  formFields    FormField[]
+  registrations Registration[]
+}
+
+model ProjectQuota {
+  id        String @id @default(cuid())
+  projectId String
+  grade     String
+  capacity  Int
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, grade])
+}
+
+enum FieldType {
+  SHORT_TEXT
+  DROPDOWN
+  CHECKBOX
+}
+
+model FormField {
+  id         String    @id @default(cuid())
+  projectId  String
+  label      String
+  type       FieldType
+  options    String?   // JSON string or comma-separated
+  isRequired Boolean   @default(false)
+
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  answers FormAnswer[]
+}
+
+model FormAnswer {
+  id             String @id @default(cuid())
+  registrationId String
+  fieldId        String
+  value          String // Stored as a string, parse if needed based on FormField type
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  field        FormField    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+}
+
+enum RegistrationStatus {
+  APPROVED
+  WAITLISTED
+  REJECTED
+  CANCELLED
+}
+
+model Registration {
+  id              String             @id @default(cuid())
+  projectId       String
+  studentIdInput  String
+  prefix          String
+  firstName       String
+  lastName       String
+  grade           String
+  room            String
+  number          String
+  status          RegistrationStatus @default(WAITLISTED)
+  masterStudentId String?
+
+  createdAt DateTime @default(now())
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile? @relation(fields: [masterStudentId], references: [studentId], onDelete: SetNull)
+  answers        FormAnswer[]
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  adminEmail String?
+  studentId  String?
+  projectId  String?
+  ipAddress  String?
+  userAgent  String?
+  payload    String?
+  createdAt  DateTime @default(now())
+}
