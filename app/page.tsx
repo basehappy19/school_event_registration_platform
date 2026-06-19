@@ -115,9 +115,9 @@ export default async function Home() {
                       <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
                         <Calendar className="w-4 h-4" />
                       </div>
-                      <div className="flex flex-col">
-                        <span>เริ่ม: {formatDateThai(project.startDate)}</span>
-                        <span>ถึง: {formatDateThai(project.endDate)}</span>
+                      <div className="flex flex-col gap-1">
+                        <span>เริ่มลงทะเบียน: {formatDateThai(project.startDate)}</span>
+                        <span>ปิดลงทะเบียน: {formatDateThai(project.endDate)}</span>
                       </div>
                     </div>
 
@@ -128,8 +128,9 @@ export default async function Home() {
                             <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
                               <Clock className="w-4 h-4" />
                             </div>
-                            <div className="flex flex-col justify-center min-h-[2rem]">
-                              <span>ติว: {project.activityDate} {project.activityTime && `เวลา ${project.activityTime}`}</span>
+                            <div className="flex flex-col justify-center gap-1 min-h-[2rem]">
+                              {project.activityDate && <span>วันติว: {project.activityDate}</span>}
+                              {project.activityTime && <span>เวลา: {project.activityTime}</span>}
                             </div>
                           </div>
                         )}
