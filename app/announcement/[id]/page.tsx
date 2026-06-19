@@ -120,7 +120,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               โครงการ {project.title}
             </h2>
             <div className="inline-block bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl text-sm md:text-base border border-white/20 print:border-none print:bg-transparent print:text-black print:p-0">
-              <p>วัน{project.activityDate || "__________"} เวลา {project.activityTime || "__________"} ณ {project.activityLocation || "__________"}</p>
+              <p>วันที่ {project.activityDate || "__________"} เวลา {project.activityTime || "__________"} ณ {project.activityLocation || "__________"}</p>
             </div>
           </div>
         </div>

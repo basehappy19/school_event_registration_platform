@@ -79,7 +79,7 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
           <h2 className="text-lg font-bold mb-4">{project.title}</h2>
           
           <p className="text-base">
-            วัน{formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
+            วันที่ {formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
           </p>
         </div>
 
