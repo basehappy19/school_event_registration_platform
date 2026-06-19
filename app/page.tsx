@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Calendar, Users, ArrowRight } from "lucide-react"
+import { Calendar, Users, ArrowRight, UserPlus } from "lucide-react"
 import prisma from "@/lib/prisma"
 
 export const revalidate = 60 // Revalidate every minute
@@ -10,8 +10,18 @@ export default async function Home() {
     where: { isPublished: true },
     orderBy: { startDate: 'asc' },
     include: {
-      _count: {
-        select: { registrations: true }
+      quotas: {
+        orderBy: { grade: 'asc' }
+      },
+      registrations: {
+        where: {
+          status: {
+            in: ['APPROVED', 'WAITLISTED']
+          }
+        },
+        select: {
+          grade: true
+        }
       }
     }
   })
@@ -25,11 +35,11 @@ export default async function Home() {
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-lg">S</span>
             </div>
-            <span className="font-bold text-slate-800 text-xl tracking-tight">SchoolEvents</span>
+            <span className="font-bold text-slate-800 text-xl tracking-tight">ระบบลงทะเบียนกิจกรรม</span>
           </div>
           <nav>
             <Link href="/admin/login" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-              Admin Login
+              เข้าสู่ระบบแอดมิน
             </Link>
           </nav>
         </div>
@@ -39,11 +49,11 @@ export default async function Home() {
         {/* Hero Section */}
         <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight">
-            Discover & Register for <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">School Events</span>
+            ค้นหาและสมัครเข้าร่วม <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">กิจกรรมของโรงเรียน</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Browse upcoming camps, clubs, and activities. Secure your spot easily with your Student ID—no account creation required!
+            ดูค่าย ชมรม และกิจกรรมต่างๆ ที่กำลังจะมาถึง จองที่นั่งได้ง่ายๆ ด้วยรหัสนักเรียนของคุณ — ไม่ต้องสร้างบัญชีผู้ใช้!
           </p>
         </div>
 
@@ -54,11 +64,15 @@ export default async function Home() {
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Calendar className="w-8 h-8 text-slate-400" />
               </div>
-              <p className="text-lg font-medium text-slate-700">No active events found.</p>
-              <p className="text-sm mt-1">Check back later for new opportunities!</p>
+              <p className="text-lg font-medium text-slate-700">ยังไม่มีกิจกรรมที่เปิดรับสมัคร</p>
+              <p className="text-sm mt-1">โปรดกลับมาตรวจสอบใหม่ในภายหลัง!</p>
             </div>
           ) : (
-            projects.map(project => (
+            projects.map(project => {
+              const totalCapacity = project.quotas.reduce((sum, q) => sum + q.capacity, 0)
+              const totalRegistered = project.registrations.length
+              
+              return (
               <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col transform hover:-translate-y-1">
                 <div className="h-48 bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-6 border-b border-slate-100 relative overflow-hidden">
                   <div className="absolute inset-0 bg-grid-slate-100/[0.2] bg-[size:20px_20px]"></div>
@@ -67,35 +81,61 @@ export default async function Home() {
                   </h3>
                 </div>
                 <div className="p-6 flex-1 flex flex-col bg-white">
-                  <p className="text-slate-600 text-sm mb-6 line-clamp-2 flex-1">
-                    {project.description || "Join this exciting event! Click to view more details and secure your registration."}
+                  <p className="text-slate-600 text-sm mb-4 line-clamp-2">
+                    {project.description || "เข้าร่วมกิจกรรมที่น่าตื่นเต้นนี้! คลิกเพื่อดูรายละเอียดเพิ่มเติมและสมัคร"}
                   </p>
                   
-                  <div className="space-y-3 mb-8 bg-slate-50 p-4 rounded-xl">
-                    <div className="flex items-center text-sm font-medium text-slate-700 gap-3">
+                  {/* Badges for grades */}
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {project.quotas.map(quota => (
+                      <span key={quota.id} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        รับ ม.{quota.grade}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <div className="space-y-3 mb-8 bg-slate-50 p-4 rounded-xl flex-1">
+                    <div className="flex items-center text-sm font-medium text-slate-700 gap-3 pb-3 border-b border-slate-200">
                       <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
                         <Calendar className="w-4 h-4" />
                       </div>
-                      <span>{new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}</span>
+                      <span>{new Date(project.startDate).toLocaleDateString('th-TH')} - {new Date(project.endDate).toLocaleDateString('th-TH')}</span>
                     </div>
-                    <div className="flex items-center text-sm font-medium text-slate-700 gap-3">
-                      <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 shrink-0">
-                        <Users className="w-4 h-4" />
+                    
+                    <div className="pt-1">
+                      <div className="flex items-center text-sm font-semibold text-slate-800 mb-2">
+                        <UserPlus className="w-4 h-4 mr-2 text-violet-600" />
+                        ยอดสมัครรวม: {totalRegistered} / {totalCapacity} คน
                       </div>
-                      <span>{project._count.registrations} students registered</span>
+                      <div className="space-y-1.5 pl-6">
+                        {project.quotas.map(quota => {
+                          const gradeRegistered = project.registrations.filter(r => r.grade === quota.grade).length
+                          const isFull = gradeRegistered >= quota.capacity
+                          
+                          return (
+                            <div key={quota.id} className="flex justify-between text-xs text-slate-600">
+                              <span>ม.{quota.grade}</span>
+                              <span className={isFull ? "text-amber-600 font-medium" : ""}>
+                                {gradeRegistered} / {quota.capacity} {isFull && "(เต็ม)"}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
 
                   <Link 
                     href={`/detail/${project.id}`}
-                    className="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow group-hover:bg-indigo-700"
+                    className="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow group-hover:bg-indigo-700 mt-auto"
                   >
-                    View Details & Register
+                    ดูรายละเอียดและสมัคร
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </div>
-            ))
+              )
+            })
           )}
         </div>
       </main>

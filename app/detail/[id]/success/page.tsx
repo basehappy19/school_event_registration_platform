@@ -24,24 +24,24 @@ export default async function SuccessPage({
         )}
 
         <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
-          {isApproved ? "Registration Approved!" : "You're on the Waitlist"}
+          {isApproved ? "ลงทะเบียนสำเร็จ!" : "คุณอยู่ในรายชื่อสำรอง (Waitlist)"}
         </h1>
         
         <p className="text-slate-600 mb-8">
           {isApproved 
-            ? "Your spot has been secured successfully. You will receive further instructions soon." 
-            : "The event capacity is currently full. We have securely saved your spot in the queue, and you will be automatically promoted if someone cancels."}
+            ? "การจองที่นั่งของคุณเสร็จสมบูรณ์แล้ว คุณจะได้รับคำแนะนำเพิ่มเติมในเร็วๆ นี้" 
+            : "ขณะนี้จำนวนที่นั่งเต็มแล้ว เราได้บันทึกรายชื่อของคุณไว้ในคิวอย่างปลอดภัย และคุณจะได้รับการเลื่อนอันดับโดยอัตโนมัติหากมีผู้สละสิทธิ์"}
         </p>
 
         <div className="bg-slate-50 rounded-2xl p-4 mb-8 text-sm text-slate-500 border border-slate-100">
-          <p>Please screenshot this page or save your URL as confirmation.</p>
+          <p>กรุณาแคปเจอร์หน้าจอนี้ หรือบันทึก URL ไว้เพื่อเป็นหลักฐานยืนยัน</p>
         </div>
 
         <Link 
           href="/"
           className="inline-flex items-center justify-center w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" /> Return to Home
+          <ArrowLeft className="w-5 h-5 mr-2" /> กลับสู่หน้าหลัก
         </Link>
       </div>
     </div>

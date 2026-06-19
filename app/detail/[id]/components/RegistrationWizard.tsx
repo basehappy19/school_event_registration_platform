@@ -30,7 +30,10 @@ export default function RegistrationWizard({ project }: { project: any }) {
 
     const res = await getStudentProfile(studentId, nationalIdSuffix)
     if (res.error) {
-      setError(res.error)
+      if (res.error === "Missing credentials") setError("กรุณากรอกข้อมูลให้ครบถ้วน")
+      else if (res.error === "Student not found") setError("ไม่พบข้อมูลนักเรียน")
+      else if (res.error === "Invalid National ID suffix") setError("เลขบัตรประชาชน 5 หลักสุดท้ายไม่ถูกต้อง")
+      else setError(res.error)
     } else if (res.data) {
       setProfile(res.data)
       setStep(2)
@@ -69,7 +72,7 @@ export default function RegistrationWizard({ project }: { project: any }) {
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-8 text-white">
         <Link href="/" className="inline-flex items-center text-indigo-100 hover:text-white transition-colors text-sm font-medium mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Events
+          <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
         </Link>
         <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
         <p className="text-indigo-100 opacity-90">{project.description}</p>
@@ -78,7 +81,7 @@ export default function RegistrationWizard({ project }: { project: any }) {
       <div className="p-8">
         {error && (
           <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-600 px-4 py-3 rounded-xl text-sm flex items-start">
-            <span className="font-semibold mr-2">Error:</span> {error}
+            <span className="font-semibold mr-2">ข้อผิดพลาด:</span> {error}
           </div>
         )}
 
@@ -88,23 +91,23 @@ export default function RegistrationWizard({ project }: { project: any }) {
               <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ShieldCheck className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">Student Verification</h2>
-              <p className="text-slate-500 mt-2">Enter your details to securely autofill your registration form.</p>
+              <h2 className="text-2xl font-bold text-slate-800">ยืนยันตัวตนนักเรียน</h2>
+              <p className="text-slate-500 mt-2">กรอกข้อมูลของคุณเพื่อดึงข้อมูลลงในแบบฟอร์มสมัครโดยอัตโนมัติอย่างปลอดภัย</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Student ID</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">เลขประจำตัวนักเรียน</label>
               <input 
                 type="text" 
                 required 
                 value={studentId}
                 onChange={e => setStudentId(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                placeholder="e.g. 66001"
+                placeholder="เช่น 66001"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Last 5 Digits of National ID</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">เลขบัตรประจำตัวประชาชน 5 หลักสุดท้าย</label>
               <input 
                 type="password" 
                 required 
@@ -114,7 +117,7 @@ export default function RegistrationWizard({ project }: { project: any }) {
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                 placeholder="•••••"
               />
-              <p className="text-xs text-slate-400 mt-2 text-right">Used exclusively for verification. Not stored in plain text.</p>
+              <p className="text-xs text-slate-400 mt-2 text-right">ใช้สำหรับการยืนยันตัวตนเท่านั้น จะไม่ถูกจัดเก็บในรูปแบบข้อความธรรมดา (Plain text)</p>
             </div>
 
             <button 
@@ -123,7 +126,7 @@ export default function RegistrationWizard({ project }: { project: any }) {
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center disabled:opacity-70 mt-4"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <>Verify & Continue <ArrowRight className="w-5 h-5 ml-2" /></>
+                <>ยืนยันตัวตนและดำเนินการต่อ <ArrowRight className="w-5 h-5 ml-2" /></>
               )}
             </button>
           </form>
@@ -136,15 +139,15 @@ export default function RegistrationWizard({ project }: { project: any }) {
                 <UserCheck className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-emerald-700">Verified as</p>
+                <p className="text-sm font-semibold text-emerald-700">ยืนยันตัวตนสำเร็จ</p>
                 <p className="text-slate-800 font-bold">{profile.prefix}{profile.firstName} {profile.lastName}</p>
-                <p className="text-slate-500 text-sm">Class {profile.grade}/{profile.room} • No. {profile.number}</p>
+                <p className="text-slate-500 text-sm">ม.{profile.grade}/{profile.room} • เลขที่ {profile.number}</p>
               </div>
             </div>
 
             {project.formFields.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Additional Information</h3>
+                <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">ข้อมูลเพิ่มเติม</h3>
                 <div className="space-y-5">
                   {project.formFields.map((field: any) => (
                     <div key={field.id}>
@@ -167,7 +170,7 @@ export default function RegistrationWizard({ project }: { project: any }) {
                           onChange={e => setAnswers({...answers, [field.id]: e.target.value})}
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
                         >
-                          <option value="" disabled>Select an option...</option>
+                          <option value="" disabled>เลือกตัวเลือก...</option>
                           {JSON.parse(field.options).map((opt: string) => (
                             <option key={opt} value={opt}>{opt}</option>
                           ))}
@@ -184,9 +187,9 @@ export default function RegistrationWizard({ project }: { project: any }) {
               disabled={loading}
               className="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center disabled:opacity-70 shadow-lg shadow-slate-900/20"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm Registration"}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ยืนยันการลงทะเบียน"}
             </button>
-            <p className="text-center text-xs text-slate-400 mt-4">By confirming, you agree to our privacy policy regarding data collection.</p>
+            <p className="text-center text-xs text-slate-400 mt-4">เมื่อกดยืนยัน ถือว่าท่านยอมรับนโยบายความเป็นส่วนตัวเกี่ยวกับการเก็บรวบรวมข้อมูลของเรา</p>
           </form>
         )}
       </div>
