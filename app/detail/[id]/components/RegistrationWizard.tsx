@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock } from "lucide-react"
+import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users } from "lucide-react"
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import CountdownTimer from "./CountdownTimer"
@@ -22,6 +22,29 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     setShowAccessDeniedModal(false)
     router.replace(`/detail/${project.id}`)
   }
+
+  // Real-time Stats State
+  const [stats, setStats] = useState({ totalCapacity: 0, totalRegistered: 0, viewersCount: 1 })
+  const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15))
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`/api/projects/${project.id}/stats?sessionId=${sessionId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setStats(data)
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    fetchStats()
+    const interval = setInterval(fetchStats, 5000)
+    return () => clearInterval(interval)
+  }, [project.id, sessionId])
+
   
   // Custom Answers State
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -123,6 +146,43 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           
           <div className="mt-8 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
             <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
+            
+            {/* Real-time Stats */}
+            <div className="mt-6 bg-slate-50 border border-slate-100 rounded-2xl p-5 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-slate-200">
+                <div 
+                  className="h-full bg-indigo-500 transition-all duration-1000 ease-out" 
+                  style={{ width: `${stats.totalCapacity > 0 ? Math.min(100, (stats.totalRegistered / stats.totalCapacity) * 100) : 0}%` }}
+                />
+              </div>
+              
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 relative">
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                      กำลังมีคนดูหน้านี้
+                    </p>
+                    <p className="text-2xl font-bold text-emerald-600 leading-none mt-1">
+                      {stats.viewersCount} <span className="text-sm font-normal text-slate-500">คน</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right flex flex-col items-center sm:items-end">
+                  <p className="text-sm font-medium text-slate-600 mb-1">ยอดผู้ลงทะเบียน</p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-bold text-slate-800">{stats.totalRegistered}</span>
+                    <span className="text-slate-400 font-medium">/</span>
+                    <span className="text-slate-500">{stats.totalCapacity || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

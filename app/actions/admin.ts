@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { UpdateProjectPayload } from "@/app/types"
+import fs from "fs"
+import path from "path"
 
 async function checkAdmin() {
   const session = await auth()
@@ -37,6 +39,18 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
   await checkAdmin()
   try {
     const { quotas, formFields, ...data } = payload
+
+    const oldProject = await prisma.project.findUnique({ where: { id: projectId }, select: { posterUrl: true } })
+    if (oldProject?.posterUrl && data.posterUrl !== undefined && oldProject.posterUrl !== data.posterUrl) {
+      try {
+        const filePath = path.join(process.cwd(), 'public', oldProject.posterUrl)
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      } catch (err) {
+        console.error("Failed to delete old poster", err)
+      }
+    }
 
     const project = await prisma.project.update({
       where: { id: projectId },
@@ -170,6 +184,18 @@ export async function adminAcceptAllWaitlist(projectId: number) {
 export async function deleteProject(projectId: number) {
   await checkAdmin()
   try {
+    const project = await prisma.project.findUnique({ where: { id: projectId }, select: { posterUrl: true } })
+    if (project?.posterUrl) {
+      try {
+        const filePath = path.join(process.cwd(), 'public', project.posterUrl)
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      } catch (err) {
+        console.error("Failed to delete project poster", err)
+      }
+    }
+
     await prisma.project.delete({
       where: { id: projectId }
     })
