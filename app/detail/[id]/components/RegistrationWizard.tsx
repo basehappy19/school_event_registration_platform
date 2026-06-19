@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock } from "lucide-react"
 import { signInWithGoogle, signOutAction } from "@/app/actions/auth"
 import Link from "next/link"
+import CountdownTimer from "./CountdownTimer"
 
 export default function RegistrationWizard({ project, session, profile }: { project: any, session: any, profile: any }) {
   const router = useRouter()
@@ -73,6 +74,10 @@ export default function RegistrationWizard({ project, session, profile }: { proj
               <span>{project.activityLocation}</span>
             </div>
           )}
+        </div>
+        
+        <div className="mt-8">
+          <CountdownTimer startDate={project.startDate} endDate={project.endDate} />
         </div>
       </div>
 

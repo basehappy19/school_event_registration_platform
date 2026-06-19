@@ -5,6 +5,18 @@ import prisma from "@/lib/prisma"
 
 export const revalidate = 60 // Revalidate every minute
 
+const formatDateThai = (dateStr: string | Date) => {
+  const date = new Date(dateStr)
+  const day = date.getDate()
+  const monthNames = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  ]
+  const month = monthNames[date.getMonth()]
+  const year = date.getFullYear() + 543
+  return `วันที่ ${day} เดือน ${month} พ.ศ. ${year}`
+}
+
 export default async function Home() {
   const projects = await prisma.project.findMany({
     where: { isPublished: true },
@@ -103,7 +115,7 @@ export default async function Home() {
                       <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
                         <Calendar className="w-4 h-4" />
                       </div>
-                      <span>{new Date(project.startDate).toLocaleDateString('th-TH')} - {new Date(project.endDate).toLocaleDateString('th-TH')}</span>
+                      <span>{formatDateThai(project.startDate)} - {formatDateThai(project.endDate)}</span>
                     </div>
                     
                     <div className="pt-1">
