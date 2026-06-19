@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist } from "@/app/actions/admin"
-import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock } from "lucide-react"
+import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye } from "lucide-react"
 
 export default function AdminRegistrationList({ project }: { project: any }) {
   const [loading, setLoading] = useState(false)
@@ -101,6 +101,9 @@ export default function AdminRegistrationList({ project }: { project: any }) {
           <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
 
           {/* Export Actions */}
+          <a href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+            <Eye className="w-4 h-4 mr-2" /> ดูประกาศหน้าเว็บ
+          </a>
           <button onClick={handlePrint} className="bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
             <Printer className="w-4 h-4 mr-2" /> พิมพ์ประกาศ (PDF)
           </button>
