@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Calendar, Users, ArrowRight, UserPlus, Megaphone } from "lucide-react"
+import { Calendar, Users, ArrowRight, UserPlus, Megaphone, MapPin, Clock } from "lucide-react"
 import prisma from "@/lib/prisma"
 
 export const revalidate = 60 // Revalidate every minute
@@ -120,6 +120,31 @@ export default async function Home() {
                         <span>ถึง: {formatDateThai(project.endDate)}</span>
                       </div>
                     </div>
+
+                    {(project.activityDate || project.activityLocation) && (
+                      <div className="flex flex-col gap-2 pb-3 border-b border-slate-200">
+                        {(project.activityDate || project.activityTime) && (
+                          <div className="flex items-start text-sm font-medium text-slate-700 gap-3">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                              <Clock className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col justify-center min-h-[2rem]">
+                              <span>ติว: {project.activityDate} {project.activityTime && `เวลา ${project.activityTime}`}</span>
+                            </div>
+                          </div>
+                        )}
+                        {project.activityLocation && (
+                          <div className="flex items-start text-sm font-medium text-slate-700 gap-3">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                              <MapPin className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col justify-center min-h-[2rem]">
+                              <span>สถานที่: {project.activityLocation}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="pt-1">
                       <div className="flex items-center text-sm font-semibold text-slate-800 mb-2">
