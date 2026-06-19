@@ -3,9 +3,17 @@ import prisma from "@/lib/prisma"
 
 // In-memory store for active viewers
 // Structure: { projectId: { sessionId: lastSeenTimestamp } }
-const globalForViewers = global as unknown as { activeViewers: Record<number, Record<string, number>> }
+const globalForViewers = global as unknown as { 
+  activeViewers: Record<number, Record<string, number>>,
+  cachedStats: Record<number, { data: any, timestamp: number }>
+}
 const activeViewers = globalForViewers.activeViewers || {}
-if (process.env.NODE_ENV !== 'production') globalForViewers.activeViewers = activeViewers
+const cachedStats = globalForViewers.cachedStats || {}
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForViewers.activeViewers = activeViewers
+  globalForViewers.cachedStats = cachedStats
+}
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -32,26 +40,35 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const viewersCount = activeViewers[projectId] ? Object.keys(activeViewers[projectId]).length : 0
 
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    select: {
-      quotas: { select: { capacity: true } },
-      _count: {
-        select: {
-          registrations: { where: { status: { in: ['APPROVED', 'WAITLISTED'] } } }
+  // In-Memory Cache (TTL 5 seconds) to prevent DB overload during high concurrency
+  const CACHE_TTL = 5000;
+  let statsData = cachedStats[projectId]?.data;
+  
+  if (!statsData || (now - cachedStats[projectId].timestamp > CACHE_TTL)) {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        quotas: { select: { capacity: true } },
+        _count: {
+          select: {
+            registrations: { where: { status: { in: ['APPROVED', 'WAITLISTED'] } } }
+          }
         }
       }
-    }
-  })
+    })
 
-  if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 })
+    if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const totalCapacity = project.quotas.reduce((acc, q) => acc + q.capacity, 0)
-  const totalRegistered = project._count.registrations
+    const totalCapacity = project.quotas.reduce((acc, q) => acc + q.capacity, 0)
+    const totalRegistered = project._count.registrations
+
+    statsData = { totalCapacity, totalRegistered }
+    cachedStats[projectId] = { data: statsData, timestamp: now }
+  }
 
   return NextResponse.json({
-    totalCapacity,
-    totalRegistered,
+    totalCapacity: statsData.totalCapacity,
+    totalRegistered: statsData.totalRegistered,
     viewersCount
   })
 }

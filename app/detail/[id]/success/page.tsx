@@ -167,9 +167,9 @@ export default async function SuccessPage({
         </div>
 
         <div className="mt-8 mb-6 text-center">
-          <p className="text-slate-600 mb-3">หากมีข้อสงสัย ปัญหาต่าง ๆ สามารถทัก IG:base_happy19 ได้</p>
+          <p className="text-slate-600 mb-3">หากมีข้อสงสัย ปัญหาต่าง ๆ สามารถทัก <br/>IG: base_happy19 มาได้เลย</p>
           <a href="https://www.instagram.com/base_happy19/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center text-pink-600 bg-pink-50 hover:bg-pink-100 font-medium px-4 py-2 rounded-lg transition-colors border border-pink-100">
-            @base_happy19
+            กดตรงนี้ @base_happy19
           </a>
         </div>
 

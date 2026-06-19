@@ -2,18 +2,41 @@ import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
 import RegistrationWizard from "./components/RegistrationWizard"
 import { auth } from "@/auth"
+import { unstable_cache } from "next/cache"
 
 import { Metadata } from "next"
+
+const getCachedProjectMeta = unstable_cache(
+  async (id: number) => {
+    return await prisma.project.findUnique({
+      where: { id, isPublished: true },
+      select: { title: true, description: true }
+    })
+  },
+  ['project-meta'],
+  { revalidate: 30 }
+)
+
+const getCachedProject = unstable_cache(
+  async (id: number) => {
+    return await prisma.project.findUnique({
+      where: { id, isPublished: true },
+      include: {
+        formFields: true,
+        quotas: true
+      }
+    })
+  },
+  ['project-detail'],
+  { revalidate: 30 }
+)
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
   const numericId = parseInt(id, 10)
   if (isNaN(numericId)) return {}
   
-  const project = await prisma.project.findUnique({
-    where: { id: numericId, isPublished: true },
-    select: { title: true, description: true }
-  })
+  const project = await getCachedProjectMeta(numericId)
 
   if (!project) return {}
 
@@ -29,13 +52,7 @@ export default async function ProjectDetail({ params, searchParams }: { params: 
   const numericId = parseInt(id, 10)
   if (isNaN(numericId)) return notFound()
   
-  const project = await prisma.project.findUnique({
-    where: { id: numericId, isPublished: true },
-    include: {
-      formFields: true,
-      quotas: true
-    }
-  })
+  const project = await getCachedProject(numericId)
 
   if (!project) return notFound()
 
