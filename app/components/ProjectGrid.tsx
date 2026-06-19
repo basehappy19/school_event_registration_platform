@@ -4,8 +4,20 @@ import { useState } from "react"
 import Link from "next/link"
 import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users } from "lucide-react"
 
-export default function ProjectGrid({ projects, formatDateThai }: { projects: any[], formatDateThai: (date: string | Date) => string }) {
+export default function ProjectGrid({ projects }: { projects: any[] }) {
   const [search, setSearch] = useState("")
+
+  const formatDateThai = (dateStr: string | Date) => {
+    const date = new Date(dateStr)
+    const day = date.getDate()
+    const monthNames = [
+      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ]
+    const month = monthNames[date.getMonth()]
+    const year = date.getFullYear() + 543
+    return `วันที่ ${day} ${month} พ.ศ. ${year}`
+  }
 
   const filteredProjects = projects.filter(project => 
     project.title.toLowerCase().includes(search.toLowerCase()) || 

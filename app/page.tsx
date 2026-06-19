@@ -5,18 +5,6 @@ import ProjectGrid from "./components/ProjectGrid"
 
 export const revalidate = 60 // Revalidate every minute
 
-const formatDateThai = (dateStr: string | Date) => {
-  const date = new Date(dateStr)
-  const day = date.getDate()
-  const monthNames = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-  ]
-  const month = monthNames[date.getMonth()]
-  const year = date.getFullYear() + 543
-  return `วันที่ ${day} ${month} พ.ศ. ${year}`
-}
-
 export default async function Home() {
   const projects = await prisma.project.findMany({
     where: { isPublished: true },
@@ -70,7 +58,7 @@ export default async function Home() {
         </div>
 
         {/* Projects Grid with Search */}
-        <ProjectGrid projects={projects} formatDateThai={formatDateThai} />
+        <ProjectGrid projects={projects} />
       </main>
     </div>
   )
