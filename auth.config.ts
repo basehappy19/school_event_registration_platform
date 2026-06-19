@@ -5,4 +5,8 @@ export const authConfig = {
   pages: {
     signIn: "/admin/login",
   },
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60, // 1 hour
+  },
 } satisfies NextAuthConfig

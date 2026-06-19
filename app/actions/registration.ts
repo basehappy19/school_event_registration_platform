@@ -12,8 +12,8 @@ const redis = new Redis({
 import { auth } from "@/auth"
 
 export async function submitRegistration(data: {
-  projectId: string,
-  formAnswers: { fieldId: string, value: string }[]
+  projectId: number,
+  formAnswers: { fieldId: number, value: string }[]
 }) {
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
@@ -38,7 +38,7 @@ export async function submitRegistration(data: {
     const result = await prisma.$transaction(async (tx) => {
       // a. Check if already registered for this project
       const existing = await tx.registration.findFirst({
-        where: { projectId: data.projectId, masterStudentId: student.studentId }
+        where: { projectId: data.projectId, studentId: student.studentId }
       })
 
       if (existing) {
@@ -61,7 +61,7 @@ export async function submitRegistration(data: {
 
       // c. Count current APPROVED registrations for this grade
       const approvedCount = await tx.registration.count({
-        where: { projectId: data.projectId, grade: student.grade, status: 'APPROVED' }
+        where: { projectId: data.projectId, studentProfile: { grade: student.grade }, status: 'APPROVED' }
       })
 
       const status = approvedCount < quota.capacity ? 'APPROVED' : 'WAITLISTED'
@@ -70,15 +70,8 @@ export async function submitRegistration(data: {
       const registration = await tx.registration.create({
         data: {
           projectId: data.projectId,
-          studentIdInput: student.studentId, // From input, but verified
-          prefix: student.prefix,
-          firstName: student.firstName,
-          lastName: student.lastName,
-          grade: student.grade,
-          room: student.room,
-          number: student.number,
+          studentId: student.studentId,
           status: status,
-          masterStudentId: student.studentId, // Link to master data
           answers: {
             create: data.formAnswers.map(ans => ({
               fieldId: ans.fieldId,
@@ -110,7 +103,7 @@ export async function submitRegistration(data: {
   }
 }
 
-export async function cancelRegistration(registrationId: string) {
+export async function cancelRegistration(registrationId: number) {
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
   const userAgent = headersList.get('user-agent') || 'Unknown'
@@ -119,7 +112,8 @@ export async function cancelRegistration(registrationId: string) {
     const result = await prisma.$transaction(async (tx) => {
       // 1. Get the registration to cancel
       const reg = await tx.registration.findUnique({
-        where: { id: registrationId }
+        where: { id: registrationId },
+        include: { studentProfile: true }
       })
 
       if (!reg || reg.status === 'CANCELLED') {
@@ -137,7 +131,7 @@ export async function cancelRegistration(registrationId: string) {
         data: {
           action: "CANCEL_REGISTRATION",
           projectId: reg.projectId,
-          studentId: reg.studentIdInput,
+          studentId: reg.studentId,
           ipAddress: ip,
           userAgent: userAgent,
           payload: JSON.stringify({ registrationId })
@@ -148,7 +142,7 @@ export async function cancelRegistration(registrationId: string) {
       if (reg.status === 'APPROVED') {
         // Find the first WAITLISTED student in the same project and grade
         const nextInLine = await tx.registration.findFirst({
-          where: { projectId: reg.projectId, grade: reg.grade, status: 'WAITLISTED' },
+          where: { projectId: reg.projectId, studentProfile: { grade: reg.studentProfile.grade }, status: 'WAITLISTED' },
           orderBy: { createdAt: 'asc' }
         })
 
@@ -163,7 +157,7 @@ export async function cancelRegistration(registrationId: string) {
             data: {
               action: "AUTO_PROMOTE_WAITLIST",
               projectId: reg.projectId,
-              studentId: nextInLine.studentIdInput,
+              studentId: nextInLine.studentId,
               payload: JSON.stringify({ previousStatus: 'WAITLISTED', newStatus: 'APPROVED', promotedDueToCancellationOf: registrationId })
             }
           })
@@ -180,7 +174,7 @@ export async function cancelRegistration(registrationId: string) {
   }
 }
 
-export async function approveAllWaitlist(projectId: string) {
+export async function approveAllWaitlist(projectId: number) {
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
   const userAgent = headersList.get('user-agent') || 'Unknown'

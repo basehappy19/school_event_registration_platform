@@ -10,10 +10,13 @@ export default async function SuccessPage({
   params: Promise<{ id: string }>,
 }) {
   const { id } = await params
+  const numericId = parseInt(id, 10)
+  if (isNaN(numericId)) redirect("/")
+
   const session = await auth()
 
   if (!session?.user?.email) {
-    redirect(`/detail/${id}`)
+    redirect(`/detail/${numericId}`)
   }
 
   const profile = await prisma.studentProfile.findUnique({
@@ -21,13 +24,13 @@ export default async function SuccessPage({
   })
 
   if (!profile) {
-    redirect(`/detail/${id}`)
+    redirect(`/detail/${numericId}`)
   }
 
   const registration = await prisma.registration.findFirst({
     where: {
-      projectId: id,
-      masterStudentId: profile.studentId
+      projectId: numericId,
+      studentId: profile.studentId
     },
     include: {
       project: true
@@ -35,7 +38,7 @@ export default async function SuccessPage({
   })
 
   if (!registration) {
-    redirect(`/detail/${id}`)
+    redirect(`/detail/${numericId}`)
   }
 
   const isApproved = registration.status === "APPROVED"

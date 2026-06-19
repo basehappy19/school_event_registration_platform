@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Calendar, Users, ArrowRight, UserPlus } from "lucide-react"
+import { Calendar, Users, ArrowRight, UserPlus, Megaphone } from "lucide-react"
 import prisma from "@/lib/prisma"
 
 export const revalidate = 60 // Revalidate every minute
@@ -19,8 +19,8 @@ export default async function Home() {
             in: ['APPROVED', 'WAITLISTED']
           }
         },
-        select: {
-          grade: true
+        include: {
+          studentProfile: true
         }
       }
     }
@@ -53,7 +53,7 @@ export default async function Home() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">กิจกรรมของโรงเรียน</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            ดูค่าย ชมรม และกิจกรรมต่างๆ ที่กำลังจะมาถึง จองที่นั่งได้ง่ายๆ ด้วยรหัสนักเรียนของคุณ — ไม่ต้องสร้างบัญชีผู้ใช้!
+            ดูค่าย ชมรม และกิจกรรมต่างๆ ที่กำลังจะมาถึง จองที่นั่งได้ง่ายๆ ด้วยอีเมลของโรงเรียน — เช็คสถานะการสมัครและประกาศผลได้ที่นี่
           </p>
         </div>
 
@@ -72,6 +72,10 @@ export default async function Home() {
               const totalCapacity = project.quotas.reduce((sum, q) => sum + q.capacity, 0)
               const totalRegistered = project.registrations.length
               
+              const isAnnouncementAvailable = project.isAnnouncementOpen && 
+                (!project.announcementStartDate || new Date() >= project.announcementStartDate) &&
+                (!project.announcementEndDate || new Date() <= project.announcementEndDate)
+
               return (
               <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col transform hover:-translate-y-1">
                 <div className="h-48 bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-6 border-b border-slate-100 relative overflow-hidden">
@@ -109,7 +113,7 @@ export default async function Home() {
                       </div>
                       <div className="space-y-1.5 pl-6">
                         {project.quotas.map(quota => {
-                          const gradeRegistered = project.registrations.filter(r => r.grade === quota.grade).length
+                          const gradeRegistered = project.registrations.filter(r => r.studentProfile.grade === quota.grade).length
                           const isFull = gradeRegistered >= quota.capacity
                           
                           return (
@@ -125,13 +129,24 @@ export default async function Home() {
                     </div>
                   </div>
 
-                  <Link 
-                    href={`/detail/${project.id}`}
-                    className="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow group-hover:bg-indigo-700 mt-auto"
-                  >
-                    ดูรายละเอียดและสมัคร
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                  <div className="flex flex-col gap-2 mt-auto">
+                    {isAnnouncementAvailable && (
+                      <Link 
+                        href={`/announcement/${project.id}`}
+                        className="flex items-center justify-center gap-2 w-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow"
+                      >
+                        <Megaphone className="w-4 h-4" />
+                        ดูประกาศรายชื่อผู้มีสิทธิ์
+                      </Link>
+                    )}
+                    <Link 
+                      href={`/detail/${project.id}`}
+                      className="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow group-hover:bg-indigo-700"
+                    >
+                      ดูรายละเอียดและสมัคร
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
                 </div>
               </div>
               )

@@ -5,9 +5,11 @@ import { auth } from "@/auth"
 
 export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const numericId = parseInt(id, 10)
+  if (isNaN(numericId)) return notFound()
   
   const project = await prisma.project.findUnique({
-    where: { id, isPublished: true },
+    where: { id: numericId, isPublished: true },
     include: {
       formFields: true,
       quotas: true
@@ -26,15 +28,15 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
     if (profile) {
       const existingReg = await prisma.registration.findFirst({
         where: {
-          projectId: id,
-          masterStudentId: profile.studentId
+          projectId: numericId,
+          studentId: profile.studentId
         }
       })
 
       if (existingReg) {
         // Redirect to success page if already registered
         const { redirect } = await import("next/navigation")
-        redirect(`/detail/${id}/success`)
+        redirect(`/detail/${numericId}/success`)
       }
     }
   }

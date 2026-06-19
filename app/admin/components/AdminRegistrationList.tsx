@@ -1,0 +1,160 @@
+"use client"
+
+import { useState } from "react"
+import { adminAddRegistration, adminDeleteRegistration } from "@/app/actions/admin"
+import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock } from "lucide-react"
+
+export default function AdminRegistrationList({ project }: { project: any }) {
+  const [loading, setLoading] = useState(false)
+  const [studentIdInput, setStudentIdInput] = useState("")
+  const [search, setSearch] = useState("")
+
+  const handleAddStudent = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!studentIdInput) return
+    setLoading(true)
+    const res = await adminAddRegistration(project.id, studentIdInput)
+    setLoading(false)
+    if (res.error) {
+      alert(res.error)
+    } else {
+      setStudentIdInput("")
+      window.location.reload()
+    }
+  }
+
+  const handleDelete = async (regId: number) => {
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบรายชื่อนี้?")) return
+    setLoading(true)
+    const res = await adminDeleteRegistration(regId)
+    setLoading(false)
+    if (res.error) {
+      alert(res.error)
+    } else {
+      window.location.reload()
+    }
+  }
+
+  const handlePrint = () => {
+    window.open(`/announcement/${project.id}?print=true`, '_blank')
+  }
+
+  const regs = project.registrations.filter((r: any) => {
+    if (!search) return true
+    const term = search.toLowerCase()
+    return r.studentProfile.studentId.includes(term) || 
+           r.studentProfile.firstName.toLowerCase().includes(term) || 
+           r.studentProfile.lastName.toLowerCase().includes(term)
+  })
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-6">
+      <div className="p-6 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800">รายชื่อผู้สมัคร ({project.registrations.length} คน)</h3>
+          <p className="text-sm text-slate-500 mt-1">จัดการรายชื่อ พิมพ์ประกาศ หรือส่งออกเป็น Excel</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          {/* Add Student Form */}
+          <form onSubmit={handleAddStudent} className="flex gap-2 w-full sm:w-auto">
+            <input 
+              type="text" 
+              placeholder="กรอกรหัสนักเรียน..." 
+              value={studentIdInput}
+              onChange={e => setStudentIdInput(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-48"
+            />
+            <button 
+              type="submit" 
+              disabled={loading || !studentIdInput}
+              className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 mr-1" />} 
+              เพิ่ม
+            </button>
+          </form>
+
+          <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
+
+          {/* Export Actions */}
+          <button onClick={handlePrint} className="bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+            <Printer className="w-4 h-4 mr-2" /> พิมพ์ประกาศ (PDF)
+          </button>
+          <a href={`/api/export/excel?projectId=${project.id}`} target="_blank" rel="noreferrer" className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+            <Download className="w-4 h-4 mr-2" /> ส่งออก Excel
+          </a>
+        </div>
+      </div>
+
+      <div className="p-4 bg-slate-50 border-b border-slate-100">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="ค้นหารายชื่อจากรหัส หรือชื่อ..." 
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm whitespace-nowrap">
+          <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+            <tr>
+              <th className="px-6 py-4 w-16 text-center">สถานะ</th>
+              <th className="px-6 py-4">รหัสนักเรียน</th>
+              <th className="px-6 py-4">ชื่อ - นามสกุล</th>
+              <th className="px-6 py-4 text-center">ชั้น/ห้อง</th>
+              <th className="px-6 py-4 text-center">เลขที่</th>
+              <th className="px-6 py-4 w-24 text-center">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {regs.length > 0 ? (
+              regs.map((reg: any) => (
+                <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-3 text-center">
+                    {reg.status === 'APPROVED' ? (
+                      <div className="inline-flex items-center text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-100">
+                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> ตัวจริง
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center text-xs font-medium bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-100">
+                        <Clock className="w-3.5 h-3.5 mr-1" /> สำรอง
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-3 text-slate-600 font-medium">{reg.studentProfile.studentId}</td>
+                  <td className="px-6 py-3 text-slate-800 font-medium">
+                    {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                  </td>
+                  <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                  <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
+                  <td className="px-6 py-3 text-center">
+                    <button 
+                      onClick={() => handleDelete(reg.id)}
+                      disabled={loading}
+                      className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded transition-colors"
+                      title="ลบรายชื่อ"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                  ไม่พบรายชื่อในระบบ
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

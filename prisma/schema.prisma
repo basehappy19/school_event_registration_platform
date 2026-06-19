@@ -13,7 +13,7 @@ enum AdminRole {
 }
 
 model AdminUser {
-  id        String    @id @default(cuid())
+  id        Int       @id @default(autoincrement())
   email     String    @unique
   name      String?
   avatar    String?
@@ -27,7 +27,7 @@ enum LoginStatus {
 }
 
 model AdminLoginLog {
-  id           String      @id @default(cuid())
+  id           Int         @id @default(autoincrement())
   emailAttempt String
   ipAddress    String?
   userAgent    String?
@@ -50,12 +50,31 @@ model StudentProfile {
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  startDate   DateTime
-  endDate     DateTime
-  isPublished Boolean  @default(false)
+  id                    Int      @id @default(autoincrement())
+  title                 String
+  description           String?
+  
+  // Existing fields (can be used for general activity duration if needed, but we will rely on specific fields below)
+  startDate             DateTime
+  endDate               DateTime
+  
+  // Visibility setting
+  isPublished           Boolean  @default(false)
+
+  // Registration settings
+  isRegistrationOpen    Boolean  @default(false)
+  registrationStartDate DateTime?
+  registrationEndDate   DateTime?
+
+  // Announcement settings
+  isAnnouncementOpen    Boolean  @default(false)
+  announcementStartDate DateTime?
+  announcementEndDate   DateTime?
+
+  // Activity Details (for PDF/Export header)
+  activityDate          String?  // e.g. "19 มิถุนายน 2569"
+  activityTime          String?  // e.g. "09:00 - 12:00 น."
+  activityLocation      String?  // e.g. "ห้องประชุม 1"
 
   quotas        ProjectQuota[]
   formFields    FormField[]
@@ -63,8 +82,8 @@ model Project {
 }
 
 model ProjectQuota {
-  id        String @id @default(cuid())
-  projectId String
+  id        Int    @id @default(autoincrement())
+  projectId Int
   grade     String
   capacity  Int
 
@@ -80,8 +99,8 @@ enum FieldType {
 }
 
 model FormField {
-  id         String    @id @default(cuid())
-  projectId  String
+  id         Int       @id @default(autoincrement())
+  projectId  Int
   label      String
   type       FieldType
   options    String?   // JSON string or comma-separated
@@ -92,9 +111,9 @@ model FormField {
 }
 
 model FormAnswer {
-  id             String @id @default(cuid())
-  registrationId String
-  fieldId        String
+  id             Int    @id @default(autoincrement())
+  registrationId Int
+  fieldId        Int
   value          String // Stored as a string, parse if needed based on FormField type
 
   registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
@@ -109,31 +128,26 @@ enum RegistrationStatus {
 }
 
 model Registration {
-  id              String             @id @default(cuid())
-  projectId       String
-  studentIdInput  String
-  prefix          String
-  firstName       String
-  lastName       String
-  grade           String
-  room            String
-  number          String
+  id              Int                @id @default(autoincrement())
+  projectId       Int
+  studentId       String
   status          RegistrationStatus @default(WAITLISTED)
-  masterStudentId String?
 
   createdAt DateTime @default(now())
 
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile? @relation(fields: [masterStudentId], references: [studentId], onDelete: SetNull)
+  studentProfile StudentProfile  @relation(fields: [studentId], references: [studentId], onDelete: Cascade)
   answers        FormAnswer[]
+  
+  @@unique([projectId, studentId])
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
+  id         Int      @id @default(autoincrement())
   action     String
   adminEmail String?
   studentId  String?
-  projectId  String?
+  projectId  Int?
   ipAddress  String?
   userAgent  String?
   payload    String?
