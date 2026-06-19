@@ -67,8 +67,14 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   const regEnd = project.registrationEndDate ? new Date(project.registrationEndDate) : null
 
   let isTimeOpen = true
-  if (regStart && now < regStart) isTimeOpen = false
-  if (regEnd && now > regEnd) isTimeOpen = false
+  let isBeforeStart = false
+  if (regStart && now < regStart) {
+    isTimeOpen = false
+    isBeforeStart = true
+  }
+  if (regEnd && now > regEnd) {
+    isTimeOpen = false
+  }
 
   const isRegistrationOpen = project.isRegistrationOpen && isTimeOpen
 
@@ -292,7 +298,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : !isRegistrationOpen ? (
-                "ระบบปิดรับสมัครแล้ว"
+                isBeforeStart ? "ยังไม่เปิดรับสมัคร" : "ระบบปิดรับสมัครแล้ว"
               ) : (
                 "ยืนยันการลงทะเบียนเข้าร่วม"
               )}
