@@ -55,6 +55,13 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     }
   }, [project.id, sessionId])
 
+  // Real-time Clock for Registration Button
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Custom Answers State
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -62,17 +69,16 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   const allowedGrades = project.quotas.map((q) => q.grade)
   const isGradeAllowed = profile ? allowedGrades.includes(profile.grade) : false
 
-  const now = new Date()
   const regStart = project.registrationStartDate ? new Date(project.registrationStartDate) : null
   const regEnd = project.registrationEndDate ? new Date(project.registrationEndDate) : null
 
   let isTimeOpen = true
   let isBeforeStart = false
-  if (regStart && now < regStart) {
+  if (regStart && currentTime < regStart) {
     isTimeOpen = false
     isBeforeStart = true
   }
-  if (regEnd && now > regEnd) {
+  if (regEnd && currentTime > regEnd) {
     isTimeOpen = false
   }
 

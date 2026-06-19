@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen, FileText } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen, FileText, LogOut } from "lucide-react"
 import { auth } from "@/auth"
+import { signOutAction } from "@/app/actions/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import CancelRegistrationButton from "../components/CancelRegistrationButton"
@@ -175,10 +176,16 @@ export default async function SuccessPage({
 
         <Link 
           href="/"
-          className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20"
+          className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20 mb-4"
         >
           <ArrowLeft className="w-5 h-5 mr-3" /> กลับสู่หน้าหลัก
         </Link>
+
+        <form action={signOutAction} className="w-full mb-4">
+          <button type="submit" className="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-6 rounded-xl transition-all border border-slate-200 cursor-pointer">
+            <LogOut className="w-5 h-5 mr-3" /> ออกจากระบบ
+          </button>
+        </form>
 
         <CancelRegistrationButton registrationId={registration.id} />
       </div>
