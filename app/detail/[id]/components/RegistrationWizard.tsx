@@ -221,7 +221,6 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ยืนยันการลงทะเบียนเข้าร่วม"}
             </button>
-            <p className="text-center text-xs text-slate-400 mt-4">เมื่อกดยืนยัน ถือว่าท่านยอมรับนโยบายความเป็นส่วนตัวเกี่ยวกับการเก็บรวบรวมข้อมูลของเรา</p>
           </form>
         </div>
       </div>
