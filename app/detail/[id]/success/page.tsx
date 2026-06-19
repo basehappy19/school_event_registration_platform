@@ -3,6 +3,7 @@ import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen } 
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import CancelRegistrationButton from "../components/CancelRegistrationButton"
 
 export default async function SuccessPage({ 
   params,
@@ -139,6 +140,8 @@ export default async function SuccessPage({
         >
           <ArrowLeft className="w-5 h-5 mr-3" /> กลับสู่หน้าหลัก
         </Link>
+
+        <CancelRegistrationButton registrationId={registration.id} />
       </div>
     </div>
   )

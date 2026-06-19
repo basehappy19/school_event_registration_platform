@@ -104,11 +104,24 @@ export async function submitRegistration(data: {
 }
 
 export async function cancelRegistration(registrationId: number) {
+  const session = await auth()
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
   const userAgent = headersList.get('user-agent') || 'Unknown'
 
+  if (!session?.user?.email) {
+    return { error: 'Unauthorized' }
+  }
+
   try {
+    const profile = await prisma.studentProfile.findUnique({
+      where: { email: session.user.email }
+    })
+
+    if (!profile) {
+      return { error: 'Student profile not found' }
+    }
+
     const result = await prisma.$transaction(async (tx) => {
       // 1. Get the registration to cancel
       const reg = await tx.registration.findUnique({
@@ -118,6 +131,11 @@ export async function cancelRegistration(registrationId: number) {
 
       if (!reg || reg.status === 'CANCELLED') {
         throw new Error("Registration not found or already cancelled")
+      }
+
+      // Verify ownership
+      if (reg.studentId !== profile.studentId) {
+        throw new Error("Unauthorized to cancel this registration")
       }
 
       // 2. Mark as Cancelled
