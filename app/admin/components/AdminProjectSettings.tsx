@@ -87,7 +87,7 @@ export default function AdminProjectSettings({ project }: { project: any }) {
             value={formData.activityDate}
             onChange={handleChange}
             placeholder="เช่น 15 สิงหาคม 2569"
-            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
           />
         </div>
         <div>
@@ -98,7 +98,7 @@ export default function AdminProjectSettings({ project }: { project: any }) {
             value={formData.activityTime}
             onChange={handleChange}
             placeholder="เช่น 09:00 - 16:00 น."
-            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
           />
         </div>
         <div>
@@ -109,7 +109,7 @@ export default function AdminProjectSettings({ project }: { project: any }) {
             value={formData.activityLocation}
             onChange={handleChange}
             placeholder="เช่น หอประชุมใหญ่"
-            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
           />
         </div>
       </div>
