@@ -66,7 +66,7 @@ export async function submitRegistration(data: {
       })
 
       if (!quota) {
-        throw new Error("Registration is not available for this grade")
+        throw new Error(`ระดับชั้น ม.${student.grade} ไม่สามารถสมัครกิจกรรมนี้ได้`)
       }
 
       // c. Count current APPROVED registrations for this grade

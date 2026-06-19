@@ -35,8 +35,13 @@ export default function RegistrationWizard({ project }: { project: any }) {
       else if (res.error === "Invalid National ID suffix") setError("เลขบัตรประชาชน 5 หลักสุดท้ายไม่ถูกต้อง")
       else setError(res.error)
     } else if (res.data) {
-      setProfile(res.data)
-      setStep(2)
+      const allowedGrades = project.quotas.map((q: any) => q.grade)
+      if (!allowedGrades.includes(res.data.grade)) {
+        setError(`ระดับชั้น ม.${res.data.grade} ไม่สามารถสมัครกิจกรรมนี้ได้ (รับเฉพาะ ม.${allowedGrades.join(', ม.')})`)
+      } else {
+        setProfile(res.data)
+        setStep(2)
+      }
     }
     setLoading(false)
   }
