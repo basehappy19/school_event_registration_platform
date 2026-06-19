@@ -157,9 +157,9 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 print:bg-transparent">
                 <tr>
                   <th className="px-6 py-4 w-16 text-center">ลำดับ</th>
-                  <th className="px-6 py-4">ชื่อ - นามสกุล</th>
                   <th className="px-6 py-4 text-center">ชั้น</th>
                   <th className="px-6 py-4 text-center">เลขที่</th>
+                  <th className="px-6 py-4">ชื่อ - นามสกุล</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -167,11 +167,11 @@ export default async function AnnouncementPage({ params, searchParams }: { param
                   approvedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-3 text-center text-slate-500">{index + 1}</td>
+                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                       <td className="px-6 py-3 text-slate-800 font-medium">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
-                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                     </tr>
                   ))
                 ) : (
@@ -197,20 +197,20 @@ export default async function AnnouncementPage({ params, searchParams }: { param
                 <thead className="bg-amber-50 text-amber-800 font-semibold border-b border-amber-100 print:bg-transparent print:text-black">
                   <tr>
                     <th className="px-6 py-4 w-16 text-center">ลำดับสำรอง</th>
-                    <th className="px-6 py-4">ชื่อ - นามสกุล</th>
                     <th className="px-6 py-4 text-center">ชั้น</th>
                     <th className="px-6 py-4 text-center">เลขที่</th>
+                    <th className="px-6 py-4">ชื่อ - นามสกุล</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {waitlistedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-3 text-center text-amber-600 font-medium">{index + 1}</td>
+                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                       <td className="px-6 py-3 text-slate-800 font-medium">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
-                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                     </tr>
                   ))}
                 </tbody>
