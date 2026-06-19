@@ -155,13 +155,14 @@ export default async function Home() {
                       <div className="space-y-1.5 pl-6">
                         {project.quotas.map(quota => {
                           const gradeRegistered = project.registrations.filter(r => r.studentProfile.grade === quota.grade).length
-                          const isFull = gradeRegistered >= quota.capacity
+                          const isFull = gradeRegistered === quota.capacity
+                          const isOver = gradeRegistered > quota.capacity
                           
                           return (
                             <div key={quota.id} className="flex justify-between text-xs text-slate-600">
                               <span>ม.{quota.grade}</span>
-                              <span className={isFull ? "text-amber-600 font-medium" : ""}>
-                                {gradeRegistered} / {quota.capacity} {isFull && "(เต็ม)"}
+                              <span className={isFull || isOver ? "text-amber-600 font-medium" : ""}>
+                                {gradeRegistered} / {quota.capacity} {isFull && "(เต็ม)"} {isOver && "(เกิน)"}
                               </span>
                             </div>
                           )
