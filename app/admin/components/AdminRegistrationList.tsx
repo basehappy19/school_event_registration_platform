@@ -2,9 +2,11 @@
 
 import { useState } from "react"
 import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist } from "@/app/actions/admin"
+import { useRouter } from "next/navigation"
 import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye } from "lucide-react"
 
 export default function AdminRegistrationList({ project }: { project: any }) {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [studentIdInput, setStudentIdInput] = useState("")
   const [search, setSearch] = useState("")
@@ -19,7 +21,7 @@ export default function AdminRegistrationList({ project }: { project: any }) {
       alert(res.error)
     } else {
       setStudentIdInput("")
-      window.location.reload()
+      router.refresh()
     }
   }
 
@@ -31,7 +33,7 @@ export default function AdminRegistrationList({ project }: { project: any }) {
     if (res.error) {
       alert(res.error)
     } else {
-      window.location.reload()
+      router.refresh()
     }
   }
 
@@ -46,7 +48,7 @@ export default function AdminRegistrationList({ project }: { project: any }) {
     if (res.error) {
       alert(res.error)
     } else {
-      window.location.reload()
+      router.refresh()
     }
   }
 
@@ -58,7 +60,7 @@ export default function AdminRegistrationList({ project }: { project: any }) {
     if (res.error) {
       alert(res.error)
     } else {
-      window.location.reload()
+      router.refresh()
     }
   }
 

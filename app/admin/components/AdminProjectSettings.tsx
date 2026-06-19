@@ -2,9 +2,12 @@
 
 import { useState } from "react"
 import { updateProjectSettings } from "@/app/actions/admin"
-import { Loader2, Save } from "lucide-react"
+import { Loader2, Save, CheckCircle2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function AdminProjectSettings({ project }: { project: any }) {
+  const router = useRouter()
+  const [showToast, setShowToast] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: project.title || "",
@@ -30,11 +33,21 @@ export default function AdminProjectSettings({ project }: { project: any }) {
     setLoading(true)
     await updateProjectSettings(project.id, formData)
     setLoading(false)
-    window.location.reload()
+    router.refresh()
+    
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 3000)
   }
 
   return (
     <div className="space-y-6">
+      {showToast && (
+        <div className="fixed top-6 right-6 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50 animate-in fade-in slide-in-from-top-4">
+          <CheckCircle2 className="w-5 h-5" />
+          <span className="font-medium">บันทึกการตั้งค่าสำเร็จ</span>
+        </div>
+      )}
+
       <div className="space-y-4 mb-8">
         <div>
           <input 

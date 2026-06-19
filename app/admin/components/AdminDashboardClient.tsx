@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Calendar, Plus, Settings, Users, ArrowLeft, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import AdminProjectSettings from "./AdminProjectSettings"
 import AdminRegistrationList from "./AdminRegistrationList"
 import { createProject } from "@/app/actions/admin"
 import Link from "next/link"
 
 export default function AdminDashboardClient({ initialProjects }: { initialProjects: any[] }) {
-  const [projects, setProjects] = useState(initialProjects)
+  const router = useRouter()
+  const projects = initialProjects
   const [activeProjectId, setActiveProjectId] = useState<number | null>(projects[0]?.id || null)
   const [isCreating, setIsCreating] = useState(false)
 
@@ -24,7 +26,10 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
     })
     setIsCreating(false)
     if (res.success) {
-      window.location.reload()
+      router.refresh()
+      if (res.project?.id) {
+        setActiveProjectId(res.project.id)
+      }
     } else {
       alert("Error: " + res.error)
     }
