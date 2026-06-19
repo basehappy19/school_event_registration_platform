@@ -84,8 +84,8 @@ export default async function SuccessPage({
   const formattedTime = regDate.toLocaleTimeString('th-TH', thaiTimeOptions) + ' น.'
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 max-w-2xl w-full">
+    <div className="min-h-screen bg-slate-50 font-sans flex flex-col items-center justify-center py-0 sm:py-12 px-0 sm:px-6 lg:px-8">
+      <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 px-5 py-8 sm:p-8 max-w-2xl w-full min-h-screen sm:min-h-0">
         <div className="text-center mb-8">
           {isApproved ? (
             <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white">
