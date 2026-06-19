@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { exportToExcel, exportToPDF } from '@/lib/export'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { cancelRegistration } from '@/app/actions/registration'
+import { cancelRegistration, approveAllWaitlist } from '@/app/actions/registration'
 
 type Registration = {
   id: string
@@ -22,11 +22,13 @@ type Registration = {
 export default function CommandCenter({ 
   registrations, 
   projectName,
-  quotaStats
+  quotaStats,
+  projectId
 }: { 
   registrations: Registration[]
   projectName: string
   quotaStats: { grade: string, approved: number, waitlisted: number, capacity: number }[]
+  projectId: string
 }) {
   const [data, setData] = useState<Registration[]>(registrations)
   const [loading, setLoading] = useState(false)
@@ -39,18 +41,27 @@ export default function CommandCenter({
     
     setLoading(true)
     const res = await cancelRegistration(id)
-    if (res.success) {
+    if ('success' in res && res.success) {
       alert("Cancelled successfully")
       setData(data.map(r => r.id === id ? { ...r, status: 'CANCELLED' } : r))
-    } else {
+    } else if ('error' in res) {
       alert(res.error)
     }
     setLoading(false)
   }
 
-  const approveAllWaitlist = async () => {
-    if (!confirm("This will bypass capacity constraints. Are you sure?")) return
-    alert("This action would approve all waitlisted students (needs backend action implementation).")
+  const handleApproveAllWaitlist = async () => {
+    if (!confirm("This will bypass capacity constraints and approve all waitlisted students. Are you sure?")) return
+    
+    setLoading(true)
+    const res = await approveAllWaitlist(projectId)
+    if ('success' in res && res.success) {
+      alert(`Successfully approved ${res.count} waitlisted students!`)
+      setData(data.map(r => r.status === 'WAITLISTED' ? { ...r, status: 'APPROVED' } : r))
+    } else if ('error' in res) {
+      alert(res.error)
+    }
+    setLoading(false)
   }
 
   return (
@@ -58,13 +69,13 @@ export default function CommandCenter({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h1 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Command Center - {projectName}</h1>
         <div className="flex flex-wrap gap-3">
-          <button onClick={handleExportExcel} className="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-sm">
+          <button onClick={handleExportExcel} disabled={loading} className="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-sm disabled:opacity-50">
             Export .xlsx (Approved)
           </button>
-          <button onClick={handleExportPDF} className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm">
+          <button onClick={handleExportPDF} disabled={loading} className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm disabled:opacity-50">
             Export .pdf (Approved)
           </button>
-          <button onClick={approveAllWaitlist} className="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors shadow-sm">
+          <button onClick={handleApproveAllWaitlist} disabled={loading} className="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors shadow-sm disabled:opacity-50">
             Approve All Waitlist
           </button>
         </div>

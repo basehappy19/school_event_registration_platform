@@ -1,6 +1,13 @@
 "use server"
 
 import prisma from "@/lib/prisma"
+import { headers } from "next/headers"
+import { Redis } from "@upstash/redis"
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL || 'https://mock-url.upstash.io',
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || 'mock-token',
+})
 
 export async function submitRegistration(data: {
   projectId: string,
@@ -8,12 +15,31 @@ export async function submitRegistration(data: {
   nationalIdSuffix: string, // The last 5 digits provided by user
   formAnswers: { fieldId: string, value: string }[]
 }) {
+  const headersList = await headers()
+  const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
+  const userAgent = headersList.get('user-agent') || 'Unknown'
+
   // Validate Student using Last 5 Digits
   const student = await prisma.studentProfile.findUnique({
     where: { studentId: data.studentId }
   })
 
   if (!student || !student.nationalId.endsWith(data.nationalIdSuffix)) {
+    // Implement Brute-Force lockout tracking
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      try {
+        const failKey = `failed:${ip}`
+        const fails = await redis.incr(failKey)
+        if (fails === 1) {
+          await redis.expire(failKey, 300) // Keep fail count active for 5 minutes
+        }
+        if (fails >= 3) {
+          await redis.set(`banned:${ip}`, 'true', { ex: 300 }) // Block IP for 5 minutes
+        }
+      } catch (err) {
+        console.error('Redis error', err)
+      }
+    }
     return { error: 'Invalid Student ID or National ID' }
   }
 
@@ -72,6 +98,18 @@ export async function submitRegistration(data: {
         }
       })
 
+      // e. Create Audit Log
+      await tx.auditLog.create({
+        data: {
+          action: "SUBMIT_REGISTRATION",
+          studentId: data.studentId,
+          projectId: data.projectId,
+          ipAddress: ip,
+          userAgent: userAgent,
+          payload: JSON.stringify({ formAnswers: data.formAnswers, status })
+        }
+      })
+
       return registration
     })
 
@@ -83,6 +121,10 @@ export async function submitRegistration(data: {
 }
 
 export async function cancelRegistration(registrationId: string) {
+  const headersList = await headers()
+  const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
+  const userAgent = headersList.get('user-agent') || 'Unknown'
+
   try {
     const result = await prisma.$transaction(async (tx) => {
       // 1. Get the registration to cancel
@@ -98,6 +140,18 @@ export async function cancelRegistration(registrationId: string) {
       await tx.registration.update({
         where: { id: registrationId },
         data: { status: 'CANCELLED' }
+      })
+
+      // Create Audit Log for Cancellation
+      await tx.auditLog.create({
+        data: {
+          action: "CANCEL_REGISTRATION",
+          projectId: reg.projectId,
+          studentId: reg.studentIdInput,
+          ipAddress: ip,
+          userAgent: userAgent,
+          payload: JSON.stringify({ registrationId })
+        }
       })
 
       // 3. Auto-Replacement: If it was APPROVED, we need to promote a WAITLISTED student
@@ -135,3 +189,45 @@ export async function cancelRegistration(registrationId: string) {
     return { error: error.message || 'Cancellation failed' }
   }
 }
+
+export async function approveAllWaitlist(projectId: string) {
+  const headersList = await headers()
+  const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
+  const userAgent = headersList.get('user-agent') || 'Unknown'
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const waitlisted = await tx.registration.findMany({
+        where: { projectId, status: 'WAITLISTED' }
+      })
+
+      if (waitlisted.length === 0) {
+        return { success: true, count: 0 }
+      }
+
+      await tx.registration.updateMany({
+        where: { projectId, status: 'WAITLISTED' },
+        data: { status: 'APPROVED' }
+      })
+
+      await tx.auditLog.create({
+        data: {
+          action: "APPROVE_ALL_WAITLIST",
+          projectId,
+          studentId: "ALL",
+          ipAddress: ip,
+          userAgent: userAgent,
+          payload: JSON.stringify({ count: waitlisted.length })
+        }
+      })
+
+      return { success: true, count: waitlisted.length }
+    })
+
+    return result
+
+  } catch (error: any) {
+    return { error: error.message || 'Approval failed' }
+  }
+}
+
