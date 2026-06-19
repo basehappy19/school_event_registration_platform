@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ArrowLeft, Search, Filter, Printer, Download } from "lucide-react"
 import AutoPrint from "./components/AutoPrint"
 import { Metadata } from "next"
+import { auth } from "@/auth"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -45,7 +46,11 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     (!project.announcementStartDate || now >= project.announcementStartDate) &&
     (!project.announcementEndDate || now <= project.announcementEndDate)
 
-  if (!isAnnouncementOpen) {
+  const session = await auth()
+  const role = (session?.user as any)?.role
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
+
+  if (!isAnnouncementOpen && !isAdmin) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 p-4">
         <div className="bg-white p-8 rounded-3xl shadow-lg text-center max-w-md w-full">

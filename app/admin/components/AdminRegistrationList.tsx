@@ -36,7 +36,7 @@ export default function AdminRegistrationList({ project }: { project: any }) {
   }
 
   const handlePrint = () => {
-    window.open(`/announcement/${project.id}?print=true`, '_blank')
+    window.open(`/admin/print/${project.id}`, '_blank')
   }
 
   const handleAccept = async (regId: number) => {
