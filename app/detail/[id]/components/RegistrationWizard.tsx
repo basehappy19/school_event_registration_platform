@@ -120,7 +120,10 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       )}
 
       {/* Header */}
-      <div className="bg-white p-8 border-b border-slate-100 flex flex-col md:flex-row gap-8 items-start">
+      <div className="bg-white p-8 border-b border-slate-100 flex flex-col gap-8">
+        
+        {/* Top Section: Poster & Info */}
+        <div className="flex flex-col md:flex-row gap-8 items-start">
         {project.posterUrl && (
           <div className="w-full md:w-64 shrink-0 rounded-2xl overflow-hidden shadow-md bg-slate-100 border border-slate-200 aspect-[3/4]">
             <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover" />
@@ -153,11 +156,14 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               </div>
             )}
           </div>
-          
-          <div className="mt-8 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
-            <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
-            
-            {/* Real-time Stats */}
+        </div>
+      </div>
+
+      {/* Bottom Section: Countdown & Stats */}
+      <div className="bg-white px-8 pb-8 border-b border-slate-100 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
+        <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
+        
+        {/* Real-time Stats */}
             <div className="mt-6 bg-slate-50 border border-slate-100 rounded-2xl p-5 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-slate-200">
                 <div 
@@ -195,13 +201,6 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             </div>
           </div>
         </div>
-
-        {project.posterUrl && (
-          <div className="w-full md:w-64 shrink-0 rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-slate-50">
-            <img src={project.posterUrl} alt={project.title} className="w-full h-auto object-cover" />
-          </div>
-        )}
-      </div>
 
       <div className="p-8">
         {error && (
