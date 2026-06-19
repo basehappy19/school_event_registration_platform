@@ -93,6 +93,8 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
     }
 
     revalidatePath('/admin')
+    revalidatePath('/')
+    revalidatePath(`/detail/${projectId}`)
     return { success: true, project }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
