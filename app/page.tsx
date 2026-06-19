@@ -43,9 +43,9 @@ export default async function Home() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      <main className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 py-6 sm:py-12 md:py-20">
         {/* Hero Section */}
-        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 md:mb-24 px-4 sm:px-0">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight">
             โครงการติวเข้ม <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">เสริมความรู้มุ่งสู่มหาวิทยาลัย</span>

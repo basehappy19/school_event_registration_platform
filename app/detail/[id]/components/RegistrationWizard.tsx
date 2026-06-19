@@ -217,7 +217,6 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             <div className="bg-rose-50 border border-rose-100 p-5 sm:p-6 rounded-2xl flex items-center gap-4">
               <ShieldCheck className="w-8 h-8 text-rose-500 shrink-0" />
               <div>
-                <h3 className="font-bold text-slate-800">สิทธิ์ไม่เพียงพอ</h3>
                 <p className="text-slate-600 text-sm">
                   ระดับชั้น ม.{profile.grade} ไม่สามารถสมัครกิจกรรมนี้ได้ (รับเฉพาะ ม.{allowedGrades.join(', ม.')})
                 </p>

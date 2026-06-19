@@ -29,7 +29,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
 
   return (
     <div>
-      <div className="max-w-2xl mx-auto mb-12">
+      <div className="max-w-2xl mx-auto mb-8 sm:mb-12 px-4 sm:px-0">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input 
@@ -61,7 +61,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
               (!project.announcementEndDate || new Date() <= new Date(project.announcementEndDate))
 
             return (
-            <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col transform hover:-translate-y-1">
+            <div key={project.id} className="bg-white sm:rounded-2xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col sm:transform hover:-translate-y-1">
               {project.posterUrl ? (
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100">
                   <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
