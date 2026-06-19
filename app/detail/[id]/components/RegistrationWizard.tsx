@@ -25,9 +25,13 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   const allowedGrades = project.quotas.map((q: any) => q.grade)
   const isGradeAllowed = profile ? allowedGrades.includes(profile.grade) : false
 
+  const now = new Date()
+  const isTimeOpen = now >= new Date(project.startDate) && now <= new Date(project.endDate)
+  const isRegistrationOpen = project.isRegistrationOpen && isTimeOpen
+
   const handleSubmitRegistration = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!session || !profile || !isGradeAllowed) return
+    if (!session || !profile || !isGradeAllowed || !isRegistrationOpen) return
 
     setLoading(true)
     setError("")
@@ -223,10 +227,20 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
             <button 
               type="submit" 
-              disabled={loading || !session || !profile || !isGradeAllowed}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10"
+              disabled={loading || !session || !profile || !isGradeAllowed || !isRegistrationOpen}
+              className={`w-full font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10 ${
+                !isRegistrationOpen 
+                  ? "bg-slate-300 text-slate-600" 
+                  : "bg-slate-900 hover:bg-slate-800 text-white"
+              }`}
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ยืนยันการลงทะเบียนเข้าร่วม"}
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : !isRegistrationOpen ? (
+                "ระบบปิดรับสมัครแล้ว"
+              ) : (
+                "ยืนยันการลงทะเบียนเข้าร่วม"
+              )}
             </button>
           </form>
         </div>

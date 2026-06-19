@@ -16,7 +16,9 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
     ]
     const month = monthNames[date.getMonth()]
     const year = date.getFullYear() + 543
-    return `วันที่ ${day} ${month} พ.ศ. ${year}`
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${day} ${month} ${year} เวลา ${hours}:${minutes} น.`
   }
 
   const filteredProjects = projects.filter(project => 
