@@ -1,0 +1,1 @@
+import fs from 'fs'; const typings = fs.readFileSync('node_modules/.prisma/client/index.d.ts', 'utf-8'); const match = typings.match(/export type PrismaClientOptions = ([\\s\\S]*?);/); if (match) console.log(match[1]); else console.log('not found');  
