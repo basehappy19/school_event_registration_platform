@@ -43,9 +43,9 @@ export default async function AdminDashboard() {
   return (
     <>
       <nav className="bg-slate-900 text-white px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-500 rounded flex items-center justify-center font-bold text-white shadow-sm">S</div>
-          <span className="font-semibold text-lg">ผู้ดูแลระบบ</span>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain rounded-lg shadow-sm bg-white" />
+          <span className="font-semibold text-lg tracking-tight">ผู้ดูแลระบบ</span>
         </div>
         <div className="flex items-center gap-4 text-sm bg-slate-800 py-1.5 px-3 rounded-xl border border-slate-700">
           <span className="opacity-80 hidden sm:inline-block">{session.user?.email}</span>

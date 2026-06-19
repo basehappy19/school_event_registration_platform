@@ -8,8 +8,11 @@ import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actio
 import Link from "next/link"
 import CountdownTimer from "./CountdownTimer"
 import { formatThaiDateWithDay } from "@/lib/dateUtils"
+import { ProjectForWizard } from "@/app/types"
+import { StudentProfile } from "@prisma/client"
+import { Session } from "next-auth"
 
-export default function RegistrationWizard({ project, session, profile, errorParam }: { project: any, session: any, profile: any, errorParam?: string }) {
+export default function RegistrationWizard({ project, session, profile, errorParam }: { project: ProjectForWizard, session: Session | null, profile: StudentProfile | null, errorParam?: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -23,11 +26,17 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   // Custom Answers State
   const [answers, setAnswers] = useState<Record<string, string>>({})
 
-  const allowedGrades = project.quotas.map((q: any) => q.grade)
+  const allowedGrades = project.quotas.map((q) => q.grade)
   const isGradeAllowed = profile ? allowedGrades.includes(profile.grade) : false
 
   const now = new Date()
-  const isTimeOpen = now >= new Date(project.startDate) && now <= new Date(project.endDate)
+  const regStart = project.registrationStartDate ? new Date(project.registrationStartDate) : null
+  const regEnd = project.registrationEndDate ? new Date(project.registrationEndDate) : null
+  
+  let isTimeOpen = true
+  if (regStart && now < regStart) isTimeOpen = false
+  if (regEnd && now > regEnd) isTimeOpen = false
+
   const isRegistrationOpen = project.isRegistrationOpen && isTimeOpen
 
   const handleSubmitRegistration = async (e: React.FormEvent) => {
@@ -49,7 +58,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
     const res = await submitRegistration(payload)
     if ('error' in res) {
-      setError(res.error)
+      setError(res.error || "An error occurred")
       setLoading(false)
     } else {
       router.push(`/detail/${project.id}/success?status=${res.status}`)
@@ -57,7 +66,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative">
+    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Access Denied Modal */}
       {showAccessDeniedModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
@@ -106,8 +115,8 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           )}
         </div>
         
-        <div className="mt-8">
-          <CountdownTimer startDate={project.startDate} endDate={project.endDate} />
+        <div className="mt-8 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
+          <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
         </div>
       </div>
 
@@ -118,7 +127,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           </div>
         )}
 
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
           {/* User Status Section */}
           {!session ? (
             <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -190,7 +199,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               <div className={!session || !profile || !isGradeAllowed ? "opacity-60 pointer-events-none" : ""}>
                 <h3 className="text-lg font-bold text-slate-800 mb-5 border-b border-slate-100 pb-3">กรอกรายละเอียดเพิ่มเติม</h3>
                 <div className="space-y-6">
-                  {project.formFields.map((field: any) => (
+                  {project.formFields.map((field) => (
                     <div key={field.id} className="bg-slate-50 p-5 rounded-xl border border-slate-100">
                       <label className="block text-sm font-semibold text-slate-800 mb-3">
                         {field.label} {field.isRequired && <span className="text-rose-500">*</span>}

@@ -59,6 +59,8 @@ export const metadata: Metadata = {
   description: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
 };
 
+import NextTopLoader from "nextjs-toploader";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -69,7 +71,10 @@ export default function RootLayout({
       lang="th"
       className={`${promptFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <NextTopLoader color="#ec4899" showSpinner={false} />
+        {children}
+      </body>
     </html>
   );
 }

@@ -118,8 +118,8 @@ export async function submitRegistration(data: {
 
     return { success: true, status: result.status, registrationId: result.id }
 
-  } catch (error: any) {
-    return { error: error.message || 'Registration failed' }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
   }
 }
 
@@ -207,8 +207,8 @@ export async function cancelRegistration(registrationId: number) {
 
     return result
 
-  } catch (error: any) {
-    return { error: error.message || 'Cancellation failed' }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
   }
 }
 
@@ -248,8 +248,8 @@ export async function approveAllWaitlist(projectId: number) {
 
     return result
 
-  } catch (error: any) {
-    return { error: error.message || 'Approval failed' }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
   }
 }
 

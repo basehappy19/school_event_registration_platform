@@ -3,8 +3,9 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users } from "lucide-react"
+import { ProjectGridItem } from "@/app/types"
 
-export default function ProjectGrid({ projects }: { projects: any[] }) {
+export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] }) {
   const [search, setSearch] = useState("")
 
   const formatDateThai = (dateStr: string | Date) => {
@@ -52,7 +53,7 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
           </div>
         ) : (
           filteredProjects.map(project => {
-            const totalCapacity = project.quotas.reduce((sum: number, q: any) => sum + q.capacity, 0)
+            const totalCapacity = project.quotas.reduce((sum, q) => sum + q.capacity, 0)
             const totalRegistered = project.registrations.length
             
             const isAnnouncementAvailable = project.isAnnouncementOpen && 
@@ -74,7 +75,7 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
                 
                 {/* Badges for grades */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.quotas.map((quota: any) => (
+                  {project.quotas.map((quota) => (
                     <span key={quota.id} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                       รับ ม.{quota.grade}
                     </span>
@@ -124,8 +125,8 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
                       ยอดสมัครรวม: {totalRegistered} / {totalCapacity} คน
                     </div>
                     <div className="space-y-1.5 pl-6">
-                      {project.quotas.map((quota: any) => {
-                        const gradeRegistered = project.registrations.filter((r: any) => r.studentProfile.grade === quota.grade).length
+                      {project.quotas.map((quota) => {
+                        const gradeRegistered = project.registrations.filter((r) => r.studentProfile.grade === quota.grade).length
                         const isFull = gradeRegistered === quota.capacity
                         const isOver = gradeRegistered > quota.capacity
                         

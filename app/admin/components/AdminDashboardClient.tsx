@@ -5,10 +5,12 @@ import { Calendar, Plus, Settings, Users, ArrowLeft, Loader2 } from "lucide-reac
 import { useRouter } from "next/navigation"
 import AdminProjectSettings from "./AdminProjectSettings"
 import AdminRegistrationList from "./AdminRegistrationList"
+import AdminProjectStats from "./AdminProjectStats"
 import { createProject } from "@/app/actions/admin"
 import Link from "next/link"
+import { ProjectWithRelations } from "@/app/types"
 
-export default function AdminDashboardClient({ initialProjects }: { initialProjects: any[] }) {
+export default function AdminDashboardClient({ initialProjects }: { initialProjects: ProjectWithRelations[] }) {
   const router = useRouter()
   const projects = initialProjects
   const [activeProjectId, setActiveProjectId] = useState<number | null>(projects[0]?.id || null)
@@ -89,6 +91,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
           </div>
         ) : (
           <div className="space-y-6">
+            <AdminProjectStats key={`stats-${activeProject.id}`} project={activeProject} />
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               {/* Settings Form Component (includes title and description edit) */}
               <AdminProjectSettings key={`settings-${activeProject.id}`} project={activeProject} />
