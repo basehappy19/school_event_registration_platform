@@ -18,7 +18,7 @@ export default async function AdminDashboard() {
 
   const role = (session.user as any)?.role
   if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
-    redirect("/")
+    redirect("/admin/login?error=AccessDenied")
   }
 
   // Fetch all projects for the selector
