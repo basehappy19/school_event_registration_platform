@@ -30,7 +30,7 @@ export default async function AdminDashboard() {
       registrations: {
         include: {
           studentProfile: true,
-          formAnswers: true
+          answers: true
         },
         orderBy: [
           { status: 'asc' },
