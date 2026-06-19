@@ -22,6 +22,21 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
     profile = await prisma.studentProfile.findUnique({
       where: { email: session.user.email }
     })
+
+    if (profile) {
+      const existingReg = await prisma.registration.findFirst({
+        where: {
+          projectId: id,
+          masterStudentId: profile.studentId
+        }
+      })
+
+      if (existingReg) {
+        // Redirect to success page if already registered
+        const { redirect } = await import("next/navigation")
+        redirect(`/detail/${id}/success`)
+      }
+    }
   }
 
   return (
