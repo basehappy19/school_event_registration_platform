@@ -53,6 +53,7 @@ model Project {
   id                    Int      @id @default(autoincrement())
   title                 String
   description           String?
+  posterUrl             String?
   
   // Existing fields (can be used for general activity duration if needed, but we will rely on specific fields below)
   startDate             DateTime

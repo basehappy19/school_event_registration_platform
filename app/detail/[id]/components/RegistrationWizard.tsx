@@ -87,37 +87,45 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       )}
 
       {/* Header */}
-      <div className="bg-white p-8 border-b border-slate-100">
-        <Link href="/" className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit shadow-sm">
-          <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
-        </Link>
-        <h1 className="text-3xl font-bold mb-2 text-slate-900">{project.title}</h1>
-        <p className="text-slate-600 mb-6">{project.description}</p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
-          {project.activityDate && (
-            <div className="flex items-center text-slate-700">
-              <Calendar className="w-4 h-4 mr-2 text-slate-500" />
-              <span>{formatThaiDateWithDay(project.activityDate)}</span>
-            </div>
-          )}
-          {project.activityTime && (
-            <div className="flex items-center text-slate-700">
-              <Clock className="w-4 h-4 mr-2 text-slate-500" />
-              <span>{project.activityTime}</span>
-            </div>
-          )}
-          {project.activityLocation && (
-            <div className="flex items-center text-slate-700">
-              <MapPin className="w-4 h-4 mr-2 text-slate-500" />
-              <span>{project.activityLocation}</span>
-            </div>
-          )}
+      <div className="bg-white p-8 border-b border-slate-100 flex flex-col md:flex-row gap-8 items-start">
+        <div className="flex-1">
+          <Link href="/" className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit shadow-sm">
+            <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
+          </Link>
+          <h1 className="text-3xl font-bold mb-2 text-slate-900">{project.title}</h1>
+          <p className="text-slate-600 mb-6">{project.description}</p>
+          
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
+            {project.activityDate && (
+              <div className="flex items-center text-slate-700">
+                <Calendar className="w-4 h-4 mr-2 text-slate-500" />
+                <span>{formatThaiDateWithDay(project.activityDate)}</span>
+              </div>
+            )}
+            {project.activityTime && (
+              <div className="flex items-center text-slate-700">
+                <Clock className="w-4 h-4 mr-2 text-slate-500" />
+                <span>{project.activityTime}</span>
+              </div>
+            )}
+            {project.activityLocation && (
+              <div className="flex items-center text-slate-700">
+                <MapPin className="w-4 h-4 mr-2 text-slate-500" />
+                <span>{project.activityLocation}</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-8 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
+            <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
+          </div>
         </div>
-        
-        <div className="mt-8 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
-          <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
-        </div>
+
+        {project.posterUrl && (
+          <div className="w-full md:w-64 shrink-0 rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-slate-50">
+            <img src={project.posterUrl} alt={project.title} className="w-full h-auto object-cover" />
+          </div>
+        )}
       </div>
 
       <div className="p-8">

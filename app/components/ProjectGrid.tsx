@@ -62,12 +62,24 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
 
             return (
             <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col transform hover:-translate-y-1">
-              <div className="h-48 bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-6 border-b border-slate-100 relative overflow-hidden">
-                <div className="absolute inset-0 bg-grid-slate-100/[0.2] bg-[size:20px_20px]"></div>
-                <h3 className="text-2xl font-bold text-slate-800 text-center line-clamp-3 relative z-10 group-hover:text-indigo-700 transition-colors">
-                  {project.title}
-                </h3>
-              </div>
+              {project.posterUrl ? (
+                <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100">
+                  <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-2xl font-bold text-white line-clamp-2 drop-shadow-md">
+                      {project.title}
+                    </h3>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-48 bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-6 border-b border-slate-100 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-grid-slate-100/[0.2] bg-[size:20px_20px]"></div>
+                  <h3 className="text-2xl font-bold text-slate-800 text-center line-clamp-3 relative z-10 group-hover:text-indigo-700 transition-colors">
+                    {project.title}
+                  </h3>
+                </div>
+              )}
               <div className="p-6 flex-1 flex flex-col bg-white">
                 <p className="text-slate-600 text-sm mb-4 line-clamp-2">
                   {project.description || "เข้าร่วมกิจกรรมที่น่าตื่นเต้นนี้! คลิกเพื่อดูรายละเอียดเพิ่มเติมและสมัคร"}

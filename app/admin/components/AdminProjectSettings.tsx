@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { updateProjectSettings, deleteProject } from "@/app/actions/admin"
-import { Loader2, Save, CheckCircle2, Plus, Trash2, GripVertical, AlertTriangle } from "lucide-react"
+import { Loader2, Save, CheckCircle2, Plus, Trash2, GripVertical, AlertTriangle, Image as ImageIcon, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { ProjectWithRelations } from "@/app/types"
 import { FieldType, ProjectQuota } from "@prisma/client"
@@ -23,6 +23,8 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     activityTime: project.activityTime || "",
     activityLocation: project.activityLocation || "",
   })
+  const [posterUrl, setPosterUrl] = useState(project.posterUrl || "")
+  const [uploadingPoster, setUploadingPoster] = useState(false)
 
   // State for Quotas
   const [quotas, setQuotas] = useState<{grade: string, capacity: number}[]>(
@@ -32,9 +34,23 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   )
 
   // State for Form Fields
-  const [formFields, setFormFields] = useState<{id?: number, label: string, type: FieldType, options: string, isRequired: boolean}[]>(
+  const [formFields, setFormFields] = useState<{id?: number, label: string, type: FieldType, options: string[], isRequired: boolean}[]>(
     project.formFields?.length > 0
-      ? project.formFields.map((f) => ({ id: f.id, label: f.label, type: f.type, options: f.options || "", isRequired: f.isRequired }))
+      ? project.formFields.map((f) => {
+          let parsedOptions: string[] = []
+          try {
+            if (f.options) {
+               if (f.options.startsWith('[')) {
+                 parsedOptions = JSON.parse(f.options)
+               } else {
+                 parsedOptions = f.options.split(',').map(s => s.trim())
+               }
+            }
+          } catch(e) {
+            parsedOptions = f.options ? f.options.split(',').map(s => s.trim()) : []
+          }
+          return { id: f.id, label: f.label, type: f.type, options: parsedOptions, isRequired: f.isRequired }
+        })
       : []
   )
 
@@ -60,7 +76,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   }
 
   const addFormField = () => {
-    setFormFields([...formFields, { label: "", type: "SHORT_TEXT", options: "", isRequired: false }])
+    setFormFields([...formFields, { label: "", type: "SHORT_TEXT", options: [], isRequired: false }])
   }
 
   const removeFormField = (index: number) => {
@@ -68,20 +84,66 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     setFormFields(formFields.filter((_, i) => i !== index))
   }
 
-  const updateFormField = (index: number, field: string, value: string | boolean | FieldType) => {
+  const updateFormField = (index: number, field: string, value: string | boolean | FieldType | string[]) => {
     const newFields = [...formFields]
     newFields[index] = { ...newFields[index], [field]: value }
     setFormFields(newFields)
+  }
+
+  const addOption = (fieldIndex: number) => {
+    const newFields = [...formFields]
+    newFields[fieldIndex].options.push("")
+    setFormFields(newFields)
+  }
+
+  const updateOption = (fieldIndex: number, optionIndex: number, value: string) => {
+    const newFields = [...formFields]
+    newFields[fieldIndex].options[optionIndex] = value
+    setFormFields(newFields)
+  }
+
+  const removeOption = (fieldIndex: number, optionIndex: number) => {
+    const newFields = [...formFields]
+    newFields[fieldIndex].options.splice(optionIndex, 1)
+    setFormFields(newFields)
+  }
+
+  const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPoster(true)
+    const formData = new FormData()
+    formData.append("file", file)
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setPosterUrl(data.url)
+      } else {
+        alert(data.error || "Upload failed")
+      }
+    } catch (err) {
+      alert("Upload failed")
+    } finally {
+      setUploadingPoster(false)
+    }
   }
 
   const handleSave = async () => {
     setLoading(true)
     const payload: any = {
       ...formData,
+      posterUrl: posterUrl || null,
       registrationStartDate: formData.registrationStartDate ? new Date(formData.registrationStartDate) : null,
       registrationEndDate: formData.registrationEndDate ? new Date(formData.registrationEndDate) : null,
       quotas,
-      formFields
+      formFields: formFields.map(f => ({
+        ...f,
+        options: JSON.stringify(f.options.filter(o => o.trim() !== ""))
+      }))
     }
     await updateProjectSettings(project.id, payload)
     setLoading(false)
@@ -130,6 +192,54 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             className="text-slate-500 w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none transition-colors px-1 py-1 rounded-md resize-y min-h-[60px]"
             placeholder="รายละเอียดโครงการ"
           />
+        </div>
+      </div>
+
+      {/* Poster Upload */}
+      <div>
+        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 mb-4">โปสเตอร์โครงการ</h3>
+        <div className="flex flex-col sm:flex-row gap-6 items-start">
+          <div className="w-48 shrink-0 relative rounded-xl overflow-hidden border-2 border-dashed border-slate-300 bg-slate-50 aspect-[3/4] flex flex-col items-center justify-center text-slate-400 group">
+            {posterUrl ? (
+              <>
+                <img src={posterUrl} alt="Poster" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <label className="cursor-pointer bg-white text-slate-900 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm hover:bg-slate-50 transition-colors">
+                    เปลี่ยนรูป
+                    <input type="file" className="hidden" accept="image/*" onChange={handlePosterUpload} disabled={uploadingPoster} />
+                  </label>
+                </div>
+              </>
+            ) : (
+              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full hover:bg-slate-100 transition-colors p-4 text-center">
+                {uploadingPoster ? (
+                  <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                ) : (
+                  <>
+                    <ImageIcon className="w-8 h-8 mb-2" />
+                    <span className="text-sm font-medium text-slate-600">อัปโหลดรูปภาพ</span>
+                    <span className="text-xs mt-1">แนวตั้ง (3:4)</span>
+                  </>
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={handlePosterUpload} disabled={uploadingPoster} />
+              </label>
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm text-slate-500 leading-relaxed">
+              อัปโหลดรูปโปสเตอร์ของโครงการเพื่อนำไปแสดงในหน้ารวมโครงการและหน้าต่างลงทะเบียน<br />
+              <strong className="text-slate-700">คำแนะนำ:</strong> ใช้รูปภาพแนวตั้ง อัตราส่วนประมาณ 3:4 (เช่น 800x1066 พิกเซล) ไฟล์ PNG หรือ JPG
+            </p>
+            {posterUrl && (
+              <button 
+                type="button" 
+                onClick={() => setPosterUrl("")} 
+                className="mt-3 text-sm text-rose-600 font-medium hover:text-rose-700 flex items-center gap-1"
+              >
+                <X className="w-4 h-4" /> ลบรูปโปสเตอร์
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -328,14 +438,34 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
                   
                   {(field.type === 'DROPDOWN' || field.type === 'CHECKBOX') && (
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">ตัวเลือก (คั่นด้วยลูกน้ำ)</label>
-                      <input 
-                        type="text" 
-                        value={field.options}
-                        onChange={(e) => updateFormField(idx, 'options', e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
-                        placeholder="เช่น S,M,L,XL"
-                      />
+                      <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">ตัวเลือก</label>
+                      <div className="space-y-2">
+                        {field.options.map((option, optIdx) => (
+                          <div key={optIdx} className="flex items-center gap-2">
+                            <input 
+                              type="text" 
+                              value={option}
+                              onChange={(e) => updateOption(idx, optIdx, e.target.value)}
+                              className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                              placeholder={`ตัวเลือกที่ ${optIdx + 1}`}
+                            />
+                            <button 
+                              type="button"
+                              onClick={() => removeOption(idx, optIdx)}
+                              className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                        <button 
+                          type="button"
+                          onClick={() => addOption(idx)}
+                          className="text-sm text-indigo-600 font-medium hover:text-indigo-700 flex items-center gap-1 mt-2"
+                        >
+                          <Plus className="w-4 h-4" /> เพิ่มตัวเลือก
+                        </button>
+                      </div>
                     </div>
                   )}
 
