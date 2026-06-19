@@ -41,7 +41,7 @@ export async function submitRegistration(data: {
         where: { projectId: data.projectId, studentId: student.studentId }
       })
 
-      if (existing) {
+      if (existing && existing.status !== 'CANCELLED') {
         throw new Error("Student is already registered for this project")
       }
 
@@ -66,20 +66,40 @@ export async function submitRegistration(data: {
 
       const status = approvedCount < quota.capacity ? 'APPROVED' : 'WAITLISTED'
 
-      // d. Create Snapshot Registration
-      const registration = await tx.registration.create({
-        data: {
-          projectId: data.projectId,
-          studentId: student.studentId,
-          status: status,
-          answers: {
-            create: data.formAnswers.map(ans => ({
-              fieldId: ans.fieldId,
-              value: ans.value
-            }))
+      // d. Create or Update Registration
+      let registration;
+      if (existing) {
+        // Clear old answers
+        await tx.formAnswer.deleteMany({ where: { registrationId: existing.id } })
+        
+        registration = await tx.registration.update({
+          where: { id: existing.id },
+          data: {
+            status: status,
+            createdAt: new Date(), // Reset timestamp for new queue position
+            answers: {
+              create: data.formAnswers.map(ans => ({
+                fieldId: ans.fieldId,
+                value: ans.value
+              }))
+            }
           }
-        }
-      })
+        })
+      } else {
+        registration = await tx.registration.create({
+          data: {
+            projectId: data.projectId,
+            studentId: student.studentId,
+            status: status,
+            answers: {
+              create: data.formAnswers.map(ans => ({
+                fieldId: ans.fieldId,
+                value: ans.value
+              }))
+            }
+          }
+        })
+      }
 
       // e. Create Audit Log
       await tx.auditLog.create({

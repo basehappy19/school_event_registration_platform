@@ -33,8 +33,8 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
         }
       })
 
-      if (existingReg) {
-        // Redirect to success page if already registered
+      if (existingReg && existingReg.status !== 'CANCELLED') {
+        // Redirect to success page if already registered and not cancelled
         const { redirect } = await import("next/navigation")
         redirect(`/detail/${numericId}/success`)
       }

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation"
 import prisma from "@/lib/prisma"
 import Link from "next/link"
 import { ArrowLeft, Search, Filter, Printer, Download } from "lucide-react"
+import AutoPrint from "./components/AutoPrint"
 
 export default async function AnnouncementPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ q?: string, grade?: string, room?: string }> }) {
   const { id } = await params
@@ -223,16 +224,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         )}
       </div>
       
-      {/* Auto-print script */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            if (window.location.search.includes('print=true')) {
-              window.onload = function() { window.print(); }
-            }
-          `,
-        }}
-      />
+      <AutoPrint />
     </div>
   )
 }
