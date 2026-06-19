@@ -1,0 +1,1 @@
+import { updateProjectSettings } from '@/app/actions/admin'; import { NextResponse } from 'next/server'; export async function GET() { try { const res = await updateProjectSettings(1, { posterUrl: '/test' }); return NextResponse.json(res); } catch (e: any) { return NextResponse.json({ error: e.message }); } } 
