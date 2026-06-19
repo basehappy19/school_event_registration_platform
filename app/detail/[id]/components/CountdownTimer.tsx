@@ -87,9 +87,19 @@ export default function CountdownTimer({ startDate, endDate }: { startDate?: str
           </div>
         </div>
       </div>
-      <div className="text-center text-sm text-slate-600">
-        เปิดลงทะเบียน {new Date(startDate).toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} เวลา {new Date(startDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.
-        {endDate && ` - ${new Date(endDate).toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} เวลา ${new Date(endDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`}
+      <div className="text-center text-sm text-slate-600 leading-relaxed">
+        <span className="block sm:inline">
+          เปิดลงทะเบียน {new Date(startDate).toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} เวลา {new Date(startDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.
+        </span>
+        {endDate && (
+          <>
+            <span className="hidden sm:inline"> - </span>
+            <span className="block sm:inline">
+              <span className="sm:hidden text-slate-400">ถึง </span>
+              {new Date(endDate).toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} เวลา {new Date(endDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.
+            </span>
+          </>
+        )}
       </div>
     </div>
   )

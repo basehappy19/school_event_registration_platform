@@ -132,7 +132,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       )}
 
       {/* Header */}
-      <div className="bg-white px-5 py-6 sm:p-8 border-b border-slate-100 flex flex-col gap-6 sm:gap-8">
+      <div className="bg-white px-5 py-6 sm:p-8 border-b border-slate-300 flex flex-col gap-6 sm:gap-8">
 
         {/* Top Section: Poster & Info */}
         <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -172,7 +172,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         </div>
 
         {/* Bottom Section: Countdown & Stats */}
-        <div className="bg-white px-5 sm:px-8 pb-6 sm:pb-8 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
+        <div className="bg-white animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
           <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
 
 
