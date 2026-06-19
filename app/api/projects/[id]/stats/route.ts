@@ -21,10 +21,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     activeViewers[projectId][sessionId] = now
   }
 
-  // Clean up old sessions (> 15 seconds)
+  // Clean up old sessions (> 6 seconds)
   if (activeViewers[projectId]) {
     for (const sid in activeViewers[projectId]) {
-      if (now - activeViewers[projectId][sid] > 15000) {
+      if (now - activeViewers[projectId][sid] > 6000) {
         delete activeViewers[projectId][sid]
       }
     }
@@ -54,4 +54,20 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     totalRegistered,
     viewersCount
   })
+}
+
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const projectId = parseInt(id, 10)
+  if (isNaN(projectId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
+
+  const url = new URL(req.url)
+  const sessionId = url.searchParams.get('sessionId')
+  const action = url.searchParams.get('action')
+
+  if (action === 'leave' && sessionId && activeViewers[projectId]) {
+    delete activeViewers[projectId][sessionId]
+  }
+
+  return NextResponse.json({ success: true })
 }

@@ -64,7 +64,7 @@ export default async function ProjectDetail({ params, searchParams }: { params: 
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <RegistrationWizard project={project} session={session} profile={profile} errorParam={error} />
       </div>
     </div>

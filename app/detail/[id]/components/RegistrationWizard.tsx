@@ -41,8 +41,18 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     }
 
     fetchStats()
-    const interval = setInterval(fetchStats, 5000)
-    return () => clearInterval(interval)
+    const interval = setInterval(fetchStats, 2000)
+
+    const handleBeforeUnload = () => {
+      navigator.sendBeacon(`/api/projects/${project.id}/stats?sessionId=${sessionId}&action=leave`)
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+      navigator.sendBeacon(`/api/projects/${project.id}/stats?sessionId=${sessionId}&action=leave`)
+    }
   }, [project.id, sessionId])
 
   
