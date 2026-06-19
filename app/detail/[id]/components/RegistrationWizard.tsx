@@ -4,7 +4,7 @@ import { useState } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock } from "lucide-react"
-import { signInWithGoogle } from "@/app/actions/auth"
+import { signInWithGoogle, signOutAction } from "@/app/actions/auth"
 import Link from "next/link"
 
 export default function RegistrationWizard({ project, session, profile }: { project: any, session: any, profile: any }) {
@@ -125,15 +125,20 @@ export default function RegistrationWizard({ project, session, profile }: { proj
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-4 bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
+            <div className="flex items-center gap-4 bg-emerald-50 p-6 rounded-2xl border border-emerald-100 relative">
               <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0 border-2 border-white shadow-sm">
                 <UserCheck className="w-6 h-6" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-semibold text-emerald-700 mb-1">ผู้สมัครยืนยันตัวตนแล้ว</p>
                 <p className="text-slate-800 font-bold">{profile.prefix}{profile.firstName} {profile.lastName}</p>
                 <p className="text-slate-500 text-sm mt-0.5">ม.{profile.grade}/{profile.room} • เลขที่ {profile.number} • {profile.email}</p>
               </div>
+              <form action={signOutAction} className="absolute top-6 right-6 sm:static sm:top-auto sm:right-auto">
+                <button type="submit" className="text-xs bg-white text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-semibold px-3 py-1.5 rounded-lg border border-rose-100 transition-colors shadow-sm">
+                  ออกจากบัญชี
+                </button>
+              </form>
             </div>
           )}
 
@@ -155,7 +160,7 @@ export default function RegistrationWizard({ project, session, profile }: { proj
                           disabled={!session || !profile || !isGradeAllowed}
                           value={answers[field.id] || ""}
                           onChange={e => setAnswers({...answers, [field.id]: e.target.value})}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow text-slate-900"
                           placeholder={`กรอก${field.label}`}
                         />
                       )}
@@ -165,11 +170,11 @@ export default function RegistrationWizard({ project, session, profile }: { proj
                           disabled={!session || !profile || !isGradeAllowed}
                           value={answers[field.id] || ""}
                           onChange={e => setAnswers({...answers, [field.id]: e.target.value})}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white transition-shadow"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white transition-shadow text-slate-900"
                         >
-                          <option value="" disabled>เลือกตัวเลือก...</option>
+                          <option value="" disabled className="text-slate-400">เลือกตัวเลือก...</option>
                           {JSON.parse(field.options).map((opt: string) => (
-                            <option key={opt} value={opt}>{opt}</option>
+                            <option key={opt} value={opt} className="text-slate-900">{opt}</option>
                           ))}
                         </select>
                       )}
