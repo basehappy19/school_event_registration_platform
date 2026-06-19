@@ -7,6 +7,8 @@ import { Loader2, Save } from "lucide-react"
 export default function AdminProjectSettings({ project }: { project: any }) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
+    title: project.title || "",
+    description: project.description || "",
     isPublished: project.isPublished,
     isRegistrationOpen: project.isRegistrationOpen,
     isAnnouncementOpen: project.isAnnouncementOpen,
@@ -32,6 +34,28 @@ export default function AdminProjectSettings({ project }: { project: any }) {
 
   return (
     <div className="space-y-6">
+      <div className="space-y-4 mb-8">
+        <div>
+          <input 
+            type="text" 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            className="text-2xl font-bold text-slate-900 w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none transition-colors px-1 py-0.5"
+            placeholder="ชื่อโครงการ"
+          />
+        </div>
+        <div>
+          <textarea 
+            name="description" 
+            value={formData.description} 
+            onChange={handleChange} 
+            className="text-slate-500 w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none transition-colors px-1 py-1 rounded-md resize-y min-h-[60px]"
+            placeholder="รายละเอียดโครงการ"
+          />
+        </div>
+      </div>
+
       <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">การตั้งค่าโครงการ</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

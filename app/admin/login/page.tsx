@@ -1,6 +1,7 @@
 import { signIn, signOut, auth } from "@/auth"
 import { ShieldAlert } from "lucide-react"
 import { Metadata } from "next"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
@@ -24,8 +25,7 @@ export default async function AdminLogin() {
         <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
           <ShieldAlert className="w-8 h-8" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">พอร์ทัลผู้ดูแลระบบ</h1>
-        <p className="text-slate-500 mb-8 text-sm">การเข้าถึงที่ปลอดภัยต้องมีการตรวจสอบสิทธิ์ผ่านบัญชี Google Workspace ของโรงเรียน</p>
+        <h1 className="text-2xl font-bold text-slate-800 mb-8">ผู้ดูแลระบบ</h1>
         
         {isStudent ? (
           <div className="mb-6">
@@ -57,7 +57,7 @@ export default async function AdminLogin() {
           </form>
         )}
 
-        <p className="mt-8 text-xs text-slate-400">หากคุณไม่ใช่ผู้ดูแลระบบ โปรดกลับไปยัง<a href="/" className="text-indigo-600 hover:underline">หน้าหลัก</a></p>
+        <p className="mt-8 text-xs text-slate-400">หากคุณไม่ใช่ผู้ดูแลระบบ โปรดกลับไปยัง<Link href="/" className="text-indigo-600 hover:underline">หน้าหลัก</Link></p>
       </div>
     </div>
   )

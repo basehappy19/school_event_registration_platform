@@ -1,24 +1,51 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Plus, Settings, Users } from "lucide-react"
+import { Calendar, Plus, Settings, Users, ArrowLeft, Loader2 } from "lucide-react"
 import AdminProjectSettings from "./AdminProjectSettings"
 import AdminRegistrationList from "./AdminRegistrationList"
+import { createProject } from "@/app/actions/admin"
+import Link from "next/link"
 
 export default function AdminDashboardClient({ initialProjects }: { initialProjects: any[] }) {
   const [projects, setProjects] = useState(initialProjects)
   const [activeProjectId, setActiveProjectId] = useState<number | null>(projects[0]?.id || null)
+  const [isCreating, setIsCreating] = useState(false)
 
   const activeProject = projects.find(p => p.id === activeProjectId)
+
+  const handleCreateProject = async () => {
+    setIsCreating(true)
+    const res = await createProject({
+      title: "โครงการใหม่",
+      description: "",
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    })
+    setIsCreating(false)
+    if (res.success) {
+      window.location.reload()
+    } else {
+      alert("Error: " + res.error)
+    }
+  }
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
       {/* Sidebar: Project Selector */}
       <div className="w-full md:w-64 shrink-0 space-y-4">
+        <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors mb-2">
+          <ArrowLeft className="w-4 h-4" />
+          กลับหน้าหลัก
+        </Link>
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">โครงการทั้งหมด</h2>
-          <button className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg transition-colors">
-            <Plus className="w-4 h-4" />
+          <button 
+            onClick={handleCreateProject}
+            disabled={isCreating}
+            className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 p-1.5 rounded-lg transition-colors"
+          >
+            {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           </button>
         </div>
         
@@ -58,10 +85,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
         ) : (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">{activeProject.title}</h1>
-              <p className="text-slate-500 mb-6">{activeProject.description || "ไม่มีรายละเอียด"}</p>
-              
-              {/* Settings Form Component */}
+              {/* Settings Form Component (includes title and description edit) */}
               <AdminProjectSettings project={activeProject} />
             </div>
 
