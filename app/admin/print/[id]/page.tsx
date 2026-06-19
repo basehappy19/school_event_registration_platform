@@ -66,7 +66,9 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
   const formattedDate = project.activityDate || "ยังไม่กำหนดวัน"
 
   return (
-    <div className={`bg-white min-h-screen p-8 text-black print:p-0 ${sarabun.className}`}>
+    <>
+      <AutoPrint title={project.title} />
+      <div id="print-content" className={`bg-white min-h-screen p-8 text-black print:p-0 ${sarabun.className}`}>
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
@@ -117,8 +119,7 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
           </table>
         </div>
       </div>
-      
-      <AutoPrint />
     </div>
+    </>
   )
 }

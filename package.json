@@ -17,6 +17,7 @@
     "@types/pg": "^8.20.0",
     "@upstash/redis": "^1.38.0",
     "exceljs": "^4.4.0",
+    "html2pdf.js": "^0.14.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.21.0",
