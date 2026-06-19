@@ -206,7 +206,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         </div>
 
         {waitlistedList.length > 0 && (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mt-8 print:border-none print:shadow-none print:mt-12">
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mt-8 print:hidden">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
               <h3 className="font-bold text-lg text-amber-700">รายชื่อสำรอง ({waitlistedList.length} คน)</h3>
             </div>

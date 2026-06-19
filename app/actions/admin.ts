@@ -78,3 +78,29 @@ export async function adminDeleteRegistration(registrationId: number) {
     return { error: error.message }
   }
 }
+
+export async function adminAcceptRegistration(regId: number) {
+  await checkAdmin()
+  try {
+    await prisma.registration.update({
+      where: { id: regId },
+      data: { status: 'APPROVED' }
+    })
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}
+
+export async function adminAcceptAllWaitlist(projectId: number) {
+  await checkAdmin()
+  try {
+    await prisma.registration.updateMany({
+      where: { projectId, status: 'WAITLISTED' },
+      data: { status: 'APPROVED' }
+    })
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}

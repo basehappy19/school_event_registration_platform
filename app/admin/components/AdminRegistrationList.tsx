@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { adminAddRegistration, adminDeleteRegistration } from "@/app/actions/admin"
+import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist } from "@/app/actions/admin"
 import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock } from "lucide-react"
 
 export default function AdminRegistrationList({ project }: { project: any }) {
@@ -37,6 +37,29 @@ export default function AdminRegistrationList({ project }: { project: any }) {
 
   const handlePrint = () => {
     window.open(`/announcement/${project.id}?print=true`, '_blank')
+  }
+
+  const handleAccept = async (regId: number) => {
+    setLoading(true)
+    const res = await adminAcceptRegistration(regId)
+    setLoading(false)
+    if (res.error) {
+      alert(res.error)
+    } else {
+      window.location.reload()
+    }
+  }
+
+  const handleAcceptAll = async () => {
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะปรับสถานะสำรองทั้งหมดให้เป็นตัวจริง?")) return
+    setLoading(true)
+    const res = await adminAcceptAllWaitlist(project.id)
+    setLoading(false)
+    if (res.error) {
+      alert(res.error)
+    } else {
+      window.location.reload()
+    }
   }
 
   const regs = project.registrations.filter((r: any) => {
@@ -81,7 +104,17 @@ export default function AdminRegistrationList({ project }: { project: any }) {
           <button onClick={handlePrint} className="bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
             <Printer className="w-4 h-4 mr-2" /> พิมพ์ประกาศ (PDF)
           </button>
-          <a href={`/api/export/excel?projectId=${project.id}`} target="_blank" rel="noreferrer" className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+          <button 
+            onClick={handleAcceptAll}
+            disabled={loading || regs.filter((r: any) => r.status === 'WAITLISTED').length === 0}
+            className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 disabled:opacity-50 border border-emerald-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span className="hidden sm:inline">รับสำรองทั้งหมด</span>
+          </button>
+          <a 
+            href={`/api/export/excel?projectId=${project.id}`}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
             <Download className="w-4 h-4 mr-2" /> ส่งออก Excel
           </a>
         </div>
@@ -134,14 +167,26 @@ export default function AdminRegistrationList({ project }: { project: any }) {
                   <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
                   <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                   <td className="px-6 py-3 text-center">
-                    <button 
-                      onClick={() => handleDelete(reg.id)}
-                      disabled={loading}
-                      className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded transition-colors"
-                      title="ลบรายชื่อ"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      {reg.status === 'WAITLISTED' && (
+                        <button 
+                          onClick={() => handleAccept(reg.id)}
+                          disabled={loading}
+                          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 p-1.5 rounded transition-colors"
+                          title="ปรับเป็นตัวจริง"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => handleDelete(reg.id)}
+                        disabled={loading}
+                        className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded transition-colors"
+                        title="ลบรายชื่อ"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
