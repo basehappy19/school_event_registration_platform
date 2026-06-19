@@ -1,12 +1,12 @@
 import Link from "next/link"
 import { CheckCircle2, Clock, ArrowLeft } from "lucide-react"
 
-export default function SuccessPage({ 
+export default async function SuccessPage({ 
   searchParams 
 }: { 
-  searchParams: { status?: string } 
+  searchParams: Promise<{ status?: string }> 
 }) {
-  const status = searchParams.status || "WAITLISTED"
+  const { status } = await searchParams
   
   const isApproved = status === "APPROVED"
 

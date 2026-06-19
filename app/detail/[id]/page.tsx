@@ -2,9 +2,11 @@ import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
 import RegistrationWizard from "./components/RegistrationWizard"
 
-export default async function ProjectDetail({ params }: { params: { id: string } }) {
+export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  
   const project = await prisma.project.findUnique({
-    where: { id: params.id, isPublished: true },
+    where: { id, isPublished: true },
     include: {
       formFields: true,
       quotas: true
