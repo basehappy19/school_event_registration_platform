@@ -7,6 +7,7 @@ import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock } f
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import CountdownTimer from "./CountdownTimer"
+import { formatThaiDateWithDay } from "@/lib/dateUtils"
 
 export default function RegistrationWizard({ project, session, profile, errorParam }: { project: any, session: any, profile: any, errorParam?: string }) {
   const router = useRouter()
@@ -88,7 +89,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           {project.activityDate && (
             <div className="flex items-center text-slate-700">
               <Calendar className="w-4 h-4 mr-2 text-slate-500" />
-              <span>{project.activityDate}</span>
+              <span>{formatThaiDateWithDay(project.activityDate)}</span>
             </div>
           )}
           {project.activityTime && (
