@@ -115,14 +115,14 @@ export default async function AnnouncementPage({ params, searchParams }: { param
                   name="q"
                   defaultValue={q}
                   placeholder="รหัสนักเรียน หรือ ชื่อ-นามสกุล..." 
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
             
             <div className="w-full md:w-32">
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ระดับชั้น</label>
-              <select name="grade" defaultValue={grade || ""} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select name="grade" defaultValue={grade || ""} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">ทุกชั้น</option>
                 {uniqueGrades.map(g => (
                   <option key={g} value={g}>ม.{g}</option>
@@ -132,7 +132,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
 
             <div className="w-full md:w-32">
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ห้อง</label>
-              <select name="room" defaultValue={room || ""} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <select name="room" defaultValue={room || ""} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">ทุกห้อง</option>
                 {uniqueRooms.map(r => (
                   <option key={r} value={r}>{r}</option>
