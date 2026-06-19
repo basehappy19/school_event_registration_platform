@@ -3,6 +3,26 @@ import prisma from "@/lib/prisma"
 import RegistrationWizard from "./components/RegistrationWizard"
 import { auth } from "@/auth"
 
+import { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const numericId = parseInt(id, 10)
+  if (isNaN(numericId)) return {}
+  
+  const project = await prisma.project.findUnique({
+    where: { id: numericId, isPublished: true },
+    select: { title: true, description: true }
+  })
+
+  if (!project) return {}
+
+  return {
+    title: project.title,
+    description: project.description
+  }
+}
+
 export default async function ProjectDetail({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ error?: string }> }) {
   const { id } = await params
   const { error } = await searchParams

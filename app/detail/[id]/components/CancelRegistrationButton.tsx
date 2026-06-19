@@ -46,7 +46,7 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
             </div>
             <h3 className="text-xl font-bold text-slate-800 mb-2">ยืนยันการสละสิทธิ์</h3>
             <p className="text-slate-600 mb-6 text-sm">
-              คุณแน่ใจหรือไม่ที่ต้องการสละสิทธิ์? การกระทำนี้ไม่สามารถย้อนกลับได้ และหากเปลี่ยนใจจะต้องทำการลงทะเบียนใหม่ (ถ้ายังมีที่นั่งว่าง)
+              นักเรียนแน่ใจหรือไม่ที่ต้องการสละสิทธิ์? หากเปลี่ยนใจจะต้องทำการลงทะเบียนใหม่ (ถ้ายังมีที่นั่งว่าง)
             </p>
             <div className="flex gap-3">
               <button 

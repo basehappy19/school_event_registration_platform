@@ -74,7 +74,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-8 text-white">
-        <Link href="/" className="inline-flex items-center text-indigo-100 hover:text-white transition-colors text-sm font-medium mb-6">
+        <Link href="/" className="bg-indigo-700/50 hover:bg-indigo-700 border border-indigo-500/30 text-white px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit shadow-sm backdrop-blur-sm">
           <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
         </Link>
         <h1 className="text-3xl font-bold mb-2">{project.title}</h1>

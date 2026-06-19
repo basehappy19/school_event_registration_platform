@@ -32,7 +32,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         <div className="bg-white p-8 rounded-3xl shadow-lg text-center max-w-md w-full">
           <h1 className="text-2xl font-bold mb-4 text-rose-600">ยังไม่ถึงเวลาประกาศผล</h1>
           <p className="text-slate-600 mb-8">โครงการนี้ยังไม่เปิดให้ดูประกาศรายชื่อ หรือหมดระยะเวลาการประกาศผลแล้ว</p>
-          <Link href="/" className="bg-slate-900 text-white px-6 py-3 rounded-xl font-medium inline-flex items-center hover:bg-black transition-colors">
+          <Link href="/" className="bg-slate-900 text-white px-6 py-3 rounded-xl font-medium inline-flex items-center hover:bg-black transition-colors shadow-md">
             <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
           </Link>
         </div>
@@ -84,7 +84,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
       <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          <Link href="/" className="inline-flex items-center text-emerald-100 hover:text-white transition-colors text-sm font-medium mb-8">
+          <Link href="/" className="bg-emerald-700/50 hover:bg-emerald-700 border border-emerald-500/30 text-white px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit print:hidden shadow-sm backdrop-blur-sm">
             <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
           </Link>
           
