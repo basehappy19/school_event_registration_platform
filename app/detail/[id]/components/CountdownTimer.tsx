@@ -48,30 +48,35 @@ export default function CountdownTimer({ startDate, endDate }: { startDate: stri
   if (!isMounted || status === "CLOSED") return null
 
   return (
-    <div className="bg-indigo-900/20 border border-indigo-400/30 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-md">
-      <div className="flex items-center text-indigo-100">
-        <Timer className="w-5 h-5 mr-2 text-indigo-200" />
-        <span className="font-semibold text-sm">
-          {status === "WAITING" ? "จะเปิดรับสมัครในอีก:" : "เหลือเวลาลงทะเบียนอีก:"}
-        </span>
+    <div className="flex flex-col gap-3">
+      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center text-indigo-700">
+          <Timer className="w-5 h-5 mr-2 text-indigo-600" />
+          <span className="font-semibold text-sm">
+            {status === "WAITING" ? "จะเปิดรับสมัครในอีก:" : "เหลือเวลาลงทะเบียนอีก:"}
+          </span>
+        </div>
+        <div className="flex gap-2 sm:gap-3 text-center">
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+            <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.days}</div>
+            <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">วัน</div>
+          </div>
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+            <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.hours}</div>
+            <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">ชั่วโมง</div>
+          </div>
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+            <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.minutes}</div>
+            <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">นาที</div>
+          </div>
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+            <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.seconds}</div>
+            <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">วินาที</div>
+          </div>
+        </div>
       </div>
-      <div className="flex gap-2 sm:gap-3 text-center">
-        <div className="bg-white/10 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
-          <div className="text-2xl font-bold text-white leading-none mb-1">{timeLeft.days}</div>
-          <div className="text-[10px] sm:text-xs text-indigo-200 font-medium">วัน</div>
-        </div>
-        <div className="bg-white/10 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
-          <div className="text-2xl font-bold text-white leading-none mb-1">{timeLeft.hours}</div>
-          <div className="text-[10px] sm:text-xs text-indigo-200 font-medium">ชั่วโมง</div>
-        </div>
-        <div className="bg-white/10 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
-          <div className="text-2xl font-bold text-white leading-none mb-1">{timeLeft.minutes}</div>
-          <div className="text-[10px] sm:text-xs text-indigo-200 font-medium">นาที</div>
-        </div>
-        <div className="bg-white/10 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
-          <div className="text-2xl font-bold text-white leading-none mb-1">{timeLeft.seconds}</div>
-          <div className="text-[10px] sm:text-xs text-indigo-200 font-medium">วินาที</div>
-        </div>
+      <div className="text-center text-sm text-slate-600">
+        เปิดลงทะเบียน {new Date(startDate).toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} เวลา {new Date(startDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น. - {new Date(endDate).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })} เวลา {new Date(endDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.
       </div>
     </div>
   )
