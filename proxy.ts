@@ -28,9 +28,10 @@ export default auth(async (req) => {
   }
 
   // If already logged in, don't allow accessing login page again
-  if (isLoginRoute && req.auth) {
-    return NextResponse.redirect(new URL('/admin', req.nextUrl.origin))
-  }
+  // (Disabled to allow students to switch accounts on the login page)
+  // if (isLoginRoute && req.auth) {
+  //   return NextResponse.redirect(new URL('/admin', req.nextUrl.origin))
+  // }
 
   // Redis logic only runs if env vars are configured properly
   if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
