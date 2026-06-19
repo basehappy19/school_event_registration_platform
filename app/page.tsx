@@ -115,7 +115,10 @@ export default async function Home() {
                       <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
                         <Calendar className="w-4 h-4" />
                       </div>
-                      <span>{formatDateThai(project.startDate)} - {formatDateThai(project.endDate)}</span>
+                      <div className="flex flex-col">
+                        <span>เริ่ม: {formatDateThai(project.startDate)}</span>
+                        <span>ถึง: {formatDateThai(project.endDate)}</span>
+                      </div>
                     </div>
                     
                     <div className="pt-1">
