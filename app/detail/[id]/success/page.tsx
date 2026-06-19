@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen, FileText } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen, FileText, Instagram } from "lucide-react"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
@@ -166,7 +166,13 @@ export default async function SuccessPage({
           </div>
         </div>
 
-
+        <div className="mt-8 mb-6 text-center">
+          <p className="text-slate-600 mb-3">หากมีข้อสงสัย ปัญหาต่าง ๆ สามารถทัก IG:base_happy19 ได้</p>
+          <a href="https://www.instagram.com/base_happy19/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center text-pink-600 bg-pink-50 hover:bg-pink-100 font-medium px-4 py-2 rounded-lg transition-colors border border-pink-100">
+            <Instagram className="w-5 h-5 mr-2" />
+            @base_happy19
+          </a>
+        </div>
 
         <Link 
           href="/"

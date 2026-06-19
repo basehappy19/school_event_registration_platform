@@ -53,7 +53,7 @@ export default function CountdownTimer({ startDate, endDate }: { startDate: stri
         <div className="flex items-center text-indigo-700">
           <Timer className="w-5 h-5 mr-2 text-indigo-600" />
           <span className="font-semibold text-sm">
-            {status === "WAITING" ? "จะเปิดรับสมัครในอีก:" : "เหลือเวลาลงทะเบียนอีก:"}
+            {status === "WAITING" ? "เปิดลงทะเบียนอีก:" : "เหลือเวลาลงทะเบียนอีก:"}
           </span>
         </div>
         <div className="flex gap-2 sm:gap-3 text-center">
