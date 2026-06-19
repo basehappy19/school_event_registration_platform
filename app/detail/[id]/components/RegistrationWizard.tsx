@@ -8,10 +8,16 @@ import { signInWithGoogle, signOutAction } from "@/app/actions/auth"
 import Link from "next/link"
 import CountdownTimer from "./CountdownTimer"
 
-export default function RegistrationWizard({ project, session, profile }: { project: any, session: any, profile: any }) {
+export default function RegistrationWizard({ project, session, profile, errorParam }: { project: any, session: any, profile: any, errorParam?: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(errorParam === "AccessDenied")
+
+  const closeAccessDeniedModal = () => {
+    setShowAccessDeniedModal(false)
+    router.replace(`/detail/${project.id}`)
+  }
   
   // Custom Answers State
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -46,7 +52,26 @@ export default function RegistrationWizard({ project, session, profile }: { proj
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative">
+      {/* Access Denied Modal */}
+      {showAccessDeniedModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in duration-200">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">สิทธิ์การเข้าถึงถูกปฏิเสธ</h3>
+            <p className="text-slate-600 mb-6 text-sm">กรุณาใช้อีเมลของโรงเรียน (@phukhieo.ac.th) ในการเข้าสู่ระบบเพื่อลงทะเบียนกิจกรรมเท่านั้น</p>
+            <button 
+              onClick={closeAccessDeniedModal}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-4 rounded-xl transition-all"
+            >
+              รับทราบ
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-8 text-white">
         <Link href="/" className="inline-flex items-center text-indigo-100 hover:text-white transition-colors text-sm font-medium mb-6">
@@ -96,7 +121,7 @@ export default function RegistrationWizard({ project, session, profile }: { proj
                 <h3 className="font-bold text-slate-800 text-lg mb-1">เข้าสู่ระบบเพื่อดำเนินการต่อ</h3>
                 <p className="text-slate-600 text-sm">คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถกรอกฟอร์มได้</p>
               </div>
-              <form action={signInWithGoogle}>
+              <form action={signInWithGoogle.bind(null, project.id)}>
                 <button 
                   type="submit"
                   className="bg-white hover:bg-slate-50 text-slate-700 font-semibold py-2.5 px-6 rounded-xl transition-all shadow-sm flex items-center shrink-0 border border-slate-200"

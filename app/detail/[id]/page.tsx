@@ -3,8 +3,9 @@ import prisma from "@/lib/prisma"
 import RegistrationWizard from "./components/RegistrationWizard"
 import { auth } from "@/auth"
 
-export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProjectDetail({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ error?: string }> }) {
   const { id } = await params
+  const { error } = await searchParams
   const numericId = parseInt(id, 10)
   if (isNaN(numericId)) return notFound()
   
@@ -44,7 +45,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <RegistrationWizard project={project} session={session} profile={profile} />
+        <RegistrationWizard project={project} session={session} profile={profile} errorParam={error} />
       </div>
     </div>
   )
