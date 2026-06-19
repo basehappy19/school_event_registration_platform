@@ -15,7 +15,7 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
     setLoading(true)
     const res = await cancelRegistration(registrationId)
     
-    if (res?.error) {
+    if (res && 'error' in res) {
       alert("เกิดข้อผิดพลาด: " + res.error)
       setLoading(false)
     } else {
