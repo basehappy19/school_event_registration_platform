@@ -62,21 +62,20 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
     ]
   })
 
-  // Format date
-  const formattedDate = project.activityDate 
-    ? new Date(project.activityDate).toLocaleDateString('th-TH', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      })
-    : "ยังไม่กำหนดวัน"
+  // Date is already a string like "15 สิงหาคม 2569"
+  const formattedDate = project.activityDate || "ยังไม่กำหนดวัน"
 
   return (
     <div className={`bg-white min-h-screen p-8 text-black print:p-0 ${sarabun.className}`}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          @page { margin: 15mm; size: A4 portrait; }
+        }
+      `}} />
       <div className="max-w-4xl mx-auto print:max-w-none">
         {/* Header */}
         <div className="text-center mb-6 mt-8 print:mt-0">
-          <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม ระดับชั้นมัธยมศึกษาปีที่ 6</h1>
+          <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
           <h2 className="text-lg font-bold mb-4">{project.title}</h2>
           
           <p className="text-base">
