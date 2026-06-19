@@ -2,7 +2,6 @@ import Image from "next/image"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import ProjectGrid from "./components/ProjectGrid"
-import prisma from "@/lib/prisma"
 
 export const revalidate = 60 // Revalidate every minute
 
@@ -66,68 +65,12 @@ export default async function Home() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">เสริมความรู้มุ่งสู่มหาวิทยาลัย</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            ลงทะเบียนเข้าร่วมกิจกรรมติวเข้มกับวิทยากรผู้เชี่ยวชาญ เพื่อเตรียมความพร้อมสู่รั้วมหาวิทยาลัยที่คุณใฝ่ฝัน
+            โปรดอ่านรายละเอียดและกฎเกณฑ์การลงทะเบียนให้ครบถ้วน ผู้ที่ลงทะเบียนทันในโควตาจะได้รับสิทธิ์เป็น <strong>"ตัวจริง"</strong> ส่วนผู้ที่ลงทะเบียนหลังจากโควตาเต็มจะอยู่ในสถานะ <strong>"สำรอง" (Waitlist)</strong> ซึ่งจะมีโอกาสได้รับสิทธิ์หากตัวจริงสละสิทธิ์
           </p>
         </div>
 
-                              <MapPin className="w-4 h-4" />
-                            </div>
-                            <div className="flex flex-col justify-center min-h-[2rem]">
-                              <span>สถานที่: {project.activityLocation}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div className="pt-1">
-                      <div className="flex items-center text-sm font-semibold text-slate-800 mb-2">
-                        <UserPlus className="w-4 h-4 mr-2 text-violet-600" />
-                        ยอดสมัครรวม: {totalRegistered} / {totalCapacity} คน
-                      </div>
-                      <div className="space-y-1.5 pl-6">
-                        {project.quotas.map(quota => {
-                          const gradeRegistered = project.registrations.filter(r => r.studentProfile.grade === quota.grade).length
-                          const isFull = gradeRegistered === quota.capacity
-                          const isOver = gradeRegistered > quota.capacity
-                          
-                          return (
-                            <div key={quota.id} className="flex justify-between text-xs text-slate-600">
-                              <span>ม.{quota.grade}</span>
-                              <span className={isFull || isOver ? "text-amber-600 font-medium" : ""}>
-                                {gradeRegistered} / {quota.capacity} {isFull && "(เต็ม)"} {isOver && "(เกิน)"}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 mt-auto">
-                    {isAnnouncementAvailable && (
-                      <Link 
-                        href={`/announcement/${project.id}`}
-                        className="flex items-center justify-center gap-2 w-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow"
-                      >
-                        <Megaphone className="w-4 h-4" />
-                        ดูประกาศรายชื่อผู้มีสิทธิ์
-                      </Link>
-                    )}
-                    <Link 
-                      href={`/detail/${project.id}`}
-                      className="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow group-hover:bg-indigo-700"
-                    >
-                      ดูรายละเอียดและสมัคร
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              )
-            })
-          )}
-        </div>
+        {/* Projects Grid with Search */}
+        <ProjectGrid projects={projects} formatDateThai={formatDateThai} />
       </main>
     </div>
   )
