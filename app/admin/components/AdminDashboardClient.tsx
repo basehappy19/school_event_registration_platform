@@ -86,11 +86,11 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
           <div className="space-y-6">
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               {/* Settings Form Component (includes title and description edit) */}
-              <AdminProjectSettings project={activeProject} />
+              <AdminProjectSettings key={`settings-${activeProject.id}`} project={activeProject} />
             </div>
 
             {/* Registration Management Component */}
-            <AdminRegistrationList project={activeProject} />
+            <AdminRegistrationList key={`regs-${activeProject.id}`} project={activeProject} />
           </div>
         )}
       </div>
