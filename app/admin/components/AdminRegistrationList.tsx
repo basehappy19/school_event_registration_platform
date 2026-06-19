@@ -183,7 +183,15 @@ export default function AdminRegistrationList({ project }: { project: any }) {
                   </td>
                   <td className="px-6 py-3 text-slate-600 font-medium">{reg.studentProfile.studentId}</td>
                   <td className="px-6 py-3 text-slate-800 font-medium">
-                    {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                    <div>{reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}</div>
+                    {reg.formAnswers && reg.formAnswers.length > 0 && (
+                      <div className="mt-1 text-xs text-slate-500 font-normal space-y-0.5">
+                        {reg.formAnswers.map((ans: any) => {
+                          const field = project.formFields?.find((f: any) => f.id === ans.fieldId)
+                          return field ? <div key={ans.id}><span className="font-medium text-slate-600">{field.label}:</span> {ans.value}</div> : null
+                        })}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
                   <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>

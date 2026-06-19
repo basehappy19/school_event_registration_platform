@@ -26,9 +26,11 @@ export default async function AdminDashboard() {
     orderBy: { startDate: 'desc' },
     include: {
       quotas: true,
+      formFields: true,
       registrations: {
         include: {
-          studentProfile: true
+          studentProfile: true,
+          formAnswers: true
         },
         orderBy: [
           { status: 'asc' },

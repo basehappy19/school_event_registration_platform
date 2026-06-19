@@ -73,29 +73,29 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       )}
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-8 text-white">
-        <Link href="/" className="bg-indigo-700/50 hover:bg-indigo-700 border border-indigo-500/30 text-white px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit shadow-sm backdrop-blur-sm">
+      <div className="bg-white p-8 border-b border-slate-100">
+        <Link href="/" className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit shadow-sm">
           <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
         </Link>
-        <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
-        <p className="text-indigo-100 opacity-90 mb-6">{project.description}</p>
+        <h1 className="text-3xl font-bold mb-2 text-slate-900">{project.title}</h1>
+        <p className="text-slate-600 mb-6">{project.description}</p>
         
-        <div className="flex flex-col sm:flex-row gap-4 text-sm bg-white/10 p-4 rounded-xl backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row gap-4 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
           {project.activityDate && (
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-2 text-indigo-200" />
+            <div className="flex items-center text-slate-700">
+              <Calendar className="w-4 h-4 mr-2 text-slate-500" />
               <span>{project.activityDate}</span>
             </div>
           )}
           {project.activityTime && (
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-indigo-200" />
+            <div className="flex items-center text-slate-700">
+              <Clock className="w-4 h-4 mr-2 text-slate-500" />
               <span>{project.activityTime}</span>
             </div>
           )}
           {project.activityLocation && (
-            <div className="flex items-center">
-              <MapPin className="w-4 h-4 mr-2 text-indigo-200" />
+            <div className="flex items-center text-slate-700">
+              <MapPin className="w-4 h-4 mr-2 text-slate-500" />
               <span>{project.activityLocation}</span>
             </div>
           )}
@@ -163,17 +163,16 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-4 bg-emerald-50 p-6 rounded-2xl border border-emerald-100 relative">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0 border-2 border-white shadow-sm">
+            <div className="flex items-center gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200 relative">
+              <div className="w-12 h-12 bg-white text-slate-600 rounded-full flex items-center justify-center shrink-0 border border-slate-200 shadow-sm">
                 <UserCheck className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-emerald-700 mb-1">ผู้สมัครยืนยันตัวตนแล้ว</p>
                 <p className="text-slate-800 font-bold">{profile.prefix}{profile.firstName} {profile.lastName}</p>
                 <p className="text-slate-500 text-sm mt-0.5">ม.{profile.grade}/{profile.room} • เลขที่ {profile.number} • {profile.email}</p>
               </div>
               <form action={signOutAction} className="absolute top-6 right-6 sm:static sm:top-auto sm:right-auto">
-                <button type="submit" className="text-xs bg-white text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-semibold px-3 py-1.5 rounded-lg border border-rose-100 transition-colors shadow-sm">
+                <button type="submit" className="text-xs bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 font-semibold px-3 py-1.5 rounded-lg border border-slate-200 transition-colors shadow-sm">
                   ออกจากบัญชี
                 </button>
               </form>
@@ -225,7 +224,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             <button 
               type="submit" 
               disabled={loading || !session || !profile || !isGradeAllowed}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ยืนยันการลงทะเบียนเข้าร่วม"}
             </button>

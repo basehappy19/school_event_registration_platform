@@ -116,13 +116,27 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
                     </div>
                   )}
 
-                  <div className="flex items-center text-sm font-medium text-slate-700 gap-3 pt-1">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-                      <Users className="w-4 h-4" />
+                  <div className="pt-1">
+                    <div className="flex items-center text-sm font-semibold text-slate-800 mb-2">
+                      <UserPlus className="w-4 h-4 mr-2 text-violet-600" />
+                      ยอดสมัครรวม: {totalRegistered} / {totalCapacity} คน
                     </div>
-                    <span>
-                      ลงทะเบียนแล้ว {totalRegistered} คน
-                    </span>
+                    <div className="space-y-1.5 pl-6">
+                      {project.quotas.map((quota: any) => {
+                        const gradeRegistered = project.registrations.filter((r: any) => r.studentProfile.grade === quota.grade).length
+                        const isFull = gradeRegistered === quota.capacity
+                        const isOver = gradeRegistered > quota.capacity
+                        
+                        return (
+                          <div key={quota.id} className="flex justify-between text-xs text-slate-600">
+                            <span>ม.{quota.grade}</span>
+                            <span className={isFull || isOver ? "text-amber-600 font-medium" : ""}>
+                              {gradeRegistered} / {quota.capacity} {isFull && "(เต็ม)"} {isOver && "(เกิน)"}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
 

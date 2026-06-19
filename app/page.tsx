@@ -52,9 +52,7 @@ export default async function Home() {
             โครงการติวเข้ม <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">เสริมความรู้มุ่งสู่มหาวิทยาลัย</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            โปรดอ่านรายละเอียดและกฎเกณฑ์การลงทะเบียนให้ครบถ้วน ผู้ที่ลงทะเบียนทันในโควตาจะได้รับสิทธิ์เป็น <strong>"ตัวจริง"</strong> ส่วนผู้ที่ลงทะเบียนหลังจากโควตาเต็มจะอยู่ในสถานะ <strong>"สำรอง" (Waitlist)</strong> ซึ่งจะมีโอกาสได้รับสิทธิ์หากตัวจริงสละสิทธิ์
-          </p>
+          
         </div>
 
         {/* Projects Grid with Search */}
