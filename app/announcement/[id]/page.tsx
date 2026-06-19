@@ -127,9 +127,9 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 print:mt-0 print:pt-4">
+      <div className="max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 -mt-12 relative z-10 print:mt-0 print:pt-4">
         {/* Filters Section - Hidden in Print */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-6 print:hidden">
+        <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-slate-200 p-4 sm:p-5 mb-6 print:hidden">
           <form className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 w-full">
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ค้นหารายชื่อ</label>
@@ -172,36 +172,36 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden print:border-none print:shadow-none">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
+        <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden print:border-none print:shadow-none">
+          <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
             <h3 className="font-bold text-lg text-slate-800">รายชื่อตัวจริง ({approvedList.length} คน)</h3>
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
+            <table className="w-full text-left text-sm sm:whitespace-nowrap">
               <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 print:bg-transparent">
                 <tr>
-                  <th className="px-6 py-4 w-16 text-center">ลำดับ</th>
-                  <th className="px-6 py-4 text-center">ชั้น</th>
-                  <th className="px-6 py-4 text-center">เลขที่</th>
-                  <th className="px-6 py-4">ชื่อ - นามสกุล</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16 text-center">ลำดับ</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">ชั้น</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">เลขที่</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4">ชื่อ - นามสกุล</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {approvedList.length > 0 ? (
                   approvedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-3 text-center text-slate-500">{index + 1}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-6 py-3 text-slate-800 font-medium">
+                      <td className="px-3 sm:px-6 py-3 text-center text-slate-500">{index + 1}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
+                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium break-words">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                    <td colSpan={4} className="px-3 sm:px-6 py-8 text-center text-slate-500">
                       ไม่พบรายชื่อ
                     </td>
                   </tr>
@@ -212,28 +212,28 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         </div>
 
         {waitlistedList.length > 0 && (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mt-8 print:hidden">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
+          <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden mt-8 print:hidden">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
               <h3 className="font-bold text-lg text-amber-700">รายชื่อสำรอง ({waitlistedList.length} คน)</h3>
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
+              <table className="w-full text-left text-sm sm:whitespace-nowrap">
                 <thead className="bg-amber-50 text-amber-800 font-semibold border-b border-amber-100 print:bg-transparent print:text-black">
                   <tr>
-                    <th className="px-6 py-4 w-16 text-center">ลำดับสำรอง</th>
-                    <th className="px-6 py-4 text-center">ชั้น</th>
-                    <th className="px-6 py-4 text-center">เลขที่</th>
-                    <th className="px-6 py-4">ชื่อ - นามสกุล</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16 text-center">ลำดับ</th>
+                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">ชั้น</th>
+                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">เลขที่</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4">ชื่อ - นามสกุล</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {waitlistedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-3 text-center text-amber-600 font-medium">{index + 1}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-6 py-3 text-slate-800 font-medium">
+                      <td className="px-3 sm:px-6 py-3 text-center text-amber-600 font-medium">{index + 1}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
+                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium break-words">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
                     </tr>
