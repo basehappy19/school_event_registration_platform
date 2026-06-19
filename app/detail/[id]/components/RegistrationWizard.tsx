@@ -160,7 +160,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       </div>
 
       {/* Bottom Section: Countdown & Stats */}
-      <div className="bg-white pb-8 border-b border-slate-100 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
+      <div className="bg-white px-8 pb-8 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
         <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
         
         {/* Real-time Stats */}
