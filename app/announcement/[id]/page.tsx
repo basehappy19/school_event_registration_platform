@@ -3,6 +3,25 @@ import prisma from "@/lib/prisma"
 import Link from "next/link"
 import { ArrowLeft, Search, Filter, Printer, Download } from "lucide-react"
 import AutoPrint from "./components/AutoPrint"
+import { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const numericId = parseInt(id, 10)
+  if (isNaN(numericId)) return {}
+  
+  const project = await prisma.project.findUnique({
+    where: { id: numericId },
+    select: { title: true }
+  })
+
+  if (!project) return {}
+
+  return {
+    title: `ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ${project.title}`,
+    description: `ตรวจสอบรายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ${project.title} โรงเรียนภูเขียว`
+  }
+}
 
 export default async function AnnouncementPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ q?: string, grade?: string, room?: string }> }) {
   const { id } = await params

@@ -1,5 +1,11 @@
 import { signIn } from "@/auth"
 import { ShieldAlert } from "lucide-react"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "เข้าสู่ระบบผู้ดูแลระบบ",
+  description: "เข้าสู่ระบบเพื่อจัดการโครงการและผู้ลงทะเบียน",
+}
 
 export default function AdminLogin() {
   return (

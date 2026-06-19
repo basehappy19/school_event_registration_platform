@@ -2,6 +2,12 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import AdminDashboardClient from "./components/AdminDashboardClient"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "ระบบจัดการผู้ดูแลระบบ",
+  description: "ระบบจัดการโครงการและผู้ลงทะเบียน",
+}
 
 export default async function AdminDashboard() {
   const session = await auth()

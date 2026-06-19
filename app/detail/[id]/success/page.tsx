@@ -4,6 +4,25 @@ import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import CancelRegistrationButton from "../components/CancelRegistrationButton"
+import { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const numericId = parseInt(id, 10)
+  if (isNaN(numericId)) return {}
+  
+  const project = await prisma.project.findUnique({
+    where: { id: numericId },
+    select: { title: true }
+  })
+
+  if (!project) return {}
+
+  return {
+    title: `ลงทะเบียนสำเร็จ - ${project.title}`,
+    description: `รายละเอียดการลงทะเบียนโครงการ${project.title}`
+  }
+}
 
 export default async function SuccessPage({ 
   params,
