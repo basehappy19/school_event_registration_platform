@@ -121,18 +121,11 @@ export default async function SuccessPage({
               <p className="font-semibold text-slate-900">ม.{profile.grade}/{profile.room} เลขที่ {profile.number}</p>
             </div>
 
-            <div>
-              <p className="text-sm text-slate-500 mb-1 flex items-center">
-                <Mail className="w-4 h-4 mr-2" /> อีเมลติดต่อ
-              </p>
-              <p className="font-semibold text-slate-900">{profile.email}</p>
-            </div>
+
           </div>
         </div>
 
-        <div className="bg-indigo-50 text-indigo-800 rounded-xl p-4 mb-8 text-sm text-center border border-indigo-100">
-          <p>กรุณาบันทึกภาพหน้าจอนี้ หรือเก็บ URL ไว้เพื่อเป็นหลักฐานยืนยันการลงทะเบียนของท่าน</p>
-        </div>
+
 
         <Link 
           href="/"
