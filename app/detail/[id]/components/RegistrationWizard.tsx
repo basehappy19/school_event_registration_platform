@@ -160,7 +160,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       </div>
 
       {/* Bottom Section: Countdown & Stats */}
-      <div className="bg-white px-8 pb-8 border-b border-slate-100 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
+      <div className="bg-white pb-8 border-b border-slate-100 animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
         <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
         
         {/* Real-time Stats */}
@@ -172,29 +172,30 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                 />
               </div>
               
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 relative">
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
-                    <Users className="w-5 h-5" />
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 relative">
+                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+                    <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-emerald-500 rounded-full"></span>
+                    <Users className="w-4 h-4" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                      กำลังมีคนดูหน้านี้
-                    </p>
-                    <p className="text-2xl font-bold text-emerald-600 leading-none mt-1">
-                      {stats.viewersCount} <span className="text-sm font-normal text-slate-500">คน</span>
-                    </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-slate-600">
+                      กำลังมีคนดูหน้านี้:
+                    </span>
+                    <span className="text-lg font-bold text-emerald-600">
+                      {stats.viewersCount}
+                    </span>
+                    <span className="text-xs text-slate-500">คน</span>
                   </div>
                 </div>
 
-                <div className="text-right flex flex-col items-center sm:items-end">
-                  <p className="text-sm font-medium text-slate-600 mb-1">ยอดผู้ลงทะเบียน</p>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-bold text-slate-800">{stats.totalRegistered}</span>
-                    <span className="text-slate-400 font-medium">/</span>
-                    <span className="text-slate-500">{stats.totalCapacity || '-'}</span>
+                <div className="text-right flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-600">ยอดผู้ลงทะเบียน:</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-lg font-bold text-slate-800">{stats.totalRegistered}</span>
+                    <span className="text-slate-400 font-medium text-sm">/</span>
+                    <span className="text-slate-500 text-sm">{stats.totalCapacity || '-'}</span>
                   </div>
                 </div>
               </div>
