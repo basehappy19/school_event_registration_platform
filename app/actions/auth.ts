@@ -11,6 +11,10 @@ export async function signInWithGoogle(projectId?: number) {
   await signIn("google", { redirectTo: projectId ? `/detail/${projectId}` : "/" })
 }
 
-export async function signOutAction(redirectTo?: string) {
+export async function signOutAction() {
+  await signOut()
+}
+
+export async function signOutAndRedirect(redirectTo: string) {
   await signOut({ redirectTo })
 }

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock } from "lucide-react"
-import { signInWithGoogle, signOutAction } from "@/app/actions/auth"
+import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import CountdownTimer from "./CountdownTimer"
 
@@ -145,7 +145,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                   <p className="text-slate-600 text-sm">อีเมล {session.user?.email} ยังไม่ได้รับการลงทะเบียนเป็นนักเรียนในระบบ</p>
                 </div>
                 <button 
-                  onClick={() => signOutAction(`/detail/${project.id}`)}
+                  onClick={() => signOutAndRedirect(`/detail/${project.id}`)}
                   className="bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-medium py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer shrink-0"
                 >
                   เปลี่ยนบัญชี
