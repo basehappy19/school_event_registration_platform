@@ -1,28 +1,6 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { redis } from "@/lib/redis"
-import { headers } from "next/headers"
-
-// Helper function to handle brute-force lockout
-async function checkAndLogFailedAttempt(ip: string, studentId: string) {
-  const attemptsKey = `attempts_${ip}_${studentId}`
-  const lockoutKey = `lockout_${ip}`
-
-  const attempts = await redis.incr(attemptsKey)
-  
-  if (attempts === 1) {
-    await redis.expire(attemptsKey, 300) // 5 minutes
-  }
-
-  if (attempts >= 3) {
-    // Lockout for 5 minutes
-    await redis.set(lockoutKey, 'true', { ex: 300 })
-    return { error: 'Too many failed validation attempts. IP blocked for 5 minutes.' }
-  }
-
-  return { error: 'Invalid Student ID or National ID' }
-}
 
 export async function submitRegistration(data: {
   projectId: string,
@@ -30,28 +8,16 @@ export async function submitRegistration(data: {
   nationalIdSuffix: string, // The last 5 digits provided by user
   formAnswers: { fieldId: string, value: string }[]
 }) {
-  const headerList = await headers()
-  const ip = headerList.get('x-forwarded-for') || '127.0.0.1'
-
-  // 1. Check if IP is locked out
-  const lockoutKey = `lockout_${ip}`
-  if (await redis.get(lockoutKey)) {
-    return { error: 'Your IP is temporarily blocked due to multiple failed validation attempts. Please try again later.' }
-  }
-
-  // 2. Validate Student using Last 5 Digits
+  // Validate Student using Last 5 Digits
   const student = await prisma.studentProfile.findUnique({
     where: { studentId: data.studentId }
   })
 
   if (!student || !student.nationalId.endsWith(data.nationalIdSuffix)) {
-    return await checkAndLogFailedAttempt(ip, data.studentId)
+    return { error: 'Invalid Student ID or National ID' }
   }
 
-  // 3. Clear failed attempts on success
-  await redis.del(`attempts_${ip}_${data.studentId}`)
-
-  // 4. Handle Registration in Transaction
+  // Handle Registration in Transaction
   try {
     const result = await prisma.$transaction(async (tx) => {
       // a. Check if already registered for this project
