@@ -208,13 +208,21 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
           <div className="w-48 shrink-0 relative rounded-xl overflow-hidden border-2 border-dashed border-slate-300 bg-slate-50 aspect-[3/4] flex flex-col items-center justify-center text-slate-400 group">
             {posterUrl ? (
               <>
-                <img src={posterUrl} alt="Poster" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <label className="cursor-pointer bg-white text-slate-900 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm hover:bg-slate-50 transition-colors">
-                    เปลี่ยนรูป
-                    <input type="file" className="hidden" accept="image/*" onChange={handlePosterUpload} disabled={uploadingPoster} />
-                  </label>
-                </div>
+                <img src={posterUrl} alt="Poster" className={`w-full h-full object-cover transition-opacity ${uploadingPoster ? 'opacity-50' : ''}`} />
+                {uploadingPoster && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white z-10">
+                    <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                    <span className="text-xs font-medium">กำลังอัปโหลด...</span>
+                  </div>
+                )}
+                {!uploadingPoster && (
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <label className="cursor-pointer bg-white text-slate-900 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm hover:bg-slate-50 transition-colors">
+                      เปลี่ยนรูปภาพ
+                      <input type="file" className="hidden" accept="image/*" onChange={handlePosterUpload} disabled={uploadingPoster} />
+                    </label>
+                  </div>
+                )}
               </>
             ) : (
               <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full hover:bg-slate-100 transition-colors p-4 text-center">
