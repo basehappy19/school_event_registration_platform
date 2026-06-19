@@ -3,6 +3,13 @@ import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
 import AutoPrint from "@/app/announcement/[id]/components/AutoPrint"
 import { Metadata } from "next"
+import { Sarabun } from "next/font/google"
+
+const sarabun = Sarabun({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['thai', 'latin'],
+  display: 'swap',
+})
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -65,44 +72,44 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
     : "ยังไม่กำหนดวัน"
 
   return (
-    <div className="bg-white min-h-screen p-8 text-slate-800 print:p-0">
+    <div className={`bg-white min-h-screen p-8 text-black print:p-0 ${sarabun.className}`}>
       <div className="max-w-4xl mx-auto print:max-w-none">
         {/* Header */}
-        <div className="text-center mb-12 mt-12 print:mt-0">
-          <h1 className="text-3xl font-bold mb-4">ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วม</h1>
-          <h2 className="text-2xl font-bold mb-6">โครงการ {project.title}</h2>
+        <div className="text-center mb-6 mt-8 print:mt-0">
+          <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม ระดับชั้นมัธยมศึกษาปีที่ 6</h1>
+          <h2 className="text-lg font-bold mb-4">{project.title}</h2>
           
-          <p className="text-slate-700">
+          <p className="text-base">
             วัน{formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
           </p>
         </div>
 
         {/* Content */}
         <div>
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="text-slate-600 font-semibold border-b border-slate-200">
+          <table className="w-full text-left text-base border-collapse border border-black">
+            <thead>
               <tr>
-                <th className="px-6 py-4 w-16 text-center">ลำดับ</th>
-                <th className="px-6 py-4 text-center">ชั้น</th>
-                <th className="px-6 py-4 text-center">เลขที่</th>
-                <th className="px-6 py-4">ชื่อ - นามสกุล</th>
+                <th className="px-2 py-1 border border-black w-16">ลำดับ</th>
+                <th className="px-2 py-1 border border-black w-24">ชั้น/ห้อง</th>
+                <th className="px-2 py-1 border border-black w-20">เลขที่</th>
+                <th className="px-2 py-1 border border-black">ชื่อ-นามสกุล</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {registrations.length > 0 ? (
                 registrations.map((reg, index) => (
                   <tr key={reg.id}>
-                    <td className="px-6 py-3 text-center text-slate-500">{index + 1}</td>
-                    <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                    <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                    <td className="px-6 py-3 text-slate-800 font-medium">
+                    <td className="px-2 py-1 border border-black">{index + 1}</td>
+                    <td className="px-2 py-1 border border-black">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                    <td className="px-2 py-1 border border-black">{reg.studentProfile.number}</td>
+                    <td className="px-2 py-1 border border-black">
                       {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-2 py-4 border border-black text-center text-black">
                     ไม่พบรายชื่อ
                   </td>
                 </tr>
