@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen, FileText } from "lucide-react"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
@@ -34,7 +34,12 @@ export default async function SuccessPage({
       studentId: profile.studentId
     },
     include: {
-      project: true
+      project: true,
+      answers: {
+        include: {
+          field: true
+        }
+      }
     }
   })
 
@@ -121,6 +126,23 @@ export default async function SuccessPage({
               <p className="font-semibold text-slate-900">ม.{profile.grade}/{profile.room} เลขที่ {profile.number}</p>
             </div>
 
+            {registration.answers && registration.answers.length > 0 && (
+              <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2">
+                <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center">
+                  <FileText className="w-4 h-4 mr-2 text-indigo-500" /> ข้อมูลเพิ่มเติมที่กรอก
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {registration.answers.map(answer => (
+                    <div key={answer.id} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                      <p className="text-xs text-slate-500 mb-1">{answer.field.label}</p>
+                      <p className="font-medium text-sm text-slate-900 break-words whitespace-pre-wrap">
+                        {answer.value || "-"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
