@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search } from "lucide-react"
+import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users } from "lucide-react"
 
 export default function ProjectGrid({ projects, formatDateThai }: { projects: any[], formatDateThai: (date: string | Date) => string }) {
   const [search, setSearch] = useState("")
