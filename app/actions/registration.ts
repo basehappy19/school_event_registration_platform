@@ -9,38 +9,28 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN || 'mock-token',
 })
 
+import { auth } from "@/auth"
+
 export async function submitRegistration(data: {
   projectId: string,
-  studentId: string,
-  nationalIdSuffix: string, // The last 5 digits provided by user
   formAnswers: { fieldId: string, value: string }[]
 }) {
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
   const userAgent = headersList.get('user-agent') || 'Unknown'
 
-  // Validate Student using Last 5 Digits
+  const session = await auth()
+  if (!session?.user?.email) {
+    return { error: 'กรุณาเข้าสู่ระบบก่อนทำการสมัคร' }
+  }
+
+  // Validate Student via Google Email
   const student = await prisma.studentProfile.findUnique({
-    where: { studentId: data.studentId }
+    where: { email: session.user.email }
   })
 
-  if (!student || !student.nationalId.endsWith(data.nationalIdSuffix)) {
-    // Implement Brute-Force lockout tracking
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      try {
-        const failKey = `failed:${ip}`
-        const fails = await redis.incr(failKey)
-        if (fails === 1) {
-          await redis.expire(failKey, 300) // Keep fail count active for 5 minutes
-        }
-        if (fails >= 3) {
-          await redis.set(`banned:${ip}`, 'true', { ex: 300 }) // Block IP for 5 minutes
-        }
-      } catch (err) {
-        console.error('Redis error', err)
-      }
-    }
-    return { error: 'Invalid Student ID or National ID' }
+  if (!student) {
+    return { error: 'อีเมลของคุณยังไม่ได้รับการลงทะเบียนเป็นนักเรียนในระบบ' }
   }
 
   // Handle Registration in Transaction
@@ -102,7 +92,7 @@ export async function submitRegistration(data: {
       await tx.auditLog.create({
         data: {
           action: "SUBMIT_REGISTRATION",
-          studentId: data.studentId,
+          studentId: student.studentId,
           projectId: data.projectId,
           ipAddress: ip,
           userAgent: userAgent,

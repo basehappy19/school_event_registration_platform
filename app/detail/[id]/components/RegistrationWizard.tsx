@@ -1,50 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { getStudentProfile } from "@/app/actions/student"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, ArrowRight, UserCheck, ShieldCheck, Loader2 } from "lucide-react"
+import { ArrowLeft, UserCheck, ShieldCheck, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { signIn } from "next-auth/react"
 
-export default function RegistrationWizard({ project }: { project: any }) {
+export default function RegistrationWizard({ project, session, profile }: { project: any, session: any, profile: any }) {
   const router = useRouter()
-  const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-
-  // Auth State
-  const [studentId, setStudentId] = useState("")
-  const [nationalIdSuffix, setNationalIdSuffix] = useState("")
-
-  // Profile State (autofilled)
-  const [profile, setProfile] = useState<any>(null)
   
   // Custom Answers State
   const [answers, setAnswers] = useState<Record<string, string>>({})
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
-    const res = await getStudentProfile(studentId, nationalIdSuffix)
-    if (res.error) {
-      if (res.error === "Missing credentials") setError("กรุณากรอกข้อมูลให้ครบถ้วน")
-      else if (res.error === "Student not found") setError("ไม่พบข้อมูลนักเรียน")
-      else if (res.error === "Invalid National ID suffix") setError("เลขบัตรประชาชน 5 หลักสุดท้ายไม่ถูกต้อง")
-      else setError(res.error)
-    } else if (res.data) {
-      const allowedGrades = project.quotas.map((q: any) => q.grade)
-      if (!allowedGrades.includes(res.data.grade)) {
-        setError(`ระดับชั้น ม.${res.data.grade} ไม่สามารถสมัครกิจกรรมนี้ได้ (รับเฉพาะ ม.${allowedGrades.join(', ม.')})`)
-      } else {
-        setProfile(res.data)
-        setStep(2)
-      }
-    }
-    setLoading(false)
-  }
+  const allowedGrades = project.quotas.map((q: any) => q.grade)
+  const isGradeAllowed = profile ? allowedGrades.includes(profile.grade) : false
 
   const handleSubmitRegistration = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,8 +30,6 @@ export default function RegistrationWizard({ project }: { project: any }) {
 
     const payload = {
       projectId: project.id,
-      studentId,
-      nationalIdSuffix,
       formAnswers
     }
 
@@ -90,63 +60,54 @@ export default function RegistrationWizard({ project }: { project: any }) {
           </div>
         )}
 
-        {step === 1 && (
-          <form onSubmit={handleAuth} className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-800">ยืนยันตัวตนนักเรียน</h2>
-              <p className="text-slate-500 mt-2">กรอกข้อมูลของคุณเพื่อดึงข้อมูลลงในแบบฟอร์มสมัครโดยอัตโนมัติอย่างปลอดภัย</p>
+        {!session ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8" />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">เลขประจำตัวนักเรียน</label>
-              <input 
-                type="text" 
-                required 
-                value={studentId}
-                onChange={e => setStudentId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                placeholder="เช่น 66001"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">เลขบัตรประจำตัวประชาชน 5 หลักสุดท้าย</label>
-              <input 
-                type="password" 
-                required 
-                maxLength={5}
-                value={nationalIdSuffix}
-                onChange={e => setNationalIdSuffix(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                placeholder="•••••"
-              />
-              <p className="text-xs text-slate-400 mt-2 text-right">ใช้สำหรับการยืนยันตัวตนเท่านั้น จะไม่ถูกจัดเก็บในรูปแบบข้อความธรรมดา (Plain text)</p>
-            </div>
-
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">เข้าสู่ระบบเพื่อสมัคร</h2>
+            <p className="text-slate-500 mb-8">กรุณาเข้าสู่ระบบด้วยบัญชี Google ของโรงเรียนเพื่อดำเนินการต่อ</p>
             <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center disabled:opacity-70 mt-4"
+              onClick={() => signIn('google')}
+              className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3 px-6 rounded-xl transition-all shadow-sm flex items-center justify-center mx-auto"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <>ยืนยันตัวตนและดำเนินการต่อ <ArrowRight className="w-5 h-5 ml-2" /></>
-              )}
+              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              </svg>
+              เข้าสู่ระบบด้วย Google
             </button>
-          </form>
-        )}
-
-        {step === 2 && profile && (
+          </div>
+        ) : !profile ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">ไม่พบข้อมูลนักเรียน</h2>
+            <p className="text-slate-500">อีเมล {session.user?.email} ยังไม่ได้รับการลงทะเบียนเป็นนักเรียนในระบบของเรา</p>
+          </div>
+        ) : !isGradeAllowed ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">สิทธิ์ไม่เพียงพอ</h2>
+            <p className="text-slate-500">
+              ระดับชั้น ม.{profile.grade} ไม่สามารถสมัครกิจกรรมนี้ได้ (รับเฉพาะ ม.{allowedGrades.join(', ม.')})
+            </p>
+          </div>
+        ) : (
           <form onSubmit={handleSubmitRegistration} className="space-y-8">
             <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
               <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
                 <UserCheck className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-emerald-700">ยืนยันตัวตนสำเร็จ</p>
+                <p className="text-sm font-semibold text-emerald-700">เข้าสู่ระบบสำเร็จ</p>
                 <p className="text-slate-800 font-bold">{profile.prefix}{profile.firstName} {profile.lastName}</p>
-                <p className="text-slate-500 text-sm">ม.{profile.grade}/{profile.room} • เลขที่ {profile.number}</p>
+                <p className="text-slate-500 text-sm">ม.{profile.grade}/{profile.room} • เลขที่ {profile.number} • {profile.email}</p>
               </div>
             </div>
 

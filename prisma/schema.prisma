@@ -44,6 +44,7 @@ model StudentProfile {
   grade      String
   room       String
   number     String
+  email      String?        @unique
 
   registrations Registration[]
 }

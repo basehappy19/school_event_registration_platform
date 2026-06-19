@@ -66,18 +66,26 @@ async function main() {
     const studentId = `660${i.toString().padStart(2, '0')}`
     const nationalId = `11001123456${i.toString().padStart(2, '0')}` // Last 5 digits: 345601, etc.
     
+    let email = null;
+    if (i === 1) {
+      email = '37088@phukhieo.ac.th'
+    } else {
+      email = `student${i}@phukhieo.ac.th`
+    }
+
     await prisma.studentProfile.upsert({
       where: { studentId },
       update: {},
       create: {
         studentId,
         nationalId,
-        prefix: i % 2 === 0 ? 'Mr.' : 'Ms.',
-        firstName: `Student${i}`,
-        lastName: `Testable`,
+        prefix: i % 2 === 0 ? 'นาย' : 'นางสาว',
+        firstName: `นักเรียน${i}`,
+        lastName: `ทดสอบ`,
         grade,
         room: (i % 5 + 1).toString(),
-        number: i.toString()
+        number: i.toString(),
+        email
       }
     })
     studentCount++

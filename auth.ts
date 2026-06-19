@@ -21,29 +21,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!emailAttempt) return false
 
         try {
+          // Check Admin
           const adminUser = await prisma.adminUser.findUnique({
             where: { email: emailAttempt },
           })
 
-          const status = adminUser ? 'SUCCESS' : 'FAILED'
-
-          // Write login attempt to log
-          await prisma.adminLoginLog.create({
-            data: {
-              emailAttempt,
-              status,
-              // ipAddress and userAgent are typically gathered in route handlers; 
-              // NextAuth beta doesn't provide them directly in callbacks without req.
-            },
-          })
-
-          if (!adminUser) {
-            return false // Deny access
+          if (adminUser) {
+            await prisma.adminLoginLog.create({
+              data: { emailAttempt, status: 'SUCCESS' },
+            })
+            return true
           }
 
-          return true
+          // Check Student
+          const studentProfile = await prisma.studentProfile.findUnique({
+            where: { email: emailAttempt }
+          })
+
+          if (studentProfile) {
+            return true
+          }
+
+          // Neither Admin nor Student
+          await prisma.adminLoginLog.create({
+            data: { emailAttempt, status: 'FAILED' },
+          })
+          return false
         } catch (error) {
-          console.error("Error checking admin user:", error)
+          console.error("Error checking user:", error)
           return false
         }
       }
@@ -56,6 +61,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         })
         if (adminUser) {
           (session.user as any).role = adminUser.role;
+        } else {
+          const studentProfile = await prisma.studentProfile.findUnique({
+            where: { email: session.user.email }
+          })
+          if (studentProfile) {
+            (session.user as any).role = 'STUDENT';
+            (session.user as any).studentId = studentProfile.studentId;
+          }
         }
       }
       return session;
