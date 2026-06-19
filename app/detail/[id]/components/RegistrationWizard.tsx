@@ -137,11 +137,19 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               </form>
             </div>
           ) : !profile ? (
-            <div className="bg-rose-50 border border-rose-100 p-6 rounded-2xl flex items-center gap-4">
+            <div className="bg-rose-50 border border-rose-100 p-6 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
               <ShieldCheck className="w-8 h-8 text-rose-500 shrink-0" />
-              <div>
-                <h3 className="font-bold text-slate-800">ไม่พบข้อมูลนักเรียน</h3>
-                <p className="text-slate-600 text-sm">อีเมล {session.user?.email} ยังไม่ได้รับการลงทะเบียนเป็นนักเรียนในระบบ</p>
+              <div className="flex-1 w-full flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-bold text-slate-800">ไม่พบข้อมูลนักเรียน</h3>
+                  <p className="text-slate-600 text-sm">อีเมล {session.user?.email} ยังไม่ได้รับการลงทะเบียนเป็นนักเรียนในระบบ</p>
+                </div>
+                <button 
+                  onClick={() => signOutAction(`/detail/${project.id}`)}
+                  className="bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-medium py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer shrink-0"
+                >
+                  เปลี่ยนบัญชี
+                </button>
               </div>
             </div>
           ) : !isGradeAllowed ? (
