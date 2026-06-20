@@ -195,7 +195,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             name="description" 
             value={formData.description} 
             onChange={handleChange} 
-            className="text-slate-500 w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none transition-colors px-1 py-1 rounded-md resize-y min-h-[60px]"
+            className="text-slate-500 w-full bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none transition-colors px-1 py-1 rounded-md resize-y min-h-15"
             placeholder="รายละเอียดโครงการ"
           />
         </div>
@@ -205,7 +205,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       <div>
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2 mb-4">โปสเตอร์โครงการ</h3>
         <div className="flex flex-col sm:flex-row gap-6 items-start">
-          <div className="w-48 shrink-0 relative rounded-xl overflow-hidden border-2 border-dashed border-slate-300 bg-slate-50 aspect-[3/4] flex flex-col items-center justify-center text-slate-400 group">
+          <div className="w-48 shrink-0 relative rounded-xl overflow-hidden border-2 border-dashed border-slate-300 bg-slate-50 aspect-3/4 flex flex-col items-center justify-center text-slate-400 group">
             {posterUrl ? (
               <>
                 <img src={posterUrl} alt="Poster" className={`w-full h-full object-cover transition-opacity ${uploadingPoster ? 'opacity-50' : ''}`} />

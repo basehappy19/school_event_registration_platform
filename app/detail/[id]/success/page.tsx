@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen, FileText, LogOut } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, FileText, LogOut } from "lucide-react"
 import { auth } from "@/auth"
 import { signOutAction } from "@/app/actions/auth"
 import prisma from "@/lib/prisma"
@@ -155,7 +155,7 @@ export default async function SuccessPage({
                   {registration.answers.map(answer => (
                     <div key={answer.id} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
                       <p className="text-xs text-slate-500 mb-1">{answer.field.label}</p>
-                      <p className="font-medium text-sm text-slate-900 break-words whitespace-pre-wrap">
+                      <p className="font-medium text-sm text-slate-900 wrap-break-word whitespace-pre-wrap">
                         {answer.value || "-"}
                       </p>
                     </div>

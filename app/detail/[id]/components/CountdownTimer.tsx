@@ -14,7 +14,9 @@ export default function CountdownTimer({ startDate, endDate }: { startDate?: str
 
   useEffect(() => {
     setIsMounted(true)
-    
+  }, [])
+
+  useEffect(() => {
     if (!startDate) {
       setStatus("OPEN")
       return
@@ -69,19 +71,19 @@ export default function CountdownTimer({ startDate, endDate }: { startDate?: str
           </span>
         </div>
         <div className="flex gap-2 sm:gap-3 text-center">
-          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-15 sm:min-w-17.5 shadow-sm">
             <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.days}</div>
             <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">วัน</div>
           </div>
-          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-15 sm:min-w-17.5 shadow-sm">
             <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.hours}</div>
             <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">ชั่วโมง</div>
           </div>
-          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-15 sm:min-w-17.5 shadow-sm">
             <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.minutes}</div>
             <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">นาที</div>
           </div>
-          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-[60px] sm:min-w-[70px] shadow-sm">
+          <div className="bg-white border border-indigo-100 rounded-xl px-3 sm:px-4 py-2 min-w-15 sm:min-w-17.5 shadow-sm">
             <div className="text-2xl font-bold text-indigo-700 leading-none mb-1">{timeLeft.seconds}</div>
             <div className="text-[10px] sm:text-xs text-indigo-500 font-medium">วินาที</div>
           </div>

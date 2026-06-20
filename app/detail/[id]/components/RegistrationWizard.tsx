@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users } from "lucide-react"
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
+import Image from "next/image"
 import CountdownTimer from "./CountdownTimer"
 import { formatThaiDateWithDay } from "@/lib/dateUtils"
 import { ProjectForWizard } from "@/app/types"
@@ -35,7 +36,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           const data = await res.json()
           setStats(data)
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -114,7 +115,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Access Denied Modal */}
       {showAccessDeniedModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in duration-200">
             <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShieldCheck className="w-8 h-8" />
@@ -137,8 +138,8 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         {/* Top Section: Poster & Info */}
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {project.posterUrl && (
-            <div className="w-full md:w-64 shrink-0 sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-[3/4]">
-              <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover" />
+            <div className="w-full md:w-64 shrink-0 relative sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-3/4">
+              <Image src={project.posterUrl} alt={project.title} fill className="object-cover" />
             </div>
           )}
           <div className="flex-1">

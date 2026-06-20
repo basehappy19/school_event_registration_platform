@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Calendar, Plus, Settings, Users, ArrowLeft, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { Calendar, Plus, ArrowLeft, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import AdminProjectSettings from "./AdminProjectSettings"
 import AdminRegistrationList from "./AdminRegistrationList"

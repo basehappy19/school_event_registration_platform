@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { Users, CheckCircle2, Clock, Calendar as CalendarIcon, TrendingUp, BarChart3 } from "lucide-react"
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, Cell, BarChart, Bar
+  PieChart, Pie, Cell
 } from "recharts"
 import { ProjectWithRelations } from "@/app/types"
 
@@ -61,7 +61,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
 
     // Prepare Time Series Array
     const timeSeriesData = Object.keys(timeSeriesMap).sort().map(date => {
-      const obj: Record<string, any> = { date }
+      const obj: Record<string, string | number> = { date }
       Object.keys(timeSeriesMap[date]).forEach(grade => {
         obj[`ม.${grade}`] = timeSeriesMap[date][grade]
       })
@@ -259,7 +259,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
             )}
             {stats.statusData.length > 0 && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center mt-[-20px]">
+                <div className="text-center -mt-5">
                   <p className="text-3xl font-bold text-slate-800">{stats.totalRegistered}</p>
                   <p className="text-xs text-slate-500">รวมทั้งหมด</p>
                 </div>

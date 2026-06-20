@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist } from "@/app/actions/admin"
-import { approveAllWaitlist, cancelRegistration } from "@/app/actions/registration"
+
 import { useRouter } from "next/navigation"
-import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, Filter, UserCheck, XCircle, ChevronLeft, ChevronRight, FileSpreadsheet } from "lucide-react"
+import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle } from "lucide-react"
 import { ProjectWithRelations } from "@/app/types"
 
 export default function AdminRegistrationList({ project }: { project: ProjectWithRelations }) {
@@ -140,7 +140,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">ยืนยันการรับสำรองทั้งหมด</h3>
               <p className="text-slate-500 mb-6">
-                คุณแน่ใจหรือไม่ที่จะปรับสถานะผู้สมัครที่เป็น <span className="font-semibold text-amber-600">"สำรอง"</span> ทั้งหมดให้เป็น <span className="font-semibold text-emerald-600">"ตัวจริง"</span>? การกระทำนี้ไม่สามารถย้อนกลับได้ทีละหลายคน
+                คุณแน่ใจหรือไม่ที่จะปรับสถานะผู้สมัครที่เป็น <span className="font-semibold text-amber-600">&quot;สำรอง&quot;</span> ทั้งหมดให้เป็น <span className="font-semibold text-emerald-600">&quot;ตัวจริง&quot;</span>? การกระทำนี้ไม่สามารถย้อนกลับได้ทีละหลายคน
               </p>
               <div className="flex items-center justify-end gap-3">
                 <button 

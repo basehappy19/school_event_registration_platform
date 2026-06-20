@@ -1,7 +1,7 @@
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
 import Link from "next/link"
-import { ArrowLeft, Search, Filter, Printer, Download } from "lucide-react"
+import { ArrowLeft, Search } from "lucide-react"
 import AutoPrint from "./components/AutoPrint"
 import { formatThaiDateWithDay } from "@/lib/dateUtils"
 import { Metadata } from "next"
@@ -48,7 +48,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     (!project.announcementEndDate || now <= project.announcementEndDate)
 
   const session = await auth()
-  const role = (session?.user as any)?.role
+  const role = (session?.user as { role?: string })?.role
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
 
   if (!isAnnouncementOpen && !isAdmin) {
@@ -107,7 +107,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8">
+      <div className="bg-linear-to-r from-emerald-600 to-teal-600 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <Link href="/" className="bg-emerald-700/50 hover:bg-emerald-700 border border-emerald-500/30 text-white px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit print:hidden shadow-sm backdrop-blur-sm">
             <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
@@ -194,7 +194,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
                       <td className="px-3 sm:px-6 py-3 text-center text-slate-500">{index + 1}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium break-words">
+                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
                     </tr>
@@ -233,7 +233,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
                       <td className="px-3 sm:px-6 py-3 text-center text-amber-600 font-medium">{index + 1}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium break-words">
+                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
                     </tr>
