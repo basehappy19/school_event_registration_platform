@@ -34,7 +34,7 @@ export type ProjectForWizard = Prisma.ProjectGetPayload<{
 export interface UpdateProjectPayload {
   title?: string
   description?: string
-  posterUrl?: string
+  posterUrl?: string | null
   startDate?: Date
   endDate?: Date
   isPublished?: boolean

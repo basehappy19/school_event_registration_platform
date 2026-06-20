@@ -152,7 +152,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     const payload = {
       ...formData,
       isRegistrationOpen: isPastEndDate ? false : formData.isRegistrationOpen,
-      posterUrl: posterUrl || undefined,
+      posterUrl: posterUrl === "" ? null : posterUrl,
       registrationStartDate: formData.registrationStartDate || undefined,
       registrationEndDate: formData.registrationEndDate || undefined,
       quotas,
