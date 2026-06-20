@@ -55,8 +55,57 @@ const promptFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ระบบลงทะเบียนเข้าร่วมกิจกรรม",
-  description: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tutor.phukhieo.ac.th/"),
+  title: {
+    template: "%s | ระบบลงทะเบียน",
+    default: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
+  },
+  description: "ระบบลงทะเบียนเข้าร่วมกิจกรรมต่างๆ ของโรงเรียนภูเขียว สะดวก รวดเร็ว ตรวจสอบสถานะและพิมพ์ประกาศรายชื่อได้ทันที",
+  keywords: [
+    "ลงทะเบียน", 
+    "กิจกรรม", 
+    "โรงเรียนภูเขียว", 
+    "ระบบลงทะเบียนกิจกรรม", 
+    "กิจกรรมโรงเรียน", 
+    "Phukhieo", 
+    "Phukhieo School"
+  ],
+  authors: [{ name: "โรงเรียนภูเขียว" }],
+  creator: "โรงเรียนภูเขียว",
+  publisher: "โรงเรียนภูเขียว",
+  openGraph: {
+    title: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
+    description: "ระบบลงทะเบียนเข้าร่วมกิจกรรมต่างๆ ของโรงเรียนภูเขียว สะดวก รวดเร็ว ตรวจสอบสถานะและพิมพ์ประกาศรายชื่อได้ทันที",
+    url: "https://tutor.phukhieo.ac.th/",
+    siteName: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
+    images: [
+      {
+        url: "/school_event_registration_platform_banner.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ป้ายประกาศระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
+      },
+    ],
+    locale: "th_TH",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
+    description: "ระบบลงทะเบียนเข้าร่วมกิจกรรมต่างๆ ของโรงเรียนภูเขียว สะดวก รวดเร็ว ตรวจสอบสถานะและพิมพ์ประกาศรายชื่อได้ทันที",
+    images: ["/school_event_registration_platform_banner.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 import NextTopLoader from "nextjs-toploader";
