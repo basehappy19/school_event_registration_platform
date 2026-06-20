@@ -87,8 +87,9 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
-          table { page-break-inside: auto; }
-          tr { break-inside: avoid; page-break-inside: avoid; page-break-after: auto; }
+          table { page-break-inside: auto; border-collapse: collapse; }
+          tr { break-inside: avoid !important; page-break-inside: avoid !important; page-break-after: auto; }
+          td, th { border: 1px solid black !important; page-break-inside: avoid !important; break-inside: avoid !important; }
           thead { display: table-header-group; }
           tfoot { display: table-footer-group; }
         }
