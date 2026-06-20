@@ -77,7 +77,7 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
       
       if (fieldsToDelete.length > 0) {
         await prisma.formField.deleteMany({
-          where: { id: { in: fieldsToDelete.map(f => f.id) } }
+          where: { id: { in: fieldsToDelete.map((f: any) => f.id) } }
         })
       }
 
