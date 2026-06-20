@@ -40,6 +40,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
+  project.registrations.sort((a, b) => {
+    if (a.status !== b.status) return a.status === 'APPROVED' ? -1 : 1;
+    const sA = a.studentProfile;
+    const sB = b.studentProfile;
+    const gA = parseInt(sA.grade) || 0;
+    const gB = parseInt(sB.grade) || 0;
+    if (gA !== gB) return gA - gB;
+    const rA = parseInt(sA.room) || 0;
+    const rB = parseInt(sB.room) || 0;
+    if (rA !== rB) return rA - rB;
+    const nA = parseInt(sA.number) || 0;
+    const nB = parseInt(sB.number) || 0;
+    return nA - nB;
+  });
+
   // Create workbook
   const workbook = new ExcelJS.Workbook()
   workbook.creator = "School Event System"

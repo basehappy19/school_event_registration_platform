@@ -63,6 +63,20 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
     ]
   })
 
+  registrations.sort((a, b) => {
+    const sA = a.studentProfile;
+    const sB = b.studentProfile;
+    const gA = parseInt(sA.grade) || 0;
+    const gB = parseInt(sB.grade) || 0;
+    if (gA !== gB) return gA - gB;
+    const rA = parseInt(sA.room) || 0;
+    const rB = parseInt(sB.room) || 0;
+    if (rA !== rB) return rA - rB;
+    const nA = parseInt(sA.number) || 0;
+    const nB = parseInt(sB.number) || 0;
+    return nA - nB;
+  });
+
   // Date is already a string like "15 สิงหาคม 2569", we format it with day
   const formattedDate = formatThaiDateWithDay(project.activityDate)
 
