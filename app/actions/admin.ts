@@ -72,8 +72,8 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
 
     if (formFields !== undefined) {
       const existingFields = await prisma.formField.findMany({ where: { projectId } })
-      const fieldIdsToKeep = formFields.filter(f => f.id).map(f => f.id)
-      const fieldsToDelete = existingFields.filter(f => !fieldIdsToKeep.includes(f.id))
+      const fieldIdsToKeep = formFields.filter((f: any) => f.id).map((f: any) => f.id)
+      const fieldsToDelete = existingFields.filter((f: any) => !fieldIdsToKeep.includes(f.id))
       
       if (fieldsToDelete.length > 0) {
         await prisma.formField.deleteMany({
