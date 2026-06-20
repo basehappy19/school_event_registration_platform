@@ -626,7 +626,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold py-2.5 px-6 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
-            ล้างค่าเป็นตอนเริ่ม
+            ยกเลิกการแก้ไขล่าสุด
           </button>
           <button 
             onClick={handleSave} 
@@ -683,9 +683,9 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
               <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4">
                 <RotateCcw className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">ล้างค่าเป็นตอนเริ่ม</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">ยกเลิกการแก้ไขล่าสุด</h3>
               <p className="text-slate-500 mb-6">
-                คุณแน่ใจหรือไม่ที่จะล้างค่าที่เปลี่ยนแปลงทั้งหมดและกลับไปใช้ค่าเริ่มต้น?
+                คุณแน่ใจหรือไม่? ข้อมูลที่คุณเพิ่งแก้ไขและ<span className="font-semibold text-rose-600">ยังไม่ได้บันทึก</span>จะถูกยกเลิกทั้งหมด และระบบจะดึงข้อมูลเดิมกลับมาแสดงแทน
               </p>
               <div className="flex items-center justify-end gap-3">
                 <button 
