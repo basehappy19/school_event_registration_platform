@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { updateProjectSettings, deleteProject } from "@/app/actions/admin"
 import { Loader2, Save, CheckCircle2, Plus, Trash2, GripVertical, AlertTriangle, Image as ImageIcon, X } from "lucide-react"
+
 import { useRouter } from "next/navigation"
 import { ProjectWithRelations } from "@/app/types"
 import { FieldType, ProjectQuota } from "@prisma/client"
@@ -11,6 +12,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   const router = useRouter()
   const [showToast, setShowToast] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [formData, setFormData] = useState({
     title: project.title || "",
     description: project.description || "",
@@ -160,7 +162,6 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   }
 
   const handleDeleteProject = async () => {
-    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบโครงการนี้? ข้อมูลทั้งหมด รวมถึงการลงทะเบียนจะถูกลบถาวร")) return
     setLoading(true)
     await deleteProject(project.id)
     router.push("/admin")
@@ -513,7 +514,8 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
 
       <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-slate-200 gap-4">
         <button 
-          onClick={handleDeleteProject}
+          type="button"
+          onClick={() => setShowDeleteModal(true)}
           disabled={loading}
           className="w-full sm:w-auto px-4 py-2 text-rose-600 bg-rose-50 hover:bg-rose-100 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
         >
@@ -529,6 +531,42 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
           {uploadingPoster ? "กำลังอัปโหลด..." : "บันทึกการตั้งค่า"}
         </button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">ลบโครงการ</h3>
+              <p className="text-slate-500 mb-6">
+                คุณแน่ใจหรือไม่ที่จะลบโครงการนี้? ข้อมูลทั้งหมด รวมถึงการลงทะเบียนจะถูกลบถาวร
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  ยกเลิก
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleDeleteProject}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  ตกลง
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
