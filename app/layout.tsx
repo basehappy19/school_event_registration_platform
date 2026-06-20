@@ -76,7 +76,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
     description: "ระบบลงทะเบียนเข้าร่วมกิจกรรมต่างๆ ของโรงเรียนภูเขียว สะดวก รวดเร็ว ตรวจสอบสถานะและพิมพ์ประกาศรายชื่อได้ทันที",
-    url: "https://tutor.phukhieo.ac.th/",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://tutor.phukhieo.ac.th/",
     siteName: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
     images: [
       {
