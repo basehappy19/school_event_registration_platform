@@ -87,8 +87,6 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
-          thead { display: table-header-group; }
-          tfoot { display: table-footer-group; }
         }
         table { 
           page-break-inside: auto; 
@@ -137,11 +135,19 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
               {registrations.length > 0 ? (
                 registrations.map((reg, index) => (
                   <tr key={reg.id}>
-                    <td className="px-2 py-1 align-middle">{index + 1}</td>
-                    <td className="px-2 py-1 align-middle">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                    <td className="px-2 py-1 align-middle">{reg.studentProfile.number}</td>
                     <td className="px-2 py-1 align-middle">
-                      {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                      <div className="break-inside-avoid print:break-inside-avoid">{index + 1}</div>
+                    </td>
+                    <td className="px-2 py-1 align-middle">
+                      <div className="break-inside-avoid print:break-inside-avoid">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
+                    </td>
+                    <td className="px-2 py-1 align-middle">
+                      <div className="break-inside-avoid print:break-inside-avoid">{reg.studentProfile.number}</div>
+                    </td>
+                    <td className="px-2 py-1 align-middle">
+                      <div className="break-inside-avoid print:break-inside-avoid">
+                        {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                      </div>
                     </td>
                   </tr>
                 ))
