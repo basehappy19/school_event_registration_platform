@@ -27,8 +27,8 @@ export default function AdminProjectSettings({ project, onSave }: { project: any
     isPublished: project.isPublished,
     isRegistrationOpen: project.isRegistrationOpen,
     isAnnouncementOpen: project.isAnnouncementOpen,
-    registrationStartDate: project.registrationStartDate ? toLocalISOString(project.registrationStartDate) : "",
-    registrationEndDate: project.registrationEndDate ? toLocalISOString(project.registrationEndDate) : "",
+    registrationStartDate: project.registrationStartDate ? new Date(project.registrationStartDate) : null,
+    registrationEndDate: project.registrationEndDate ? new Date(project.registrationEndDate) : null,
     activityDate: project.activityDate ? new Date(project.activityDate) : null,
     activityStartTime: project.activityStartTime ? new Date(project.activityStartTime) : null,
     activityEndTime: project.activityEndTime ? new Date(project.activityEndTime) : null,
@@ -148,8 +148,8 @@ export default function AdminProjectSettings({ project, onSave }: { project: any
     const payload = {
       ...formData,
       posterUrl: posterUrl || undefined,
-      registrationStartDate: formData.registrationStartDate ? new Date(formData.registrationStartDate) : undefined,
-      registrationEndDate: formData.registrationEndDate ? new Date(formData.registrationEndDate) : undefined,
+      registrationStartDate: formData.registrationStartDate || undefined,
+      registrationEndDate: formData.registrationEndDate || undefined,
       quotas,
       formFields: formFields.map(f => ({
         ...f,
@@ -318,25 +318,33 @@ export default function AdminProjectSettings({ project, onSave }: { project: any
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">วัน/เวลา เปิดรับสมัคร</label>
-            <input 
-              type="datetime-local" 
-              name="registrationStartDate"
-              lang="th-TH"
-              value={formData.registrationStartDate}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors"
-            />
+            <div className="flex items-center gap-2">
+              <ThaiDatePicker 
+                value={formData.registrationStartDate}
+                onChange={(date) => setFormData({ ...formData, registrationStartDate: date })}
+                className="flex-1"
+              />
+              <ThaiTimePicker
+                value={formData.registrationStartDate}
+                onChange={(time) => setFormData({ ...formData, registrationStartDate: time })}
+                className="w-24 shrink-0"
+              />
+            </div>
           </div>
           <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">วัน/เวลา ปิดรับสมัคร <span className="text-slate-400 font-normal">(ไม่บังคับ)</span></label>
-            <input 
-              type="datetime-local" 
-              name="registrationEndDate"
-              lang="th-TH"
-              value={formData.registrationEndDate}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors"
-            />
+            <div className="flex items-center gap-2">
+              <ThaiDatePicker 
+                value={formData.registrationEndDate}
+                onChange={(date) => setFormData({ ...formData, registrationEndDate: date })}
+                className="flex-1"
+              />
+              <ThaiTimePicker
+                value={formData.registrationEndDate}
+                onChange={(time) => setFormData({ ...formData, registrationEndDate: time })}
+                className="w-24 shrink-0"
+              />
+            </div>
           </div>
         </div>
       </div>

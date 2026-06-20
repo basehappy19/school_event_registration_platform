@@ -51,7 +51,17 @@ export function ThaiDatePicker({ value, onChange, placeholder = "เลือก
           <DayPicker
             mode="single"
             selected={value || undefined}
-            onSelect={(d) => { onChange(d || null); setIsOpen(false); }}
+            defaultMonth={value || undefined}
+            onSelect={(d) => {
+              if (d && value) {
+                const newDate = new Date(d);
+                newDate.setHours(value.getHours(), value.getMinutes(), value.getSeconds());
+                onChange(newDate);
+              } else {
+                onChange(d || null);
+              }
+              setIsOpen(false);
+            }}
             locale={th}
             formatters={{
               formatCaption: (date, options) => {
