@@ -88,26 +88,6 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
         }
-        table { 
-          page-break-inside: auto; 
-          border-collapse: separate !important; 
-          border-spacing: 0 !important; 
-          border-top: 1px solid black !important;
-          border-left: 1px solid black !important;
-        }
-        tr { 
-          break-inside: avoid !important; 
-          page-break-inside: avoid !important; 
-          page-break-after: auto; 
-        }
-        td, th { 
-          border-bottom: 1px solid black !important; 
-          border-right: 1px solid black !important;
-          border-top: none !important;
-          border-left: none !important;
-          page-break-inside: avoid !important; 
-          break-inside: avoid !important; 
-        }
       `}} />
       <div className="max-w-4xl mx-auto print:max-w-none">
         {/* Header */}
@@ -121,45 +101,33 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
         </div>
 
         {/* Content */}
-        <div>
-          <table className="w-full text-left text-base">
-            <thead>
-              <tr>
-                <th className="px-2 py-1 w-16 align-middle">ลำดับ</th>
-                <th className="px-2 py-1 w-24 align-middle">ชั้น/ห้อง</th>
-                <th className="px-2 py-1 w-20 align-middle">เลขที่</th>
-                <th className="px-2 py-1 align-middle">ชื่อ-นามสกุล</th>
-              </tr>
-            </thead>
-            <tbody>
-              {registrations.length > 0 ? (
-                registrations.map((reg, index) => (
-                  <tr key={reg.id}>
-                    <td className="px-2 py-1 align-middle">
-                      <div className="break-inside-avoid print:break-inside-avoid">{index + 1}</div>
-                    </td>
-                    <td className="px-2 py-1 align-middle">
-                      <div className="break-inside-avoid print:break-inside-avoid">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
-                    </td>
-                    <td className="px-2 py-1 align-middle">
-                      <div className="break-inside-avoid print:break-inside-avoid">{reg.studentProfile.number}</div>
-                    </td>
-                    <td className="px-2 py-1 align-middle">
-                      <div className="break-inside-avoid print:break-inside-avoid">
-                        {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="px-2 py-4 align-middle text-center text-black">
-                    ไม่พบรายชื่อ
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {/* Content */}
+        <div className="border border-black flex flex-col">
+          {/* Header */}
+          <div className="flex font-bold bg-white">
+            <div className="px-2 py-1 w-16 border-r border-black flex items-center">ลำดับ</div>
+            <div className="px-2 py-1 w-24 border-r border-black flex items-center">ชั้น/ห้อง</div>
+            <div className="px-2 py-1 w-20 border-r border-black flex items-center">เลขที่</div>
+            <div className="px-2 py-1 flex-1 flex items-center">ชื่อ-นามสกุล</div>
+          </div>
+          
+          {/* Body */}
+          {registrations.length > 0 ? (
+            registrations.map((reg, index) => (
+              <div key={reg.id} className="flex border-t border-black break-inside-avoid print:break-inside-avoid">
+                <div className="px-2 py-1 w-16 border-r border-black flex items-center">{index + 1}</div>
+                <div className="px-2 py-1 w-24 border-r border-black flex items-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
+                <div className="px-2 py-1 w-20 border-r border-black flex items-center">{reg.studentProfile.number}</div>
+                <div className="px-2 py-1 flex-1 flex items-center">
+                  {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="border-t border-black px-2 py-4 text-center">
+              ไม่พบรายชื่อ
+            </div>
+          )}
         </div>
       </div>
     </div>
