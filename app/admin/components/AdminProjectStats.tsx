@@ -79,8 +79,8 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
 
     // Prepare Status Pie Chart Array
     const statusData = [
-      { name: 'ตัวจริง (Approved)', value: statusCounts['APPROVED'] || 0, color: '#10b981' },
-      { name: 'สำรอง (Waitlisted)', value: statusCounts['WAITLISTED'] || 0, color: '#f59e0b' },
+      { name: 'ตัวจริง', value: statusCounts['APPROVED'] || 0, color: '#10b981' },
+      { name: 'สำรอง', value: statusCounts['WAITLISTED'] || 0, color: '#f59e0b' },
     ].filter(d => d.value > 0)
 
     return {
@@ -119,7 +119,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">ตัวจริง (Approved)</p>
+            <p className="text-sm font-medium text-slate-500 mb-1">ตัวจริง</p>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-slate-900">{stats.totalApproved}</span>
               <span className="text-sm text-slate-500 font-medium">คน</span>
@@ -132,7 +132,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">สำรอง (Waitlisted)</p>
+            <p className="text-sm font-medium text-slate-500 mb-1">สำรอง</p>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-slate-900">{stats.totalWaitlisted}</span>
               <span className="text-sm text-slate-500 font-medium">คน</span>
@@ -170,7 +170,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
           </div>
           <div className="h-72 w-full">
             {stats.timeSeriesData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+              <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={stats.timeSeriesData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis 
@@ -227,11 +227,11 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <BarChart3 className="w-5 h-5 text-indigo-500" />
-            <h3 className="font-bold text-slate-800">สัดส่วนสถานะผู้สมัคร</h3>
+            <h3 className="font-bold text-slate-800">สัดส่วนสถานะนักเรียน</h3>
           </div>
           <div className="h-64 w-full relative">
             {stats.statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={stats.statusData}
