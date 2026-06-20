@@ -15,6 +15,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   const [showToast, setShowToast] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showResetModal, setShowResetModal] = useState(false)
 
   const [formData, setFormData] = useState({
     title: project.title || "",
@@ -168,46 +169,45 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   }
 
   const handleReset = () => {
-    if (confirm("คุณแน่ใจหรือไม่ที่จะล้างค่าที่เปลี่ยนแปลงทั้งหมดและกลับไปใช้ค่าเริ่มต้น?")) {
-      setFormData({
-        title: project.title || "",
-        description: project.description || "",
-        isPublished: project.isPublished,
-        isRegistrationOpen: project.isRegistrationOpen,
-        isAnnouncementOpen: project.isAnnouncementOpen,
-        registrationStartDate: project.registrationStartDate ? new Date(project.registrationStartDate) : null,
-        registrationEndDate: project.registrationEndDate ? new Date(project.registrationEndDate) : null,
-        activityDate: project.activityDate ? new Date(project.activityDate) : null,
-        activityStartTime: project.activityStartTime ? new Date(project.activityStartTime) : null,
-        activityEndTime: project.activityEndTime ? new Date(project.activityEndTime) : null,
-        activityLocation: project.activityLocation || "",
-      })
-      setPosterUrl(project.posterUrl || "")
-      setQuotas(
-        project.quotas?.length > 0 
-          ? project.quotas.map((q: ProjectWithRelations['quotas'][0]) => ({ grade: q.grade, capacity: q.capacity }))
-          : []
-      )
-      setFormFields(
-        project.formFields?.length > 0
-          ? project.formFields.map((f: ProjectWithRelations['formFields'][0]) => {
-              let parsedOptions: string[] = []
-              try {
-                if (f.options) {
-                   if (f.options.startsWith('[')) {
-                     parsedOptions = JSON.parse(f.options)
-                   } else {
-                     parsedOptions = f.options.split(',').map((s: string) => s.trim())
-                   }
-                }
-              } catch {
-                parsedOptions = f.options ? f.options.split(',').map((s: string) => s.trim()) : []
+    setFormData({
+      title: project.title || "",
+      description: project.description || "",
+      isPublished: project.isPublished,
+      isRegistrationOpen: project.isRegistrationOpen,
+      isAnnouncementOpen: project.isAnnouncementOpen,
+      registrationStartDate: project.registrationStartDate ? new Date(project.registrationStartDate) : null,
+      registrationEndDate: project.registrationEndDate ? new Date(project.registrationEndDate) : null,
+      activityDate: project.activityDate ? new Date(project.activityDate) : null,
+      activityStartTime: project.activityStartTime ? new Date(project.activityStartTime) : null,
+      activityEndTime: project.activityEndTime ? new Date(project.activityEndTime) : null,
+      activityLocation: project.activityLocation || "",
+    })
+    setPosterUrl(project.posterUrl || "")
+    setQuotas(
+      project.quotas?.length > 0 
+        ? project.quotas.map((q: ProjectWithRelations['quotas'][0]) => ({ grade: q.grade, capacity: q.capacity }))
+        : []
+    )
+    setFormFields(
+      project.formFields?.length > 0
+        ? project.formFields.map((f: ProjectWithRelations['formFields'][0]) => {
+            let parsedOptions: string[] = []
+            try {
+              if (f.options) {
+                 if (f.options.startsWith('[')) {
+                   parsedOptions = JSON.parse(f.options)
+                 } else {
+                   parsedOptions = f.options.split(',').map((s: string) => s.trim())
+                 }
               }
-              return { id: f.id, label: f.label, type: f.type, options: parsedOptions, isRequired: f.isRequired }
-            })
-          : []
-      )
-    }
+            } catch {
+              parsedOptions = f.options ? f.options.split(',').map((s: string) => s.trim()) : []
+            }
+            return { id: f.id, label: f.label, type: f.type, options: parsedOptions, isRequired: f.isRequired }
+          })
+        : []
+    )
+    setShowResetModal(false)
   }
 
   const handleDeleteProject = async () => {
@@ -621,7 +621,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
           <button 
             type="button"
-            onClick={handleReset} 
+            onClick={() => setShowResetModal(true)} 
             disabled={loading || uploadingPoster}
             className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold py-2.5 px-6 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
@@ -667,6 +667,41 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
                   className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors flex items-center gap-2"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  ตกลง
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4">
+                <RotateCcw className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">ล้างค่าเป็นตอนเริ่ม</h3>
+              <p className="text-slate-500 mb-6">
+                คุณแน่ใจหรือไม่ที่จะล้างค่าที่เปลี่ยนแปลงทั้งหมดและกลับไปใช้ค่าเริ่มต้น?
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setShowResetModal(false)}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  ยกเลิก
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleReset}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors flex items-center gap-2"
+                >
                   ตกลง
                 </button>
               </div>
