@@ -61,29 +61,8 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
 
   const handlePrint = () => {
     setIsPrinting(true)
-    // Create an off-screen iframe so html2pdf can render the DOM without opening a new tab
-    const iframe = document.createElement('iframe')
-    iframe.style.position = 'absolute'
-    iframe.style.width = '1000px'
-    iframe.style.height = '1000px'
-    iframe.style.top = '-9999px'
-    iframe.style.left = '-9999px'
-    iframe.style.visibility = 'hidden'
-    iframe.src = `/admin/print/${project.id}?print=true`
-    
-    iframe.onload = () => {
-      setTimeout(() => setIsPrinting(false), 1500)
-    }
-
-    document.body.appendChild(iframe)
-
-    // Remove the iframe after 10 seconds to clean up
-    setTimeout(() => {
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe)
-      }
-      setIsPrinting(false)
-    }, 10000)
+    window.open(`/admin/print/${project.id}?print=true`, '_blank')
+    setTimeout(() => setIsPrinting(false), 1500)
   }
 
   const handleExportExcel = async () => {

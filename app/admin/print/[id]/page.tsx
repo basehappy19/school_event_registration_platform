@@ -80,74 +80,62 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
   // Date is already a string like "15 สิงหาคม 2569", we format it with day
   const formattedDate = formatThaiDateWithDay(project.activityDate)
 
-  // Chunk registrations into pages
-  const ROWS_PER_PAGE = 22; // Safe limit for A4
-  const pages = [];
-  if (registrations.length === 0) {
-    pages.push([]);
-  } else {
-    for (let i = 0; i < registrations.length; i += ROWS_PER_PAGE) {
-      pages.push(registrations.slice(i, i + ROWS_PER_PAGE));
-    }
-  }
-
   return (
     <>
-      <AutoPrint title={project.title} />
+      <AutoPrint />
       <div id="print-content" className={`bg-white min-h-screen text-black print:p-0 ${sarabun.className}`}>
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
-          .page-break { page-break-after: always; }
-          .page-break:last-child { page-break-after: auto; }
+          thead { display: table-header-group; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid black; padding: 4px 8px; }
+          tr { page-break-inside: avoid; }
         }
+        /* Screen styles */
+        table.screen-table { width: 100%; border-collapse: collapse; }
+        table.screen-table th, table.screen-table td { border: 1px solid black; padding: 4px 8px; }
       `}} />
       
-      {pages.map((pageRegistrations, pageIndex) => (
-        <div key={pageIndex} className="page-break p-8 print:p-0 max-w-4xl mx-auto print:max-w-none">
-          {/* Header */}
-          <div className="text-center mb-6 mt-8 print:mt-0">
-            <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
-            <h2 className="text-lg font-bold mb-4">{project.title}</h2>
-            
-            <p className="text-base">
-              {formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
-            </p>
-          </div>
-
-          {/* Content */}
-          <div className="border border-black">
-            {/* Header */}
-            <div className="flex font-bold bg-white">
-              <div className="px-2 py-1 w-16 border-r border-black flex items-center">ลำดับ</div>
-              <div className="px-2 py-1 w-24 border-r border-black flex items-center">ชั้น/ห้อง</div>
-              <div className="px-2 py-1 w-20 border-r border-black flex items-center">เลขที่</div>
-              <div className="px-2 py-1 flex-1 flex items-center">ชื่อ-นามสกุล</div>
-            </div>
-            
-            {/* Body */}
-            {pageRegistrations.length > 0 ? (
-              pageRegistrations.map((reg, index) => {
-                const globalIndex = pageIndex * ROWS_PER_PAGE + index;
-                return (
-                  <div key={reg.id} className="flex border-t border-black">
-                    <div className="px-2 py-1 w-16 border-r border-black flex items-center">{globalIndex + 1}</div>
-                    <div className="px-2 py-1 w-24 border-r border-black flex items-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
-                    <div className="px-2 py-1 w-20 border-r border-black flex items-center">{reg.studentProfile.number}</div>
-                    <div className="px-2 py-1 flex-1 flex items-center">
-                      {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="border-t border-black px-2 py-4 text-center">
-                ไม่พบรายชื่อ
-              </div>
-            )}
-          </div>
+      <div className="p-8 print:p-0 max-w-4xl mx-auto print:max-w-none">
+        <div className="text-center mb-6 mt-8 print:mt-0">
+          <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
+          <h2 className="text-lg font-bold mb-4">{project.title}</h2>
+          
+          <p className="text-base">
+            {formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
+          </p>
         </div>
-      ))}
+
+        <table className="screen-table text-left">
+          <thead className="bg-white">
+            <tr>
+              <th className="w-16 text-center">ลำดับ</th>
+              <th className="w-24 text-center">ชั้น/ห้อง</th>
+              <th className="w-20 text-center">เลขที่</th>
+              <th>ชื่อ-นามสกุล</th>
+            </tr>
+          </thead>
+          <tbody>
+            {registrations.length > 0 ? (
+              registrations.map((reg, index) => (
+                <tr key={reg.id}>
+                  <td className="text-center">{index + 1}</td>
+                  <td className="text-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                  <td className="text-center">{reg.studentProfile.number}</td>
+                  <td>
+                    {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-center py-4">ไม่พบรายชื่อ</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
     </>
   )

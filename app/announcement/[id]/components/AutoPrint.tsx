@@ -8,22 +8,9 @@ export default function AutoPrint({ title }: { title?: string }) {
       // Small delay to ensure styles and fonts are loaded
       setTimeout(async () => {
         try {
-          const html2pdf = (await import('html2pdf.js')).default
-          const element = document.getElementById('print-content') || document.body
-          const opt = {
-            margin:       15,
-            filename:     `${title || 'document'}.pdf`,
-            image:        { type: 'jpeg' as const, quality: 1 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-            pagebreak:    { mode: ['css', 'legacy'] }
-          };
-          
-          await html2pdf().set(opt).from(element).save()
-          window.close() // Close the print tab after download
-        } catch (error) {
-          console.error("PDF generation failed, fallback to print", error)
           window.print()
+        } catch (error) {
+          console.error("Print failed", error)
         }
       }, 500)
     }
