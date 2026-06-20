@@ -16,6 +16,8 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   const [loading, setLoading] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
+  const [fieldToRemove, setFieldToRemove] = useState<number | null>(null)
+  const [alertModal, setAlertModal] = useState<{title: string, message: string} | null>(null)
 
   const [formData, setFormData] = useState({
     title: project.title || "",
@@ -87,8 +89,13 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   }
 
   const removeFormField = (index: number) => {
-    if (!confirm("การลบคำถามจะทำให้คำตอบที่มีอยู่ถูกลบไปด้วย (ถ้ามี) คุณแน่ใจหรือไม่?")) return
-    setFormFields(formFields.filter((_, i) => i !== index))
+    setFieldToRemove(index)
+  }
+
+  const confirmRemoveField = () => {
+    if (fieldToRemove === null) return
+    setFormFields(formFields.filter((_, i) => i !== fieldToRemove))
+    setFieldToRemove(null)
   }
 
   const updateFormField = (index: number, field: string, value: string | boolean | FieldType | string[]) => {
@@ -130,10 +137,10 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       if (res.ok) {
         setPosterUrl(data.url)
       } else {
-        alert(data.error || "Upload failed")
+        setAlertModal({ title: "เกิดข้อผิดพลาด", message: data.error || "Upload failed" })
       }
     } catch {
-      alert("Upload failed")
+      setAlertModal({ title: "เกิดข้อผิดพลาด", message: "Upload failed" })
     } finally {
       setUploadingPoster(false)
     }
@@ -158,7 +165,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     setLoading(false)
     
     if (res.error) {
-      alert("เกิดข้อผิดพลาดในการบันทึก: " + res.error)
+      setAlertModal({ title: "เกิดข้อผิดพลาดในการบันทึก", message: res.error })
       return
     }
     
@@ -703,6 +710,63 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
                   className="px-4 py-2 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors flex items-center gap-2"
                 >
                   ตกลง
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Field Confirmation Modal */}
+      {fieldToRemove !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">ลบคำถาม</h3>
+              <p className="text-slate-500 mb-6">
+                การลบคำถามจะทำให้คำตอบที่มีอยู่ถูกลบไปด้วย (ถ้ามี) คุณแน่ใจหรือไม่?
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setFieldToRemove(null)}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  ยกเลิก
+                </button>
+                <button 
+                  type="button"
+                  onClick={confirmRemoveField}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors"
+                >
+                  ตกลง
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">{alertModal.title}</h3>
+              <p className="text-slate-500 mb-6">{alertModal.message}</p>
+              <div className="flex items-center justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setAlertModal(null)}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                  ปิด
                 </button>
               </div>
             </div>
