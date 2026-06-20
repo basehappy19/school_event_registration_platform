@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { updateProjectSettings, deleteProject } from "@/app/actions/admin"
-import { Loader2, Save, CheckCircle2, Plus, Trash2, AlertTriangle, Image as ImageIcon, X, Info } from "lucide-react"
+import { Loader2, Save, CheckCircle2, Plus, Trash2, AlertTriangle, Image as ImageIcon, X, Info, RotateCcw } from "lucide-react"
 
 import { useRouter } from "next/navigation"
 import { ProjectWithRelations } from "@/app/types"
@@ -165,6 +165,49 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     
     setShowToast(true)
     setTimeout(() => setShowToast(false), 3000)
+  }
+
+  const handleReset = () => {
+    if (confirm("คุณแน่ใจหรือไม่ที่จะล้างค่าที่เปลี่ยนแปลงทั้งหมดและกลับไปใช้ค่าเริ่มต้น?")) {
+      setFormData({
+        title: project.title || "",
+        description: project.description || "",
+        isPublished: project.isPublished,
+        isRegistrationOpen: project.isRegistrationOpen,
+        isAnnouncementOpen: project.isAnnouncementOpen,
+        registrationStartDate: project.registrationStartDate ? new Date(project.registrationStartDate) : null,
+        registrationEndDate: project.registrationEndDate ? new Date(project.registrationEndDate) : null,
+        activityDate: project.activityDate ? new Date(project.activityDate) : null,
+        activityStartTime: project.activityStartTime ? new Date(project.activityStartTime) : null,
+        activityEndTime: project.activityEndTime ? new Date(project.activityEndTime) : null,
+        activityLocation: project.activityLocation || "",
+      })
+      setPosterUrl(project.posterUrl || "")
+      setQuotas(
+        project.quotas?.length > 0 
+          ? project.quotas.map((q: ProjectWithRelations['quotas'][0]) => ({ grade: q.grade, capacity: q.capacity }))
+          : []
+      )
+      setFormFields(
+        project.formFields?.length > 0
+          ? project.formFields.map((f: ProjectWithRelations['formFields'][0]) => {
+              let parsedOptions: string[] = []
+              try {
+                if (f.options) {
+                   if (f.options.startsWith('[')) {
+                     parsedOptions = JSON.parse(f.options)
+                   } else {
+                     parsedOptions = f.options.split(',').map((s: string) => s.trim())
+                   }
+                }
+              } catch {
+                parsedOptions = f.options ? f.options.split(',').map((s: string) => s.trim()) : []
+              }
+              return { id: f.id, label: f.label, type: f.type, options: parsedOptions, isRequired: f.isRequired }
+            })
+          : []
+      )
+    }
   }
 
   const handleDeleteProject = async () => {
@@ -575,14 +618,25 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
           <Trash2 className="w-4 h-4" />
           ลบโครงการ
         </button>
-        <button 
-          onClick={handleSave} 
-          disabled={loading || uploadingPoster}
-          className="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 px-6 rounded-xl flex items-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-        >
-          {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
-          {uploadingPoster ? "กำลังอัปโหลด..." : "บันทึกการตั้งค่า"}
-        </button>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <button 
+            type="button"
+            onClick={handleReset} 
+            disabled={loading || uploadingPoster}
+            className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold py-2.5 px-6 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            ล้างค่าเป็นตอนเริ่ม
+          </button>
+          <button 
+            onClick={handleSave} 
+            disabled={loading || uploadingPoster}
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 px-6 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          >
+            {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
+            {uploadingPoster ? "กำลังอัปโหลด..." : "บันทึกการตั้งค่า"}
+          </button>
+        </div>
       </div>
 
       {/* Delete Confirmation Modal */}
