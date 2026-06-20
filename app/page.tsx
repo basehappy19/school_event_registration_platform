@@ -2,10 +2,15 @@ import Image from "next/image"
 import Link from "next/link"
 import prisma from "@/lib/prisma"
 import ProjectGrid from "./components/ProjectGrid"
+import { auth } from "@/auth"
 
 export const revalidate = 60 // Revalidate every minute
 
 export default async function Home() {
+  const session = await auth()
+  const role = (session?.user as { role?: string })?.role
+  const isAdmin = session && (role === "ADMIN" || role === "SUPER_ADMIN")
+
   const projects = await prisma.project.findMany({
     where: { isPublished: true },
     orderBy: { startDate: 'asc' },
@@ -36,9 +41,15 @@ export default async function Home() {
             <span className="font-bold text-slate-800 text-xl tracking-tight">ระบบลงทะเบียนกิจกรรม</span>
           </div>
           <nav>
-            <Link href="/admin/login" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-              เข้าสู่ระบบแอดมิน
-            </Link>
+            {isAdmin ? (
+              <Link href="/admin" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+                จัดการระบบ (แอดมิน)
+              </Link>
+            ) : (
+              <Link href="/admin/login" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+                เข้าสู่ระบบแอดมิน
+              </Link>
+            )}
           </nav>
         </div>
       </header>
