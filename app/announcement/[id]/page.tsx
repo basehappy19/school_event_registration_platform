@@ -133,7 +133,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วม
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold mb-6">
-              โครงการ {project.title}
+              {project.title}
             </h2>
             <div className="inline-block bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl text-sm md:text-base border border-white/20 print:border-none print:bg-transparent print:text-black print:p-0">
               <p>{formatThaiDateWithDay(project.activityDate)} เวลา {project.activityTime || "__________"} ณ {project.activityLocation || "__________"}</p>

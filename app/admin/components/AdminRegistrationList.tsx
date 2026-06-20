@@ -210,6 +210,9 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
           </button>
           <a 
             href={`/api/export/excel?projectId=${project.id}`}
+            target="_blank"
+            rel="noreferrer"
+            download
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
             <Download className="w-4 h-4 mr-2" /> ส่งออก Excel
           </a>
