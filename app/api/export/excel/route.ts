@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
     status: 200,
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="Registrations_${cleanTitle}.xlsx"`,
+      'Content-Disposition': `attachment; filename="Registrations.xlsx"; filename*=UTF-8''Registrations_${encodeURIComponent(cleanTitle)}.xlsx`,
     }
   })
 }

@@ -121,7 +121,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
           <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
             <Users className="w-6 h-6" />
           </div>
-          <div className="flex flex-col justify-between h-full w-full min-h-[3rem]">
+          <div className="flex flex-col justify-between h-full w-full min-h-12">
             <p className="text-sm font-medium text-slate-500 mb-1 leading-tight">ยอดรับสมัครทั้งหมด</p>
             <div className="flex items-baseline gap-2 mt-auto">
               <span className="text-2xl font-bold text-slate-900">{stats.totalRegistered}</span>
@@ -134,7 +134,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
           <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-6 h-6" />
           </div>
-          <div className="flex flex-col justify-between h-full w-full min-h-[3rem]">
+          <div className="flex flex-col justify-between h-full w-full min-h-12">
             <p className="text-sm font-medium text-slate-500 mb-1 leading-tight">ตัวจริง</p>
             <div className="flex items-baseline gap-2 mt-auto">
               <span className="text-2xl font-bold text-slate-900">{stats.totalApproved}</span>
@@ -147,7 +147,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
           <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
             <Clock className="w-6 h-6" />
           </div>
-          <div className="flex flex-col justify-between h-full w-full min-h-[3rem]">
+          <div className="flex flex-col justify-between h-full w-full min-h-12">
             <p className="text-sm font-medium text-slate-500 mb-1 leading-tight">สำรอง</p>
             <div className="flex items-baseline gap-2 mt-auto">
               <span className="text-2xl font-bold text-slate-900">{stats.totalWaitlisted}</span>
@@ -187,7 +187,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
             </div>
             <select 
               value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value as any)}
+              onChange={(e) => setTimeFilter(e.target.value as 'minute' | 'hour' | 'day')}
               className="text-sm border border-slate-200 rounded-lg text-slate-600 bg-white focus:ring-indigo-500 focus:border-indigo-500 py-1.5 pl-3 pr-8 shadow-sm"
             >
               <option value="minute">รายนาที</option>
