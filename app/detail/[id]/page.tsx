@@ -10,7 +10,7 @@ const getCachedProjectMeta = unstable_cache(
   async (id: number) => {
     return await prisma.project.findUnique({
       where: { id, isPublished: true },
-      select: { title: true, description: true }
+      select: { title: true, description: true, posterUrl: true }
     })
   },
   ['project-meta'],
@@ -40,9 +40,22 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   if (!project) return {}
 
+  const images = project.posterUrl ? [project.posterUrl] : ["/school_event_registration_platform_banner.jpg"]
+
   return {
     title: project.title,
-    description: project.description
+    description: project.description,
+    openGraph: {
+      title: project.title,
+      description: project.description || undefined,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description: project.description || undefined,
+      images,
+    }
   }
 }
 
