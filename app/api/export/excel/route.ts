@@ -62,19 +62,21 @@ export async function GET(request: NextRequest) {
   // Create workbook
   const workbook = new ExcelJS.Workbook()
   workbook.creator = "School Event System"
+
+  const baseHeaders = ["ลำดับ", "ระดับชั้น", "เลขที่", "ชื่อ - นามสกุล"]
+  const dynamicHeaders = project.formFields.map(f => f.label)
+  const totalColumns = baseHeaders.length + dynamicHeaders.length
   
   // Sheet 1: ตัวจริง
   const ws1 = workbook.addWorksheet("รายชื่อตัวจริง")
   
   // Add Project Title
-  ws1.mergeCells('A1:D1')
-  ws1.getCell('A1').value = `รายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ: ${project.title}`
-  ws1.getCell('A1').font = { size: 16, bold: true }
-  ws1.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
+  ws1.mergeCells(1, 1, 1, totalColumns)
+  ws1.getCell(1, 1).value = `รายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ: ${project.title}`
+  ws1.getCell(1, 1).font = { size: 16, bold: true }
+  ws1.getCell(1, 1).alignment = { vertical: 'middle', horizontal: 'center' }
 
   // Add Headers
-  const baseHeaders = ["ลำดับ", "ระดับชั้น", "เลขที่", "ชื่อ - นามสกุล"]
-  const dynamicHeaders = project.formFields.map(f => f.label)
   ws1.addRow([...baseHeaders, ...dynamicHeaders])
   ws1.getRow(2).font = { bold: true }
   ws1.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
@@ -113,10 +115,10 @@ export async function GET(request: NextRequest) {
     const ws2 = workbook.addWorksheet("รายชื่อสำรอง")
     
     // Add Project Title
-    ws2.mergeCells('A1:D1')
-    ws2.getCell('A1').value = `รายชื่อสำรองโครงการ: ${project.title}`
-    ws2.getCell('A1').font = { size: 16, bold: true }
-    ws2.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
+    ws2.mergeCells(1, 1, 1, totalColumns)
+    ws2.getCell(1, 1).value = `รายชื่อสำรองโครงการ: ${project.title}`
+    ws2.getCell(1, 1).font = { size: 16, bold: true }
+    ws2.getCell(1, 1).alignment = { vertical: 'middle', horizontal: 'center' }
 
     // Add Headers
     ws2.addRow([...baseHeaders, ...dynamicHeaders])
