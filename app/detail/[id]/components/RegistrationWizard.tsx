@@ -92,9 +92,16 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
   const isRegistrationOpen = project.isRegistrationOpen && isTimeOpen
 
+  const isAllRequiredFieldsFilled = project.formFields
+    .filter(field => field.isRequired)
+    .every(field => {
+      const val = answers[field.id]
+      return val !== undefined && val.trim() !== ""
+    })
+
   const handleSubmitRegistration = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!session || !profile || !isGradeAllowed || !isRegistrationOpen) return
+    if (!session || !profile || !isGradeAllowed || !isRegistrationOpen || !isAllRequiredFieldsFilled) return
 
     setLoading(true)
     setError("")
@@ -312,7 +319,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
             <button
               type="submit"
-              disabled={loading || !session || !profile || !isGradeAllowed || !isRegistrationOpen}
+              disabled={loading || !session || !profile || !isGradeAllowed || !isRegistrationOpen || !isAllRequiredFieldsFilled}
               className={`w-full font-bold py-3 sm:py-4 px-4 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10 ${!isRegistrationOpen
                 ? "bg-slate-300 text-slate-600"
                 : "bg-slate-900 hover:bg-slate-800 text-white"
