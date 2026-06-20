@@ -80,58 +80,74 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
   // Date is already a string like "15 สิงหาคม 2569", we format it with day
   const formattedDate = formatThaiDateWithDay(project.activityDate)
 
+  // Chunk registrations into pages
+  const ROWS_PER_PAGE = 22; // Safe limit for A4
+  const pages = [];
+  if (registrations.length === 0) {
+    pages.push([]);
+  } else {
+    for (let i = 0; i < registrations.length; i += ROWS_PER_PAGE) {
+      pages.push(registrations.slice(i, i + ROWS_PER_PAGE));
+    }
+  }
+
   return (
     <>
       <AutoPrint title={project.title} />
-      <div id="print-content" className={`bg-white min-h-screen p-8 text-black print:p-0 ${sarabun.className}`}>
+      <div id="print-content" className={`bg-white min-h-screen text-black print:p-0 ${sarabun.className}`}>
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
+          .page-break { page-break-after: always; }
+          .page-break:last-child { page-break-after: auto; }
         }
       `}} />
-      <div className="max-w-4xl mx-auto print:max-w-none">
-        {/* Header */}
-        <div className="text-center mb-6 mt-8 print:mt-0">
-          <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
-          <h2 className="text-lg font-bold mb-4">{project.title}</h2>
-          
-          <p className="text-base">
-            {formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
-          </p>
-        </div>
-
-        {/* Content */}
-        {/* Content */}
-        <div className="border border-black">
+      
+      {pages.map((pageRegistrations, pageIndex) => (
+        <div key={pageIndex} className="page-break p-8 print:p-0 max-w-4xl mx-auto print:max-w-none">
           {/* Header */}
-          <div className="flex font-bold bg-white">
-            <div className="px-2 py-1 w-16 border-r border-black flex items-center">ลำดับ</div>
-            <div className="px-2 py-1 w-24 border-r border-black flex items-center">ชั้น/ห้อง</div>
-            <div className="px-2 py-1 w-20 border-r border-black flex items-center">เลขที่</div>
-            <div className="px-2 py-1 flex-1 flex items-center">ชื่อ-นามสกุล</div>
+          <div className="text-center mb-6 mt-8 print:mt-0">
+            <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
+            <h2 className="text-lg font-bold mb-4">{project.title}</h2>
+            
+            <p className="text-base">
+              {formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
+            </p>
           </div>
-          
-          {/* Body */}
-          {registrations.length > 0 ? (
-            registrations.map((reg, index) => (
-              <div key={reg.id} className="block break-inside-avoid print:break-inside-avoid" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                <div className="flex border-t border-black">
-                  <div className="px-2 py-1 w-16 border-r border-black flex items-center">{index + 1}</div>
-                  <div className="px-2 py-1 w-24 border-r border-black flex items-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
-                  <div className="px-2 py-1 w-20 border-r border-black flex items-center">{reg.studentProfile.number}</div>
-                  <div className="px-2 py-1 flex-1 flex items-center">
-                    {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="border-t border-black px-2 py-4 text-center">
-              ไม่พบรายชื่อ
+
+          {/* Content */}
+          <div className="border border-black">
+            {/* Header */}
+            <div className="flex font-bold bg-white">
+              <div className="px-2 py-1 w-16 border-r border-black flex items-center">ลำดับ</div>
+              <div className="px-2 py-1 w-24 border-r border-black flex items-center">ชั้น/ห้อง</div>
+              <div className="px-2 py-1 w-20 border-r border-black flex items-center">เลขที่</div>
+              <div className="px-2 py-1 flex-1 flex items-center">ชื่อ-นามสกุล</div>
             </div>
-          )}
+            
+            {/* Body */}
+            {pageRegistrations.length > 0 ? (
+              pageRegistrations.map((reg, index) => {
+                const globalIndex = pageIndex * ROWS_PER_PAGE + index;
+                return (
+                  <div key={reg.id} className="flex border-t border-black">
+                    <div className="px-2 py-1 w-16 border-r border-black flex items-center">{globalIndex + 1}</div>
+                    <div className="px-2 py-1 w-24 border-r border-black flex items-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
+                    <div className="px-2 py-1 w-20 border-r border-black flex items-center">{reg.studentProfile.number}</div>
+                    <div className="px-2 py-1 flex-1 flex items-center">
+                      {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="border-t border-black px-2 py-4 text-center">
+                ไม่พบรายชื่อ
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      ))}
     </div>
     </>
   )
