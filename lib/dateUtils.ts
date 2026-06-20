@@ -1,11 +1,6 @@
 export function formatThaiDateWithDay(dateString: string | null): string {
   if (!dateString) return "ยังไม่กำหนดวัน";
 
-  // If it already starts with a day name (e.g. วันจันทร์), just return it
-  if (dateString.startsWith("วัน")) {
-    return dateString.includes("ที่") ? dateString : dateString.replace("วัน", "วันที่ ");
-  }
-
   const thaiMonths = [
     "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
     "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
@@ -14,6 +9,24 @@ export function formatThaiDateWithDay(dateString: string | null): string {
   const thaiDays = [
     "วันอาทิตย์", "วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์"
   ];
+
+  // Support YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const dateObj = new Date(dateString);
+    if (!isNaN(dateObj.getTime())) {
+      const dayOfWeek = thaiDays[dateObj.getDay()];
+      const day = dateObj.getDate();
+      const month = thaiMonths[dateObj.getMonth()];
+      const year = dateObj.getFullYear() + 543;
+      return `${dayOfWeek}ที่ ${day} ${month} ${year}`;
+    }
+  }
+
+  // If it already starts with a day name (e.g. วันจันทร์), just return it
+  if (dateString.startsWith("วัน")) {
+    return dateString.includes("ที่") ? dateString : dateString.replace("วัน", "วันที่ ");
+  }
+
 
   try {
     // Expected format: "19 กรกฎาคม 2569"

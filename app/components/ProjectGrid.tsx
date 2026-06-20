@@ -100,8 +100,8 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                       <Calendar className="w-4 h-4" />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span>เริ่มลงทะเบียน: {formatDateThai(project.startDate)}</span>
-                      <span>ปิดลงทะเบียน: {formatDateThai(project.endDate)}</span>
+                      <span>เริ่มลงทะเบียน: {formatDateThai(project.registrationStartDate || project.startDate)}</span>
+                      <span>ปิดลงทะเบียน: {formatDateThai(project.registrationEndDate || project.endDate)}</span>
                     </div>
                   </div>
 
