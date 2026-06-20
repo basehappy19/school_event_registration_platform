@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users } from "lucide-react"
+import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2 } from "lucide-react"
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import Image from "next/image"
@@ -18,6 +18,13 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(errorParam === "AccessDenied")
+  const [isCopied, setIsCopied] = useState(false)
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href)
+    setIsCopied(true)
+    setTimeout(() => setIsCopied(false), 2000)
+  }
 
   const closeAccessDeniedModal = () => {
     setShowAccessDeniedModal(false)
@@ -143,9 +150,18 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             </div>
           )}
           <div className="flex-1">
-            <Link href="/" className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit shadow-sm">
-              <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
-            </Link>
+            <div className="flex gap-3 mb-6">
+              <Link href="/" className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center text-sm font-medium transition-all w-fit shadow-sm">
+                <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
+              </Link>
+              <button 
+                onClick={handleCopyLink}
+                className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center text-sm font-medium transition-all w-fit shadow-sm"
+              >
+                {isCopied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <LinkIcon className="w-4 h-4 mr-2" />} 
+                {isCopied ? 'คัดลอกลิงก์แล้ว' : 'คัดลอกลิงก์'}
+              </button>
+            </div>
             <h1 className="text-3xl font-bold mb-2 text-slate-900">{project.title}</h1>
             <p className="text-slate-600 mb-6">{project.description}</p>
 
