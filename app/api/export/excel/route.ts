@@ -54,27 +54,27 @@ export async function GET(request: NextRequest) {
   ws1.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
 
   // Add Headers
-  ws1.addRow(["ลำดับ", "ชื่อ - นามสกุล", "ระดับชั้น", "เลขที่"])
+  ws1.addRow(["ลำดับ", "ระดับชั้น", "เลขที่", "ชื่อ - นามสกุล"])
   ws1.getRow(2).font = { bold: true }
   ws1.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
   
   // Set Column Widths
   ws1.getColumn(1).width = 10
   ws1.getColumn(1).alignment = { horizontal: 'center' }
-  ws1.getColumn(2).width = 40
-  ws1.getColumn(3).width = 15
+  ws1.getColumn(2).width = 15 // ระดับชั้น
+  ws1.getColumn(2).alignment = { horizontal: 'center' }
+  ws1.getColumn(3).width = 10 // เลขที่
   ws1.getColumn(3).alignment = { horizontal: 'center' }
-  ws1.getColumn(4).width = 10
-  ws1.getColumn(4).alignment = { horizontal: 'center' }
+  ws1.getColumn(4).width = 40 // ชื่อ - นามสกุล
 
   // Add Data
   const approved = project.registrations.filter(r => r.status === 'APPROVED')
   approved.forEach((reg, index) => {
     ws1.addRow([
       index + 1,
-      `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`,
       `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
-      reg.studentProfile.number
+      reg.studentProfile.number,
+      `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`
     ])
   })
 
@@ -90,25 +90,25 @@ export async function GET(request: NextRequest) {
     ws2.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
 
     // Add Headers
-    ws2.addRow(["ลำดับ", "ชื่อ - นามสกุล", "ระดับชั้น", "เลขที่"])
+    ws2.addRow(["ลำดับ", "ระดับชั้น", "เลขที่", "ชื่อ - นามสกุล"])
     ws2.getRow(2).font = { bold: true }
     ws2.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
     
     // Set Column Widths
     ws2.getColumn(1).width = 10
     ws2.getColumn(1).alignment = { horizontal: 'center' }
-    ws2.getColumn(2).width = 40
-    ws2.getColumn(3).width = 15
+    ws2.getColumn(2).width = 15 // ระดับชั้น
+    ws2.getColumn(2).alignment = { horizontal: 'center' }
+    ws2.getColumn(3).width = 10 // เลขที่
     ws2.getColumn(3).alignment = { horizontal: 'center' }
-    ws2.getColumn(4).width = 10
-    ws2.getColumn(4).alignment = { horizontal: 'center' }
+    ws2.getColumn(4).width = 40 // ชื่อ - นามสกุล
 
     waitlisted.forEach((reg, index) => {
       ws2.addRow([
         index + 1,
-        `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`,
         `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
-        reg.studentProfile.number
+        reg.studentProfile.number,
+        `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`
       ])
     })
   }
