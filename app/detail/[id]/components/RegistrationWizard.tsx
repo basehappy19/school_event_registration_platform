@@ -146,7 +146,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {project.posterUrl && (
             <div className="w-full md:w-64 shrink-0 relative sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-3/4">
-              <Image src={project.posterUrl} alt={project.title} fill className="object-cover" />
+              <Image src={project.posterUrl} alt={project.title} fill className="object-cover" unoptimized />
             </div>
           )}
           <div className="flex-1">
