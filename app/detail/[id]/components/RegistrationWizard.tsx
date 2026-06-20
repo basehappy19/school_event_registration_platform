@@ -231,8 +231,8 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               <ShieldCheck className="w-8 h-8 text-rose-500 shrink-0" />
               <div className="flex-1 w-full flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
                 <div>
-                  <h3 className="font-bold text-slate-800">ไม่พบข้อมูลนักเรียน</h3>
-                  <p className="text-slate-600 text-sm">อีเมล {session.user?.email} ยังไม่ได้รับการลงทะเบียนเป็นนักเรียนในระบบ</p>
+                  <h3 className="font-bold text-slate-800">กรุณาใช้อีเมลของโรงเรียน</h3>
+                  <p className="text-slate-600 text-sm">อีเมล {session.user?.email} ไม่สามารถใช้งานได้ กรุณาเปลี่ยนไปใช้อีเมลของโรงเรียนในการลงทะเบียน</p>
                 </div>
                 <button
                   onClick={() => signOutAndRedirect(`/detail/${project.id}`)}
