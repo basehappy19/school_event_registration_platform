@@ -230,7 +230,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
                 <tbody className="divide-y divide-slate-100">
                   {waitlistedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-3 sm:px-6 py-3 text-center text-amber-600 font-medium">{index + 1}</td>
+                      <td className="px-3 sm:px-6 py-3 text-center text-amber-600 font-medium">{approvedList.length + index + 1}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                       <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
