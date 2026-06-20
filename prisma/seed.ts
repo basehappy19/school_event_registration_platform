@@ -35,8 +35,9 @@ async function main() {
       registrationStartDate: new Date(),
       registrationEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
       isAnnouncementOpen: true,
-      activityDate: '19 กรกฎาคม 2569',
-      activityTime: '09:00 - 16:00 น.',
+      activityDate: new Date('2026-07-19T00:00:00Z'),
+      activityStartTime: new Date('2026-07-19T09:00:00Z'),
+      activityEndTime: new Date('2026-07-19T16:00:00Z'),
       activityLocation: 'หอประชุมใหญ่ โรงเรียนภูเขียว',
       quotas: {
         create: [

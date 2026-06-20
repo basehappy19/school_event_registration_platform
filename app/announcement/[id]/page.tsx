@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma"
 import Link from "next/link"
 import { ArrowLeft, Search } from "lucide-react"
 import AutoPrint from "./components/AutoPrint"
-import { formatThaiDateWithDay } from "@/lib/dateUtils"
+import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { Metadata } from "next"
 import { auth } from "@/auth"
 
@@ -136,7 +136,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               {project.title}
             </h2>
             <div className="inline-block bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl text-sm md:text-base border border-white/20 print:border-none print:bg-transparent print:text-black print:p-0">
-              <p>{formatThaiDateWithDay(project.activityDate)} เวลา {project.activityTime || "__________"} ณ {project.activityLocation || "__________"}</p>
+              <p>{formatThaiDateWithDay(project.activityDate)} เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)} ณ {project.activityLocation || "__________"}</p>
             </div>
           </div>
         </div>

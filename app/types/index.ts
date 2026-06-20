@@ -42,8 +42,9 @@ export interface UpdateProjectPayload {
   isAnnouncementOpen?: boolean
   registrationStartDate?: Date
   registrationEndDate?: Date
-  activityDate?: string
-  activityTime?: string
+  activityDate?: Date | null
+  activityStartTime?: Date | null
+  activityEndTime?: Date | null
   activityLocation?: string
   quotas?: { grade: string; capacity: number }[]
   formFields?: { id?: number; label: string; type: FieldType; options?: string; isRequired: boolean }[]

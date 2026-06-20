@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users } from "lucide-react"
 import { ProjectGridItem } from "@/app/types"
+import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
 export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] }) {
   const [search, setSearch] = useState("")
@@ -107,14 +108,14 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
 
                   {(project.activityDate || project.activityLocation) && (
                     <div className="flex flex-col gap-2 pb-3 border-b border-slate-200">
-                      {(project.activityDate || project.activityTime) && (
+                      {(project.activityDate || project.activityStartTime || project.activityEndTime) && (
                         <div className="flex items-start text-sm font-medium text-slate-700 gap-3">
                           <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
                             <Clock className="w-4 h-4" />
                           </div>
                           <div className="flex flex-col justify-center gap-1 min-h-[2rem]">
-                            {project.activityDate && <span>วันติว: {project.activityDate}</span>}
-                            {project.activityTime && <span>เวลา: {project.activityTime}</span>}
+                            {project.activityDate && <span>วันติว: {formatThaiDateWithDay(new Date(project.activityDate).toISOString().split('T')[0])}</span>}
+                            {(project.activityStartTime || project.activityEndTime) && <span>เวลา: {formatTimeRange(project.activityStartTime, project.activityEndTime)}</span>}
                           </div>
                         </div>
                       )}

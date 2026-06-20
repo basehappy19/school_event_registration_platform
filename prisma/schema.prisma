@@ -73,8 +73,9 @@ model Project {
   announcementEndDate   DateTime?
 
   // Activity Details (for PDF/Export header)
-  activityDate          String?  // e.g. "19 มิถุนายน 2569"
-  activityTime          String?  // e.g. "09:00 - 12:00 น."
+  activityDate          DateTime?
+  activityStartTime     DateTime?
+  activityEndTime       DateTime?
   activityLocation      String?  // e.g. "ห้องประชุม 1"
 
   quotas        ProjectQuota[]

@@ -8,21 +8,30 @@ import { useRouter } from "next/navigation"
 import { ProjectWithRelations } from "@/app/types"
 import { FieldType } from "@prisma/client"
 
-export default function AdminProjectSettings({ project }: { project: ProjectWithRelations }) {
+import { ThaiDatePicker, ThaiTimePicker } from "@/app/components/ThaiPickers"
+
+export default function AdminProjectSettings({ project, onSave }: { project: any, onSave?: () => void }) {
   const router = useRouter()
   const [showToast, setShowToast] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const toLocalISOString = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
   const [formData, setFormData] = useState({
     title: project.title || "",
     description: project.description || "",
     isPublished: project.isPublished,
     isRegistrationOpen: project.isRegistrationOpen,
     isAnnouncementOpen: project.isAnnouncementOpen,
-    registrationStartDate: project.registrationStartDate ? new Date(project.registrationStartDate).toISOString().slice(0, 16) : "",
-    registrationEndDate: project.registrationEndDate ? new Date(project.registrationEndDate).toISOString().slice(0, 16) : "",
-    activityDate: project.activityDate || "",
-    activityTime: project.activityTime || "",
+    registrationStartDate: project.registrationStartDate ? toLocalISOString(project.registrationStartDate) : "",
+    registrationEndDate: project.registrationEndDate ? toLocalISOString(project.registrationEndDate) : "",
+    activityDate: project.activityDate ? new Date(project.activityDate) : null,
+    activityStartTime: project.activityStartTime ? new Date(project.activityStartTime) : null,
+    activityEndTime: project.activityEndTime ? new Date(project.activityEndTime) : null,
     activityLocation: project.activityLocation || "",
   })
   const [posterUrl, setPosterUrl] = useState(project.posterUrl || "")
@@ -31,25 +40,25 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   // State for Quotas
   const [quotas, setQuotas] = useState<{grade: string, capacity: number}[]>(
     project.quotas?.length > 0 
-      ? project.quotas.map((q) => ({ grade: q.grade, capacity: q.capacity }))
+      ? project.quotas.map((q: any) => ({ grade: q.grade, capacity: q.capacity }))
       : []
   )
 
   // State for Form Fields
   const [formFields, setFormFields] = useState<{id?: number, label: string, type: FieldType, options: string[], isRequired: boolean}[]>(
     project.formFields?.length > 0
-      ? project.formFields.map((f) => {
+      ? project.formFields.map((f: any) => {
           let parsedOptions: string[] = []
           try {
             if (f.options) {
                if (f.options.startsWith('[')) {
                  parsedOptions = JSON.parse(f.options)
                } else {
-                 parsedOptions = f.options.split(',').map(s => s.trim())
+                 parsedOptions = f.options.split(',').map((s: string) => s.trim())
                }
             }
           } catch {
-            parsedOptions = f.options ? f.options.split(',').map(s => s.trim()) : []
+            parsedOptions = f.options ? f.options.split(',').map((s: string) => s.trim()) : []
           }
           return { id: f.id, label: f.label, type: f.type, options: parsedOptions, isRequired: f.isRequired }
         })
@@ -312,6 +321,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             <input 
               type="datetime-local" 
               name="registrationStartDate"
+              lang="th-TH"
               value={formData.registrationStartDate}
               onChange={handleChange}
               className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors"
@@ -322,6 +332,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             <input 
               type="datetime-local" 
               name="registrationEndDate"
+              lang="th-TH"
               value={formData.registrationEndDate}
               onChange={handleChange}
               className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors"
@@ -334,25 +345,24 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1.5">วันที่จัดกิจกรรม</label>
-          <input 
-            type="text"
-            name="activityDate"
+          <ThaiDatePicker
             value={formData.activityDate}
-            onChange={handleChange}
-            placeholder="เช่น 15 สิงหาคม 2569"
-            className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            onChange={(date) => setFormData({ ...formData, activityDate: date })}
           />
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1.5">เวลาที่จัดกิจกรรม</label>
-          <input 
-            type="text"
-            name="activityTime"
-            value={formData.activityTime}
-            onChange={handleChange}
-            placeholder="เช่น 09:00 - 16:00 น."
-            className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-          />
+          <div className="flex items-center gap-2">
+            <ThaiTimePicker
+              value={formData.activityStartTime}
+              onChange={(time) => setFormData({ ...formData, activityStartTime: time })}
+            />
+            <span className="text-slate-500">-</span>
+            <ThaiTimePicker
+              value={formData.activityEndTime}
+              onChange={(time) => setFormData({ ...formData, activityEndTime: time })}
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1.5">สถานที่</label>

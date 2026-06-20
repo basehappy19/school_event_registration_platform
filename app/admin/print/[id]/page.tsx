@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import AutoPrint from "@/app/announcement/[id]/components/AutoPrint"
 import { Metadata } from "next"
 import { Sarabun } from "next/font/google"
-import { formatThaiDateWithDay } from "@/lib/dateUtils"
+import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
 const sarabun = Sarabun({
   weight: ['400', '500', '600', '700'],
@@ -103,7 +103,7 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
           <h2 className="text-lg font-bold mb-4">{project.title}</h2>
           
           <p className="text-base">
-            {formattedDate} เวลา {project.activityTime || "ยังไม่กำหนดเวลา"} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
+            {formattedDate} เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
           </p>
         </div>
 

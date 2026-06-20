@@ -1,5 +1,7 @@
-export function formatThaiDateWithDay(dateString: string | null): string {
-  if (!dateString) return "ยังไม่กำหนดวัน";
+export function formatThaiDateWithDay(dateInput: string | Date | null): string {
+  if (!dateInput) return "ยังไม่กำหนดวัน";
+
+  let dateString = typeof dateInput === 'string' ? dateInput : dateInput.toISOString().split('T')[0];
 
   const thaiMonths = [
     "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
@@ -57,4 +59,27 @@ export function formatThaiDateWithDay(dateString: string | null): string {
 
   // Fallback to original string prefixed with "วันที่ "
   return `วันที่ ${dateString}`;
+}
+
+export function formatTimeRange(startTime: Date | string | null | undefined, endTime: Date | string | null | undefined): string {
+  if (!startTime && !endTime) return "ยังไม่กำหนดเวลา";
+
+  const formatTime = (t: Date | string) => {
+    const d = new Date(t);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  const startStr = startTime ? formatTime(startTime) : "";
+  const endStr = endTime ? formatTime(endTime) : "";
+
+  if (startStr && endStr) {
+    return `${startStr} - ${endStr} น.`;
+  } else if (startStr) {
+    return `${startStr} น.`;
+  } else if (endStr) {
+    return `จนถึง ${endStr} น.`;
+  }
+
+  return "ยังไม่กำหนดเวลา";
 }

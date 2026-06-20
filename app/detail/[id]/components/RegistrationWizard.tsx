@@ -8,7 +8,7 @@ import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actio
 import Link from "next/link"
 import Image from "next/image"
 import CountdownTimer from "./CountdownTimer"
-import { formatThaiDateWithDay } from "@/lib/dateUtils"
+import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { ProjectForWizard } from "@/app/types"
 import { StudentProfile } from "@prisma/client"
 import { Session } from "next-auth"
@@ -169,13 +169,13 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               {project.activityDate && (
                 <div className="flex items-center text-slate-700">
                   <Calendar className="w-4 h-4 mr-2 text-slate-500" />
-                  <span>{formatThaiDateWithDay(project.activityDate)}</span>
+                  <span>{formatThaiDateWithDay(new Date(project.activityDate).toISOString().split('T')[0])}</span>
                 </div>
               )}
-              {project.activityTime && (
+              {(project.activityStartTime || project.activityEndTime) && (
                 <div className="flex items-center text-slate-700">
                   <Clock className="w-4 h-4 mr-2 text-slate-500" />
-                  <span>{project.activityTime}</span>
+                  <span>{formatTimeRange(project.activityStartTime, project.activityEndTime)}</span>
                 </div>
               )}
               {project.activityLocation && (
