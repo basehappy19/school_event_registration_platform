@@ -124,6 +124,18 @@ export function ThaiTimePicker({ value, onChange, placeholder = "00:00", classNa
     return format(date, "HH:mm");
   };
 
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && value && listRef.current) {
+      const selectedTime = formatTime(value);
+      const selectedButton = listRef.current.querySelector(`[data-time="${selectedTime}"]`);
+      if (selectedButton) {
+        selectedButton.scrollIntoView({ block: 'center' });
+      }
+    }
+  }, [isOpen, value]);
+
   return (
     <div className={`relative ${className}`} ref={containerRef}>
       <button
@@ -136,14 +148,18 @@ export function ThaiTimePicker({ value, onChange, placeholder = "00:00", classNa
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg w-full max-h-48 overflow-y-auto">
+        <div 
+          ref={listRef}
+          className="absolute z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg w-full max-h-48 overflow-y-auto"
+        >
           <div className="flex flex-col py-1">
             {generateTimeOptions().map((timeStr) => (
               <button
                 key={timeStr}
                 type="button"
+                data-time={timeStr}
                 onClick={() => handleSelectTime(timeStr)}
-                className="px-4 py-2 text-sm text-left hover:bg-slate-100 focus:bg-slate-100 focus:outline-none"
+                className={`px-4 py-2 text-sm text-left hover:bg-slate-100 focus:bg-slate-100 focus:outline-none ${value && formatTime(value) === timeStr ? 'bg-indigo-50 text-indigo-700 font-medium' : ''}`}
               >
                 {timeStr}
               </button>

@@ -340,7 +340,18 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             </div>
           </div>
           <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">วัน/เวลา ปิดรับลงทะเบียน</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700">วัน/เวลา ปิดรับลงทะเบียน</label>
+              {formData.registrationEndDate && (
+                <button 
+                  type="button" 
+                  onClick={() => setFormData({ ...formData, registrationEndDate: null })}
+                  className="text-xs text-rose-500 hover:text-rose-600 font-medium flex items-center gap-1 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md transition-colors"
+                >
+                  <X className="w-3 h-3" /> ล้างค่า
+                </button>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <ThaiDatePicker 
                 value={formData.registrationEndDate}
