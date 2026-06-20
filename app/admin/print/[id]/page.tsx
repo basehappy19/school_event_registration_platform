@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function AdminPrintPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  const role = (session?.user as any)?.role
+  const role = (session?.user as { role?: string })?.role
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
 
   if (!isAdmin) {
