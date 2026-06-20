@@ -87,6 +87,10 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page { margin: 15mm; size: A4 portrait; }
+          table { page-break-inside: auto; }
+          tr { break-inside: avoid; page-break-inside: avoid; page-break-after: auto; }
+          thead { display: table-header-group; }
+          tfoot { display: table-footer-group; }
         }
       `}} />
       <div className="max-w-4xl mx-auto print:max-w-none">
