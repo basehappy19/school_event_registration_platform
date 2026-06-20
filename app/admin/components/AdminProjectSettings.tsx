@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { updateProjectSettings, deleteProject } from "@/app/actions/admin"
-import { Loader2, Save, CheckCircle2, Plus, Trash2, GripVertical, AlertTriangle, Image as ImageIcon, X } from "lucide-react"
+import { Loader2, Save, CheckCircle2, Plus, Trash2, AlertTriangle, Image as ImageIcon, X } from "lucide-react"
 
 import { useRouter } from "next/navigation"
 import { ProjectWithRelations } from "@/app/types"
-import { FieldType, ProjectQuota } from "@prisma/client"
+import { FieldType } from "@prisma/client"
 
 export default function AdminProjectSettings({ project }: { project: ProjectWithRelations }) {
   const router = useRouter()
@@ -48,7 +48,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
                  parsedOptions = f.options.split(',').map(s => s.trim())
                }
             }
-          } catch(e) {
+          } catch {
             parsedOptions = f.options ? f.options.split(',').map(s => s.trim()) : []
           }
           return { id: f.id, label: f.label, type: f.type, options: parsedOptions, isRequired: f.isRequired }
@@ -127,7 +127,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       } else {
         alert(data.error || "Upload failed")
       }
-    } catch (err) {
+    } catch {
       alert("Upload failed")
     } finally {
       setUploadingPoster(false)
@@ -136,7 +136,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
 
   const handleSave = async () => {
     setLoading(true)
-    const payload: any = {
+    const payload = {
       ...formData,
       posterUrl: posterUrl || null,
       registrationStartDate: formData.registrationStartDate ? new Date(formData.registrationStartDate) : null,
@@ -209,6 +209,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
           <div className="w-48 shrink-0 relative rounded-xl overflow-hidden border-2 border-dashed border-slate-300 bg-slate-50 aspect-3/4 flex flex-col items-center justify-center text-slate-400 group">
             {posterUrl ? (
               <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={posterUrl} alt="Poster" className={`w-full h-full object-cover transition-opacity ${uploadingPoster ? 'opacity-50' : ''}`} />
                 {uploadingPoster && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 text-white z-10">
@@ -408,7 +409,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       {/* Form Fields Section */}
       <div>
         <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">คำถามเพิ่มเติม (Form Fields)</h3>
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">คำถามเพิ่มเติม</h3>
           <button 
             type="button" 
             onClick={addFormField}

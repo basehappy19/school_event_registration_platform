@@ -19,12 +19,16 @@ export async function GET(request: NextRequest) {
   const project = await prisma.project.findUnique({
     where: { id: parseInt(projectId, 10) },
     include: {
+      formFields: {
+        orderBy: { id: 'asc' }
+      },
       registrations: {
         where: {
           status: { in: ['APPROVED', 'WAITLISTED'] }
         },
         include: {
-          studentProfile: true
+          studentProfile: true,
+          answers: true
         },
         orderBy: [
           { status: 'asc' }, // APPROVED first
@@ -69,7 +73,9 @@ export async function GET(request: NextRequest) {
   ws1.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
 
   // Add Headers
-  ws1.addRow(["ลำดับ", "ระดับชั้น", "เลขที่", "ชื่อ - นามสกุล"])
+  const baseHeaders = ["ลำดับ", "ระดับชั้น", "เลขที่", "ชื่อ - นามสกุล"]
+  const dynamicHeaders = project.formFields.map(f => f.label)
+  ws1.addRow([...baseHeaders, ...dynamicHeaders])
   ws1.getRow(2).font = { bold: true }
   ws1.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
   
@@ -85,12 +91,20 @@ export async function GET(request: NextRequest) {
   // Add Data
   const approved = project.registrations.filter(r => r.status === 'APPROVED')
   approved.forEach((reg, index) => {
-    ws1.addRow([
+    const rowData: any[] = [
       index + 1,
       `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
       reg.studentProfile.number,
       `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`
-    ])
+    ]
+    
+    // Add dynamic answers
+    project.formFields.forEach(field => {
+      const answer = reg.answers.find(a => a.fieldId === field.id)
+      rowData.push(answer ? answer.value : "")
+    })
+
+    ws1.addRow(rowData)
   })
 
   // Sheet 2: สำรอง
@@ -105,7 +119,7 @@ export async function GET(request: NextRequest) {
     ws2.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
 
     // Add Headers
-    ws2.addRow(["ลำดับ", "ระดับชั้น", "เลขที่", "ชื่อ - นามสกุล"])
+    ws2.addRow([...baseHeaders, ...dynamicHeaders])
     ws2.getRow(2).font = { bold: true }
     ws2.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
     
@@ -119,12 +133,20 @@ export async function GET(request: NextRequest) {
     ws2.getColumn(4).width = 40 // ชื่อ - นามสกุล
 
     waitlisted.forEach((reg, index) => {
-      ws2.addRow([
+      const rowData: any[] = [
         index + 1,
         `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
         reg.studentProfile.number,
         `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`
-      ])
+      ]
+      
+      // Add dynamic answers
+      project.formFields.forEach(field => {
+        const answer = reg.answers.find(a => a.fieldId === field.id)
+        rowData.push(answer ? answer.value : "")
+      })
+
+      ws2.addRow(rowData)
     })
   }
 
