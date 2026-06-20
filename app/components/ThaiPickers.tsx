@@ -129,9 +129,15 @@ export function ThaiTimePicker({ value, onChange, placeholder = "00:00", classNa
   useEffect(() => {
     if (isOpen && value && listRef.current) {
       const selectedTime = formatTime(value);
-      const selectedButton = listRef.current.querySelector(`[data-time="${selectedTime}"]`);
+      const selectedButton = listRef.current.querySelector(`[data-time="${selectedTime}"]`) as HTMLElement;
       if (selectedButton) {
-        selectedButton.scrollIntoView({ block: 'center' });
+        // Calculate scroll position to center the button within the dropdown, preventing full page scroll
+        const container = listRef.current;
+        const buttonOffset = selectedButton.offsetTop;
+        const buttonHeight = selectedButton.offsetHeight;
+        const containerHeight = container.offsetHeight;
+        
+        container.scrollTop = buttonOffset - (containerHeight / 2) + (buttonHeight / 2);
       }
     }
   }, [isOpen, value]);
