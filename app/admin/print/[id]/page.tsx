@@ -114,12 +114,14 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
           {/* Body */}
           {registrations.length > 0 ? (
             registrations.map((reg, index) => (
-              <div key={reg.id} className="flex border-t border-black break-inside-avoid print:break-inside-avoid">
-                <div className="px-2 py-1 w-16 border-r border-black flex items-center">{index + 1}</div>
-                <div className="px-2 py-1 w-24 border-r border-black flex items-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
-                <div className="px-2 py-1 w-20 border-r border-black flex items-center">{reg.studentProfile.number}</div>
-                <div className="px-2 py-1 flex-1 flex items-center">
-                  {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+              <div key={reg.id} className="block break-inside-avoid print:break-inside-avoid">
+                <div className="flex border-t border-black">
+                  <div className="px-2 py-1 w-16 border-r border-black flex items-center">{index + 1}</div>
+                  <div className="px-2 py-1 w-24 border-r border-black flex items-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</div>
+                  <div className="px-2 py-1 w-20 border-r border-black flex items-center">{reg.studentProfile.number}</div>
+                  <div className="px-2 py-1 flex-1 flex items-center">
+                    {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                  </div>
                 </div>
               </div>
             ))
