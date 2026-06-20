@@ -356,11 +356,13 @@ export default function AdminProjectSettings({ project, onSave }: { project: any
             <ThaiTimePicker
               value={formData.activityStartTime}
               onChange={(time) => setFormData({ ...formData, activityStartTime: time })}
+              className="flex-1"
             />
             <span className="text-slate-500">-</span>
             <ThaiTimePicker
               value={formData.activityEndTime}
               onChange={(time) => setFormData({ ...formData, activityEndTime: time })}
+              className="flex-1"
             />
           </div>
         </div>
