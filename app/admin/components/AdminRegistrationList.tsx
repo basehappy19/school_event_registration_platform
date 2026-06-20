@@ -15,6 +15,8 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   
   const [toast, setToast] = useState<{message: string, type: 'error' | 'success'} | null>(null)
   const [showAcceptAllModal, setShowAcceptAllModal] = useState(false)
+  const [isPrinting, setIsPrinting] = useState(false)
+  const [isExportingExcel, setIsExportingExcel] = useState(false)
 
   useEffect(() => {
     if (toast) {
@@ -58,6 +60,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   }
 
   const handlePrint = () => {
+    setIsPrinting(true)
     // Create an off-screen iframe so html2pdf can render the DOM without opening a new tab
     const iframe = document.createElement('iframe')
     iframe.style.position = 'absolute'
@@ -67,6 +70,11 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     iframe.style.left = '-9999px'
     iframe.style.visibility = 'hidden'
     iframe.src = `/admin/print/${project.id}?print=true`
+    
+    iframe.onload = () => {
+      setTimeout(() => setIsPrinting(false), 1500)
+    }
+
     document.body.appendChild(iframe)
 
     // Remove the iframe after 10 seconds to clean up
@@ -74,7 +82,38 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
       if (document.body.contains(iframe)) {
         document.body.removeChild(iframe)
       }
+      setIsPrinting(false)
     }, 10000)
+  }
+
+  const handleExportExcel = async () => {
+    setIsExportingExcel(true)
+    try {
+      const res = await fetch(`/api/export/excel?projectId=${project.id}`)
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      
+      let filename = \`Registrations_\${project.title}.xlsx\`
+      const disposition = res.headers.get('content-disposition')
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const utf8Matches = /filename\\*=UTF-8''([^;\\n]*)/.exec(disposition)
+        if (utf8Matches != null && utf8Matches[1]) {
+          filename = decodeURIComponent(utf8Matches[1])
+        }
+      }
+      
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      a.remove()
+    } catch (err) {
+      showToast("เกิดข้อผิดพลาดในการส่งออก Excel", 'error')
+    } finally {
+      setIsExportingExcel(false)
+    }
   }
 
   const handleAccept = async (regId: number) => {
@@ -196,8 +235,13 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
           <a href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
             <Eye className="w-4 h-4 mr-2" /> ดูประกาศหน้าเว็บ
           </a>
-          <button type="button" onClick={handlePrint} className="bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
-            <Printer className="w-4 h-4 mr-2" /> พิมพ์ประกาศ (PDF)
+          <button 
+            type="button" 
+            onClick={handlePrint} 
+            disabled={isPrinting}
+            className="bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 disabled:opacity-50 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+            {isPrinting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Printer className="w-4 h-4 mr-2" />} 
+            {isPrinting ? 'กำลังเตรียมพิมพ์...' : 'พิมพ์ประกาศ (PDF)'}
           </button>
           <button 
             type="button"
@@ -208,14 +252,14 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             <CheckCircle2 className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">รับสำรองทั้งหมด</span>
           </button>
-          <a 
-            href={`/api/export/excel?projectId=${project.id}`}
-            target="_blank"
-            rel="noreferrer"
-            download
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
-            <Download className="w-4 h-4 mr-2" /> ส่งออก Excel
-          </a>
+          <button 
+            type="button"
+            onClick={handleExportExcel}
+            disabled={isExportingExcel}
+            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+            {isExportingExcel ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+            {isExportingExcel ? 'กำลังส่งออก...' : 'ส่งออก Excel'}
+          </button>
         </div>
       </div>
 
