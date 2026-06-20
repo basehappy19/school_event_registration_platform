@@ -140,8 +140,10 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
 
   const handleSave = async () => {
     setLoading(true)
+    const isPastEndDate = formData.registrationEndDate ? new Date() > formData.registrationEndDate : false;
     const payload = {
       ...formData,
+      isRegistrationOpen: isPastEndDate ? false : formData.isRegistrationOpen,
       posterUrl: posterUrl || undefined,
       registrationStartDate: formData.registrationStartDate || undefined,
       registrationEndDate: formData.registrationEndDate || undefined,
@@ -281,19 +283,30 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             </div>
           </label>
 
-          <label className="flex items-start gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-            <input 
-              type="checkbox" 
-              name="isRegistrationOpen"
-              checked={formData.isRegistrationOpen}
-              onChange={handleChange}
-              className="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600"
-            />
-            <div>
-              <span className="block font-medium text-slate-800">เปิดรับสมัคร</span>
-              <span className="block text-xs text-slate-500 mt-0.5">อนุญาตให้นักเรียนกดลงทะเบียนได้</span>
-            </div>
-          </label>
+          {(() => {
+            const isPastEndDate = formData.registrationEndDate ? new Date() > formData.registrationEndDate : false;
+            return (
+              <label className={`flex items-start gap-3 p-4 border border-slate-200 rounded-xl transition-colors ${isPastEndDate ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-50'}`}>
+                <input 
+                  type="checkbox" 
+                  name="isRegistrationOpen"
+                  checked={isPastEndDate ? false : formData.isRegistrationOpen}
+                  disabled={isPastEndDate}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <div>
+                  <span className="block font-medium text-slate-800">เปิดรับสมัคร</span>
+                  <span className="block text-xs text-slate-500 mt-0.5">อนุญาตให้นักเรียนกดลงทะเบียนได้</span>
+                  {isPastEndDate && (
+                    <div className="mt-2 text-[11px] leading-tight text-rose-600 bg-rose-50/80 px-2 py-1.5 rounded border border-rose-100">
+                      เลยเวลาปิดรับสมัครแล้ว หากต้องการเปิดอีกครั้ง<br/>กรุณาล้างค่าเวลาปิดรับสมัครด้านล่าง หรือขยายเวลา
+                    </div>
+                  )}
+                </div>
+              </label>
+            );
+          })()}
 
           <label className="flex items-start gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
             <input 
