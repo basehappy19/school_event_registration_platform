@@ -138,9 +138,9 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     setLoading(true)
     const payload = {
       ...formData,
-      posterUrl: posterUrl || null,
-      registrationStartDate: formData.registrationStartDate ? new Date(formData.registrationStartDate) : null,
-      registrationEndDate: formData.registrationEndDate ? new Date(formData.registrationEndDate) : null,
+      posterUrl: posterUrl || undefined,
+      registrationStartDate: formData.registrationStartDate ? new Date(formData.registrationStartDate) : undefined,
+      registrationEndDate: formData.registrationEndDate ? new Date(formData.registrationEndDate) : undefined,
       quotas,
       formFields: formFields.map(f => ({
         ...f,

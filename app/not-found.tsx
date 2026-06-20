@@ -22,7 +22,7 @@ export default function NotFound() {
         {/* Text Content */}
         <div className="space-y-4 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
           <h1 className="text-4xl font-black tracking-tight text-slate-900">404</h1>
-          <h2 className="text-2xl font-bold text-slate-800 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
+          <h2 className="text-2xl font-bold text-slate-800 bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-pink-500">
             ไม่พบหน้าที่คุณค้นหา
           </h2>
           <p className="text-slate-500 leading-relaxed max-w-sm mx-auto">
