@@ -95,10 +95,10 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
       const a = document.createElement('a')
       a.href = url
       
-      let filename = \`Registrations_\${project.title}.xlsx\`
+      let filename = `Registrations_${project.title}.xlsx`
       const disposition = res.headers.get('content-disposition')
       if (disposition && disposition.indexOf('filename=') !== -1) {
-        const utf8Matches = /filename\\*=UTF-8''([^;\\n]*)/.exec(disposition)
+        const utf8Matches = /filename\*=UTF-8''([^;\n]*)/.exec(disposition)
         if (utf8Matches != null && utf8Matches[1]) {
           filename = decodeURIComponent(utf8Matches[1])
         }
