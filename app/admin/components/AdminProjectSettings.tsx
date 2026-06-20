@@ -372,7 +372,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             <strong className="block text-sky-900 mb-1">หลักการเปิดรับสมัคร:</strong>
             การรับสมัครจะเปิดให้นักเรียนลงทะเบียนได้ก็ต่อเมื่อ 
             <ol className="list-decimal ml-5 mt-1.5 space-y-1 text-sky-800">
-              <li>สวิตช์ <b className="text-sky-900">"เปิดรับสมัคร"</b> ด้านบนถูกเปิดอยู่ <u>และ</u></li>
+              <li>สวิตช์ <b className="text-sky-900">&quot;เปิดรับสมัคร&quot;</b> ด้านบนถูกเปิดอยู่ <u>และ</u></li>
               <li>เวลาปัจจุบันอยู่ในช่วง <b className="text-sky-900">วัน/เวลา เปิด-ปิดรับสมัคร</b> ด้านล่าง (ถ้าไม่ได้ตั้งเวลาไว้ ระบบจะยึดตามสวิตช์ด้านบนเป็นหลัก)</li>
             </ol>
             <p className="mt-2 text-xs text-sky-700 bg-sky-100/50 px-2 py-1.5 rounded-md inline-block">* หากปิดสวิตช์ด้านบน จะเป็นการปิดรับสมัครทันทีโดยไม่สนใจช่วงเวลาด้านล่าง</p>
