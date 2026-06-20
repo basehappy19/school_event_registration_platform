@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { updateProjectSettings, deleteProject } from "@/app/actions/admin"
-import { Loader2, Save, CheckCircle2, Plus, Trash2, AlertTriangle, Image as ImageIcon, X } from "lucide-react"
+import { Loader2, Save, CheckCircle2, Plus, Trash2, AlertTriangle, Image as ImageIcon, X, Info } from "lucide-react"
 
 import { useRouter } from "next/navigation"
 import { ProjectWithRelations } from "@/app/types"
@@ -10,16 +10,11 @@ import { FieldType } from "@prisma/client"
 
 import { ThaiDatePicker, ThaiTimePicker } from "@/app/components/ThaiPickers"
 
-export default function AdminProjectSettings({ project, onSave }: { project: any, onSave?: () => void }) {
+export default function AdminProjectSettings({ project }: { project: ProjectWithRelations }) {
   const router = useRouter()
   const [showToast, setShowToast] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const toLocalISOString = (dateString: string | Date) => {
-    const date = new Date(dateString);
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  };
 
   const [formData, setFormData] = useState({
     title: project.title || "",
@@ -40,14 +35,14 @@ export default function AdminProjectSettings({ project, onSave }: { project: any
   // State for Quotas
   const [quotas, setQuotas] = useState<{grade: string, capacity: number}[]>(
     project.quotas?.length > 0 
-      ? project.quotas.map((q: any) => ({ grade: q.grade, capacity: q.capacity }))
+      ? project.quotas.map((q: ProjectWithRelations['quotas'][0]) => ({ grade: q.grade, capacity: q.capacity }))
       : []
   )
 
   // State for Form Fields
   const [formFields, setFormFields] = useState<{id?: number, label: string, type: FieldType, options: string[], isRequired: boolean}[]>(
     project.formFields?.length > 0
-      ? project.formFields.map((f: any) => {
+      ? project.formFields.map((f: ProjectWithRelations['formFields'][0]) => {
           let parsedOptions: string[] = []
           try {
             if (f.options) {
@@ -314,10 +309,23 @@ export default function AdminProjectSettings({ project, onSave }: { project: any
             </div>
           </label>
         </div>
+
+        <div className="mt-4 p-4 bg-sky-50 text-sky-800 text-sm rounded-xl flex items-start gap-3 border border-sky-100">
+          <Info className="w-5 h-5 shrink-0 text-sky-600 mt-0.5" />
+          <div>
+            <strong className="block text-sky-900 mb-1">หลักการเปิดรับสมัคร:</strong>
+            การรับสมัครจะเปิดให้นักเรียนลงทะเบียนได้ก็ต่อเมื่อ 
+            <ol className="list-decimal ml-5 mt-1.5 space-y-1 text-sky-800">
+              <li>สวิตช์ <b className="text-sky-900">"เปิดรับสมัคร"</b> ด้านบนถูกเปิดอยู่ <u>และ</u></li>
+              <li>เวลาปัจจุบันอยู่ในช่วง <b className="text-sky-900">วัน/เวลา เปิด-ปิดรับสมัคร</b> ด้านล่าง (ถ้าไม่ได้ตั้งเวลาไว้ ระบบจะยึดตามสวิตช์ด้านบนเป็นหลัก)</li>
+            </ol>
+            <p className="mt-2 text-xs text-sky-700 bg-sky-100/50 px-2 py-1.5 rounded-md inline-block">* หากปิดสวิตช์ด้านบน จะเป็นการปิดรับสมัครทันทีโดยไม่สนใจช่วงเวลาด้านล่าง</p>
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">วัน/เวลา เปิดรับสมัคร</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">วัน/เวลา เปิดรับลงทะเบียน</label>
             <div className="flex items-center gap-2">
               <ThaiDatePicker 
                 value={formData.registrationStartDate}
@@ -332,7 +340,7 @@ export default function AdminProjectSettings({ project, onSave }: { project: any
             </div>
           </div>
           <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">วัน/เวลา ปิดรับสมัคร <span className="text-slate-400 font-normal">(ไม่บังคับ)</span></label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">วัน/เวลา ปิดรับลงทะเบียน</label>
             <div className="flex items-center gap-2">
               <ThaiDatePicker 
                 value={formData.registrationEndDate}
