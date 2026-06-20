@@ -48,33 +48,30 @@ export async function GET(request: NextRequest) {
   const ws1 = workbook.addWorksheet("รายชื่อตัวจริง")
   
   // Add Project Title
-  ws1.mergeCells('A1:E1')
+  ws1.mergeCells('A1:D1')
   ws1.getCell('A1').value = `รายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ: ${project.title}`
   ws1.getCell('A1').font = { size: 16, bold: true }
   ws1.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
 
   // Add Headers
-  ws1.addRow(["ลำดับ", "รหัสนักเรียน", "ชื่อ - นามสกุล", "ระดับชั้น", "เลขที่"])
+  ws1.addRow(["ลำดับ", "ชื่อ - นามสกุล", "ระดับชั้น", "เลขที่"])
   ws1.getRow(2).font = { bold: true }
   ws1.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
   
   // Set Column Widths
   ws1.getColumn(1).width = 10
   ws1.getColumn(1).alignment = { horizontal: 'center' }
-  ws1.getColumn(2).width = 15
-  ws1.getColumn(2).alignment = { horizontal: 'center' }
-  ws1.getColumn(3).width = 40
-  ws1.getColumn(4).width = 15
+  ws1.getColumn(2).width = 40
+  ws1.getColumn(3).width = 15
+  ws1.getColumn(3).alignment = { horizontal: 'center' }
+  ws1.getColumn(4).width = 10
   ws1.getColumn(4).alignment = { horizontal: 'center' }
-  ws1.getColumn(5).width = 10
-  ws1.getColumn(5).alignment = { horizontal: 'center' }
 
   // Add Data
   const approved = project.registrations.filter(r => r.status === 'APPROVED')
   approved.forEach((reg, index) => {
     ws1.addRow([
       index + 1,
-      reg.studentProfile.studentId,
       `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`,
       `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
       reg.studentProfile.number
@@ -87,31 +84,28 @@ export async function GET(request: NextRequest) {
     const ws2 = workbook.addWorksheet("รายชื่อสำรอง")
     
     // Add Project Title
-    ws2.mergeCells('A1:E1')
+    ws2.mergeCells('A1:D1')
     ws2.getCell('A1').value = `รายชื่อสำรองโครงการ: ${project.title}`
     ws2.getCell('A1').font = { size: 16, bold: true }
     ws2.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' }
 
     // Add Headers
-    ws2.addRow(["ลำดับ", "รหัสนักเรียน", "ชื่อ - นามสกุล", "ระดับชั้น", "เลขที่"])
+    ws2.addRow(["ลำดับ", "ชื่อ - นามสกุล", "ระดับชั้น", "เลขที่"])
     ws2.getRow(2).font = { bold: true }
     ws2.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
     
     // Set Column Widths
     ws2.getColumn(1).width = 10
     ws2.getColumn(1).alignment = { horizontal: 'center' }
-    ws2.getColumn(2).width = 15
-    ws2.getColumn(2).alignment = { horizontal: 'center' }
-    ws2.getColumn(3).width = 40
-    ws2.getColumn(4).width = 15
+    ws2.getColumn(2).width = 40
+    ws2.getColumn(3).width = 15
+    ws2.getColumn(3).alignment = { horizontal: 'center' }
+    ws2.getColumn(4).width = 10
     ws2.getColumn(4).alignment = { horizontal: 'center' }
-    ws2.getColumn(5).width = 10
-    ws2.getColumn(5).alignment = { horizontal: 'center' }
 
     waitlisted.forEach((reg, index) => {
       ws2.addRow([
         index + 1,
-        reg.studentProfile.studentId,
         `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`,
         `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
         reg.studentProfile.number
