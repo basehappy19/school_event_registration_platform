@@ -67,9 +67,9 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
             const totalCapacity = project.quotas.reduce((sum, q) => sum + q.capacity, 0)
             const totalRegistered = project.registrations.length
             
-            const isRegistrationAvailable = project.isRegistrationOpen && 
-              (!project.registrationStartDate || new Date() >= new Date(project.registrationStartDate)) &&
-              (!project.registrationEndDate || new Date() <= new Date(project.registrationEndDate))
+            const isPastEndDate = project.registrationEndDate && new Date() > new Date(project.registrationEndDate)
+            const isManuallyClosed = !project.isRegistrationOpen && (!project.registrationStartDate || new Date() >= new Date(project.registrationStartDate))
+            const isRegistrationAvailable = !isPastEndDate && !isManuallyClosed
 
             const isAnnouncementAvailable = project.isAnnouncementOpen && 
               (!project.announcementStartDate || new Date() >= new Date(project.announcementStartDate)) &&
