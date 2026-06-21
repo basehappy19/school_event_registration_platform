@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     siteName: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
     images: [
       {
-        url: "/school_event_registration_platform_banner.jpg",
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://tutor.phukhieo.ac.th"}/school_event_registration_platform_banner.jpg`,
         width: 1200,
         height: 630,
         alt: "ป้ายประกาศระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ระบบลงทะเบียนเข้าร่วมกิจกรรม โรงเรียนภูเขียว",
     description: "ระบบลงทะเบียนเข้าร่วมกิจกรรมต่างๆ ของโรงเรียนภูเขียว สะดวก รวดเร็ว ตรวจสอบสถานะและพิมพ์ประกาศรายชื่อได้ทันที",
-    images: ["/school_event_registration_platform_banner.jpg"],
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || "https://tutor.phukhieo.ac.th"}/school_event_registration_platform_banner.jpg`],
   },
   robots: {
     index: true,
