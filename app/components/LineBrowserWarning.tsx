@@ -10,25 +10,37 @@ export default function LineBrowserWarning() {
 
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isLine = (userAgent.indexOf("Line") > -1);
-    const isFB = (userAgent.indexOf("FBAN") > -1) || (userAgent.indexOf("FBAV") > -1) || (userAgent.indexOf("Instagram") > -1);
+    const isLine = /Line/i.test(userAgent);
+    const isInAppBrowser = /FBAN|FBAV|Instagram|IGApp|TikTok|trill|Twitter|LinkedInApp/i.test(userAgent) || isLine;
     
-    if (isLine || isFB) {
-      setIsInLine(true)
+    if (isInAppBrowser) {
+      setIsInLine(true);
       const currentUrl = window.location.href;
       setUrl(currentUrl);
       
-      // Attempt to force open in external browser using LINE's URL parameter
+      // 1. LINE's built-in parameter (Works on both Android and iOS LINE)
       if (isLine && !currentUrl.includes('openExternalBrowser=1')) {
         const hasAttempted = sessionStorage.getItem('lineRedirectAttempted');
         if (!hasAttempted) {
           sessionStorage.setItem('lineRedirectAttempted', 'true');
-          const newUrl = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'openExternalBrowser=1';
-          window.location.href = newUrl;
+          window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'openExternalBrowser=1';
+          return;
+        }
+      }
+
+      // 2. Android Chrome Intent (Works for FB, IG, TikTok, etc. on Android)
+      const isAndroid = /android/i.test(userAgent);
+      if (isAndroid) {
+        const hasIntentAttempted = sessionStorage.getItem('androidIntentAttempted');
+        if (!hasIntentAttempted) {
+          sessionStorage.setItem('androidIntentAttempted', 'true');
+          const urlWithoutHttp = currentUrl.replace(/^https?:\/\//i, '');
+          const intentUrl = `intent://${urlWithoutHttp}#Intent;scheme=https;package=com.android.chrome;end`;
+          window.location.href = intentUrl;
         }
       }
     }
-  }, [])
+  }, []);
 
   if (!isInLine) return null;
 
