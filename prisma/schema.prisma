@@ -61,6 +61,7 @@ model Project {
   
   // Visibility setting
   isPublished           Boolean  @default(false)
+  order                 Int      @default(0)
 
   // Registration settings
   isRegistrationOpen    Boolean  @default(false)

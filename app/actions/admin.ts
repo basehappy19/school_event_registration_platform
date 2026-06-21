@@ -206,3 +206,20 @@ export async function deleteProject(projectId: number) {
     return { error: error instanceof Error ? error.message : String(error) }
   }
 }
+
+export async function updateProjectsOrder(orderedIds: number[]) {
+  await checkAdmin()
+  try {
+    for (let i = 0; i < orderedIds.length; i++) {
+      await prisma.project.update({
+        where: { id: orderedIds[i] },
+        data: { order: i }
+      })
+    }
+    revalidatePath('/admin')
+    revalidatePath('/')
+    return { success: true }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
+  }
+}

@@ -13,7 +13,10 @@ export default async function Home() {
 
   const projects = await prisma.project.findMany({
     where: { isPublished: true },
-    orderBy: { id: 'desc' },
+    orderBy: [
+      { order: 'asc' },
+      { id: 'desc' }
+    ],
     include: {
       quotas: {
         orderBy: { grade: 'asc' }

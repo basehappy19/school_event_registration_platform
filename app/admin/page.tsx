@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
 
   // Fetch all projects for the selector
   const projects = await prisma.project.findMany({
-    orderBy: { startDate: 'desc' },
+    orderBy: [{ order: 'asc' }, { id: 'desc' }],
     include: {
       quotas: true,
       formFields: true,
