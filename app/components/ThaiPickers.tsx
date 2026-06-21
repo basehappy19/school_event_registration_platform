@@ -29,10 +29,23 @@ export function ThaiDatePicker({ value, onChange, placeholder = "เลือก
   }, []);
 
   const formatThaiBuddhist = (date: Date) => {
-    const d = date.getDate().toString().padStart(2, '0');
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
-    const y = (date.getFullYear() + 543).toString();
-    return `${d}/${m}/${y}`;
+    try {
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Bangkok',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).formatToParts(date);
+      const day = parts.find(p => p.type === 'day')?.value || '01';
+      const month = parts.find(p => p.type === 'month')?.value || '01';
+      const year = parts.find(p => p.type === 'year')?.value || '1970';
+      return `${day}/${month}/${parseInt(year) + 543}`;
+    } catch {
+      const d = date.getDate().toString().padStart(2, '0');
+      const m = (date.getMonth() + 1).toString().padStart(2, '0');
+      const y = (date.getFullYear() + 543).toString();
+      return `${d}/${m}/${y}`;
+    }
   };
 
   return (
@@ -121,7 +134,16 @@ export function ThaiTimePicker({ value, onChange, placeholder = "00:00", classNa
   };
 
   const formatTime = (date: Date) => {
-    return format(date, "HH:mm");
+    try {
+      return new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Bangkok',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(date);
+    } catch {
+      return format(date, "HH:mm");
+    }
   };
 
   const listRef = useRef<HTMLDivElement>(null);
