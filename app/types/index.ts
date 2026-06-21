@@ -40,8 +40,10 @@ export interface UpdateProjectPayload {
   isPublished?: boolean
   isRegistrationOpen?: boolean
   isAnnouncementOpen?: boolean
-  registrationStartDate?: Date
-  registrationEndDate?: Date
+  registrationStartDate?: Date | null
+  registrationEndDate?: Date | null
+  announcementStartDate?: Date | null
+  announcementEndDate?: Date | null
   activityDate?: Date | null
   activityStartTime?: Date | null
   activityEndTime?: Date | null
