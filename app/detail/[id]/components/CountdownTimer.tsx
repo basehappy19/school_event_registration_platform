@@ -104,12 +104,12 @@ export default function CountdownTimer({ startDate, endDate }: { startDate?: str
   if (!isMounted || status === "CLOSED" || (!endDate && status === "OPEN") || !startDate) return null
 
   const TimeBox = ({ value, label }: { value: number, label: string }) => (
-    <div className="bg-white border border-indigo-100 rounded-2xl px-3 sm:px-5 py-3 sm:py-4 min-w-[70px] sm:min-w-[85px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(99,102,241,0.1)] transition-shadow duration-300 flex flex-col items-center justify-center relative overflow-hidden group">
+    <div className="bg-white border border-indigo-100 rounded-2xl px-2 sm:px-4 py-2 sm:py-3 min-w-[64px] sm:min-w-[76px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(99,102,241,0.1)] transition-shadow duration-300 flex flex-col items-center justify-center relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <div className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-purple-600 leading-none mb-1.5 relative z-10">
+      <div className="text-2xl sm:text-3xl font-black text-indigo-600 leading-none mb-1 relative z-10">
         <AnimatedNumber value={value} />
       </div>
-      <div className="text-[10px] sm:text-[11px] text-indigo-500/80 font-bold uppercase tracking-widest relative z-10">{label}</div>
+      <div className="text-[10px] text-indigo-500/80 font-bold uppercase tracking-widest relative z-10">{label}</div>
     </div>
   )
 
