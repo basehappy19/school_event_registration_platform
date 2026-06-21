@@ -13,7 +13,7 @@ export default async function Home() {
 
   const projects = await prisma.project.findMany({
     where: { isPublished: true },
-    orderBy: { startDate: 'asc' },
+    orderBy: { id: 'desc' },
     include: {
       quotas: {
         orderBy: { grade: 'asc' }
@@ -57,6 +57,9 @@ export default async function Home() {
       <main className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 py-6 sm:py-12 md:py-20">
         {/* Hero Section */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12 md:mb-16 px-4 sm:px-0">
+          <div className="flex justify-center mb-6">
+            <Image src="/logo.png" alt="Logo" width={120} height={120} className="object-contain w-24 h-24 sm:w-32 sm:h-32 drop-shadow-sm hover:scale-105 transition-transform" />
+          </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-4 leading-tight">
             โครงการติวเข้ม <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600">เสริมความรู้มุ่งสู่มหาวิทยาลัย</span>
