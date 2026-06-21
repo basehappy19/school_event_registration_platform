@@ -153,8 +153,8 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       ...formData,
       isRegistrationOpen: isPastEndDate ? false : formData.isRegistrationOpen,
       posterUrl: posterUrl === "" ? null : posterUrl,
-      registrationStartDate: formData.registrationStartDate || undefined,
-      registrationEndDate: formData.registrationEndDate || undefined,
+      registrationStartDate: formData.registrationStartDate,
+      registrationEndDate: formData.registrationEndDate,
       quotas,
       formFields: formFields.map(f => ({
         ...f,
