@@ -33,6 +33,8 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     activityLocation: project.activityLocation || "",
   })
   const [posterUrl, setPosterUrl] = useState(project.posterUrl || "")
+  const [originalPosterUrl, setOriginalPosterUrl] = useState(project.posterUrl || "")
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
   const [uploadingPoster, setUploadingPoster] = useState(false)
 
   // State for Quotas
@@ -136,6 +138,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       const data = await res.json()
       if (res.ok) {
         setPosterUrl(data.url)
+        setUploadedUrls(prev => [...prev, data.url])
       } else {
         setAlertModal({ title: "เกิดข้อผิดพลาด", message: data.error || "Upload failed" })
       }
@@ -168,6 +171,18 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       setAlertModal({ title: "เกิดข้อผิดพลาดในการบันทึก", message: res.error })
       return
     }
+
+    // Cleanup files
+    const toDelete = new Set<string>()
+    uploadedUrls.forEach(url => { if (url !== posterUrl) toDelete.add(url) })
+    if (originalPosterUrl && originalPosterUrl !== posterUrl) {
+      toDelete.add(originalPosterUrl)
+    }
+    Array.from(toDelete).forEach(url => {
+      fetch(`/api/upload?url=${encodeURIComponent(url)}`, { method: 'DELETE' }).catch(() => {})
+    })
+    setOriginalPosterUrl(posterUrl || "")
+    setUploadedUrls([])
     
     router.refresh()
     
@@ -305,7 +320,13 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
             {posterUrl && (
               <button 
                 type="button" 
-                onClick={() => setPosterUrl("")} 
+                onClick={() => {
+                  if (posterUrl && uploadedUrls.includes(posterUrl)) {
+                    fetch(`/api/upload?url=${encodeURIComponent(posterUrl)}`, { method: 'DELETE' }).catch(() => {})
+                    setUploadedUrls(prev => prev.filter(url => url !== posterUrl))
+                  }
+                  setPosterUrl("")
+                }} 
                 className="mt-3 text-sm text-rose-600 font-medium hover:text-rose-700 flex items-center gap-1"
               >
                 <X className="w-4 h-4" /> ลบรูปโปสเตอร์
