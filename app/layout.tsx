@@ -109,6 +109,7 @@ export const metadata: Metadata = {
 };
 
 import NextTopLoader from "nextjs-toploader";
+import LineBrowserWarning from "./components/LineBrowserWarning";
 
 export default function RootLayout({
   children,
@@ -122,6 +123,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         <NextTopLoader color="#ec4899" showSpinner={false} />
+        <LineBrowserWarning />
         {children}
       </body>
     </html>
