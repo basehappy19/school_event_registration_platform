@@ -43,6 +43,16 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
         </div>
       </div>
 
+      <div className="max-w-4xl mx-auto mb-10 sm:mb-16 px-4 sm:px-0">
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white">
+          <img 
+            src="/schedule.jpg" 
+            alt="Schedule Banner" 
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredProjects.length === 0 ? (
           <div className="col-span-full py-16 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 border-dashed">
