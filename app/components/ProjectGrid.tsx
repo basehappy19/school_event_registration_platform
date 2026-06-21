@@ -67,6 +67,10 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
             const totalCapacity = project.quotas.reduce((sum, q) => sum + q.capacity, 0)
             const totalRegistered = project.registrations.length
             
+            const isRegistrationAvailable = project.isRegistrationOpen && 
+              (!project.registrationStartDate || new Date() >= new Date(project.registrationStartDate)) &&
+              (!project.registrationEndDate || new Date() <= new Date(project.registrationEndDate))
+
             const isAnnouncementAvailable = project.isAnnouncementOpen && 
               (!project.announcementStartDate || new Date() >= new Date(project.announcementStartDate)) &&
               (!project.announcementEndDate || new Date() <= new Date(project.announcementEndDate))
@@ -169,14 +173,16 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                 </div>
 
                 <div className="mt-auto flex flex-col gap-3">
-                  <Link 
-                    href={`/detail/${project.id}`}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center group/btn"
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    รายละเอียดและลงทะเบียน
-                    <ArrowRight className="w-4 h-4 ml-2 transform group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
+                  {isRegistrationAvailable && (
+                    <Link 
+                      href={`/detail/${project.id}`}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center group/btn"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      รายละเอียดและลงทะเบียน
+                      <ArrowRight className="w-4 h-4 ml-2 transform group-hover/btn:translate-x-1 transition-transform" />
+                    </Link>
+                  )}
 
                   {isAnnouncementAvailable && (
                     <Link
