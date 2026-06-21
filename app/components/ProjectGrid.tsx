@@ -30,7 +30,17 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
 
   return (
     <div>
-      <div className="max-w-2xl mx-auto mb-8 sm:mb-12 px-4 sm:px-0">
+      <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-4 sm:px-0">
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white">
+          <img 
+            src="/schedule.jpg" 
+            alt="Schedule Banner" 
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto mb-10 sm:mb-16 px-4 sm:px-0">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input 
@@ -39,16 +49,6 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all text-slate-900 bg-white shadow-sm"
-          />
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto mb-10 sm:mb-16 px-4 sm:px-0">
-        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white">
-          <img 
-            src="/schedule.jpg" 
-            alt="Schedule Banner" 
-            className="w-full h-auto object-cover"
           />
         </div>
       </div>
