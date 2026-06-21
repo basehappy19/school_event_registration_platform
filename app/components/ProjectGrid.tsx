@@ -130,7 +130,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                             <Clock className="w-4 h-4" />
                           </div>
                           <div className="flex flex-col justify-center gap-1 min-h-[2rem]">
-                            {project.activityDate && <span>วันติว: {formatThaiDateWithDay(new Date(project.activityDate).toISOString().split('T')[0])}</span>}
+                            {project.activityDate && <span>วันติว: {formatThaiDateWithDay(project.activityDate)}</span>}
                             {(project.activityStartTime || project.activityEndTime) && <span>เวลา: {formatTimeRange(project.activityStartTime, project.activityEndTime)}</span>}
                           </div>
                         </div>

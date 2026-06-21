@@ -176,7 +176,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               {project.activityDate && (
                 <div className="flex items-center text-slate-700">
                   <Calendar className="w-4 h-4 mr-2 text-slate-500" />
-                  <span>{formatThaiDateWithDay(new Date(project.activityDate).toISOString().split('T')[0])}</span>
+                  <span>{formatThaiDateWithDay(project.activityDate)}</span>
                 </div>
               )}
               {(project.activityStartTime || project.activityEndTime) && (
