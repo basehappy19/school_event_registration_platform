@@ -61,10 +61,7 @@ export default async function Home() {
             โครงการติวเข้ม <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600">เสริมความรู้มุ่งสู่มหาวิทยาลัย</span>
           </h1>
-          <p 
-            className="text-[#e72528] text-3xl sm:text-4xl md:text-5xl mt-2 -rotate-2 transform" 
-            style={{ fontFamily: "'Mali', 'Comic Sans MS', cursive" }}
-          >
+          <p className="text-[#e72528] text-3xl sm:text-4xl md:text-5xl mt-2 font-extrabold tracking-tight">
             โรงเรียนภูเขียว สพม.ชัยภูมิ
           </p>
         </div>
