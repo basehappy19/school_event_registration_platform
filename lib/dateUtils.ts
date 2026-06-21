@@ -1,22 +1,20 @@
 export function formatThaiDateWithDay(dateInput: string | Date | null): string {
   if (!dateInput) return "ยังไม่กำหนดวัน";
 
-  const thaiMonths = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-  ];
-  const thaiDays = [
-    "วันอาทิตย์", "วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์"
-  ];
-
   // Create Date object
   const dateObj = new Date(dateInput);
   if (!isNaN(dateObj.getTime())) {
-    const dayOfWeek = thaiDays[dateObj.getDay()];
-    const day = dateObj.getDate();
-    const month = thaiMonths[dateObj.getMonth()];
-    const year = dateObj.getFullYear() + 543;
-    return `${dayOfWeek}ที่ ${day} ${month} ${year}`;
+    try {
+      return new Intl.DateTimeFormat('th-TH', { 
+        timeZone: 'Asia/Bangkok', 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }).format(dateObj);
+    } catch (e) {
+      // Fallback if Intl fails
+    }
   }
 
   // Fallback for pre-formatted Thai strings like "19 กรกฎาคม 2569"
