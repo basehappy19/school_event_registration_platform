@@ -11,16 +11,26 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
 
   const formatDateThai = (dateStr: string | Date) => {
     const date = new Date(dateStr)
-    const day = date.getDate()
-    const monthNames = [
-      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-    ]
-    const month = monthNames[date.getMonth()]
-    const year = date.getFullYear() + 543
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${day} ${month} ${year} เวลา ${hours}:${minutes} น.`
+    if (isNaN(date.getTime())) return ""
+    try {
+      const datePart = new Intl.DateTimeFormat('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(date)
+      
+      const timePart = new Intl.DateTimeFormat('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(date)
+
+      return `${datePart} เวลา ${timePart} น.`
+    } catch (e) {
+      return ""
+    }
   }
 
   const filteredProjects = projects.filter(project => 
