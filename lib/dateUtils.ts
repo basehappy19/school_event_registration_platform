@@ -37,7 +37,7 @@ export function formatTimeRange(startTime: Date | string | null | undefined, end
   const formatTime = (t: Date | string) => {
     const d = new Date(t);
     if (isNaN(d.getTime())) return "";
-    return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' });
   };
 
   const startStr = startTime ? formatTime(startTime) : "";
