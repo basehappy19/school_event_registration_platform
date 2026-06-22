@@ -53,6 +53,7 @@ model Project {
   id                    Int      @id @default(autoincrement())
   title                 String
   description           String?
+  posterUrl             String?
   
   // Existing fields (can be used for general activity duration if needed, but we will rely on specific fields below)
   startDate             DateTime
@@ -60,6 +61,7 @@ model Project {
   
   // Visibility setting
   isPublished           Boolean  @default(false)
+  order                 Int      @default(0)
 
   // Registration settings
   isRegistrationOpen    Boolean  @default(false)
@@ -72,8 +74,9 @@ model Project {
   announcementEndDate   DateTime?
 
   // Activity Details (for PDF/Export header)
-  activityDate          String?  // e.g. "19 มิถุนายน 2569"
-  activityTime          String?  // e.g. "09:00 - 12:00 น."
+  activityDate          DateTime?
+  activityStartTime     DateTime?
+  activityEndTime       DateTime?
   activityLocation      String?  // e.g. "ห้องประชุม 1"
 
   quotas        ProjectQuota[]

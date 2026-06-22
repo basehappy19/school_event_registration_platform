@@ -45,15 +45,14 @@ export async function submitRegistration(data: {
         throw new Error("Student is already registered for this project")
       }
 
-      // b. Check Project Quota for student's grade
-      const quota = await tx.projectQuota.findUnique({
-        where: { 
-          projectId_grade: { 
-            projectId: data.projectId, 
-            grade: student.grade 
-          } 
-        }
-      })
+      // b. Check and lock Project Quota for student's grade
+      const quotas: any[] = await tx.$queryRaw`
+        SELECT * FROM "ProjectQuota" 
+        WHERE "projectId" = ${data.projectId} AND "grade" = ${student.grade} 
+        FOR UPDATE
+      `
+
+      const quota = quotas[0]
 
       if (!quota) {
         throw new Error(`ระดับชั้น ม.${student.grade} ไม่สามารถสมัครกิจกรรมนี้ได้`)
@@ -118,8 +117,8 @@ export async function submitRegistration(data: {
 
     return { success: true, status: result.status, registrationId: result.id }
 
-  } catch (error: any) {
-    return { error: error.message || 'Registration failed' }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
   }
 }
 
@@ -143,7 +142,6 @@ export async function cancelRegistration(registrationId: number) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Get the registration to cancel
       const reg = await tx.registration.findUnique({
         where: { id: registrationId },
         include: { studentProfile: true }
@@ -152,6 +150,13 @@ export async function cancelRegistration(registrationId: number) {
       if (!reg || reg.status === 'CANCELLED') {
         throw new Error("Registration not found or already cancelled")
       }
+
+      // Lock the quota for this grade to prevent race conditions during waitlist promotion
+      await tx.$queryRaw`
+        SELECT * FROM "ProjectQuota" 
+        WHERE "projectId" = ${reg.projectId} AND "grade" = ${reg.studentProfile.grade} 
+        FOR UPDATE
+      `
 
       // Verify ownership
       if (reg.studentId !== profile.studentId) {
@@ -207,8 +212,8 @@ export async function cancelRegistration(registrationId: number) {
 
     return result
 
-  } catch (error: any) {
-    return { error: error.message || 'Cancellation failed' }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
   }
 }
 
@@ -248,8 +253,8 @@ export async function approveAllWaitlist(projectId: number) {
 
     return result
 
-  } catch (error: any) {
-    return { error: error.message || 'Approval failed' }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
   }
 }
 

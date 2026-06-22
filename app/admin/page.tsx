@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import AdminDashboardClient from "./components/AdminDashboardClient"
 import { Metadata } from "next"
+import Image from "next/image"
 
 export const metadata: Metadata = {
   title: "ระบบจัดการผู้ดูแลระบบ",
@@ -16,14 +17,14 @@ export default async function AdminDashboard() {
     redirect("/admin/login")
   }
 
-  const role = (session.user as any)?.role
+  const role = (session.user as { role?: string })?.role
   if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
     redirect("/admin/login?error=AccessDenied")
   }
 
   // Fetch all projects for the selector
   const projects = await prisma.project.findMany({
-    orderBy: { startDate: 'desc' },
+    orderBy: [{ order: 'asc' }, { id: 'desc' }],
     include: {
       quotas: true,
       formFields: true,
@@ -43,9 +44,9 @@ export default async function AdminDashboard() {
   return (
     <>
       <nav className="bg-slate-900 text-white px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-500 rounded flex items-center justify-center font-bold text-white shadow-sm">S</div>
-          <span className="font-semibold text-lg">ผู้ดูแลระบบ</span>
+        <div className="flex items-center gap-3">
+          <Image src="/logo.png" alt="Logo" width={40} height={40} className="w-10 h-10 object-contain rounded-lg shadow-sm bg-white" />
+          <span className="font-semibold text-lg tracking-tight">ผู้ดูแลระบบ</span>
         </div>
         <div className="flex items-center gap-4 text-sm bg-slate-800 py-1.5 px-3 rounded-xl border border-slate-700">
           <span className="opacity-80 hidden sm:inline-block">{session.user?.email}</span>

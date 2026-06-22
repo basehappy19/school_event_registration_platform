@@ -1,9 +1,9 @@
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import prisma from "@/lib/prisma"
 import Link from "next/link"
-import { ArrowLeft, Search, Filter, Printer, Download } from "lucide-react"
+import { ArrowLeft, Search } from "lucide-react"
 import AutoPrint from "./components/AutoPrint"
-import { formatThaiDateWithDay } from "@/lib/dateUtils"
+import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { Metadata } from "next"
 import { auth } from "@/auth"
 
@@ -48,12 +48,12 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     (!project.announcementEndDate || now <= project.announcementEndDate)
 
   const session = await auth()
-  const role = (session?.user as any)?.role
+  const role = (session?.user as { role?: string })?.role
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
 
   if (!isAnnouncementOpen && !isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-transparent text-slate-800 p-4">
         <div className="bg-white p-8 rounded-3xl shadow-lg text-center max-w-md w-full">
           <h1 className="text-2xl font-bold mb-4 text-rose-600">ยังไม่ถึงเวลาประกาศผล</h1>
           <p className="text-slate-600 mb-8">โครงการนี้ยังไม่เปิดให้ดูประกาศรายชื่อ หรือหมดระยะเวลาการประกาศผลแล้ว</p>
@@ -93,6 +93,21 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     ]
   })
 
+  registrations.sort((a, b) => {
+    if (a.status !== b.status) return a.status === 'APPROVED' ? -1 : 1;
+    const sA = a.studentProfile;
+    const sB = b.studentProfile;
+    const gA = parseInt(sA.grade) || 0;
+    const gB = parseInt(sB.grade) || 0;
+    if (gA !== gB) return gA - gB;
+    const rA = parseInt(sA.room) || 0;
+    const rB = parseInt(sB.room) || 0;
+    if (rA !== rB) return rA - rB;
+    const nA = parseInt(sA.number) || 0;
+    const nB = parseInt(sB.number) || 0;
+    return nA - nB;
+  });
+
   const approvedList = registrations.filter(r => r.status === 'APPROVED')
   const waitlistedList = registrations.filter(r => r.status === 'WAITLISTED')
 
@@ -106,8 +121,8 @@ export default async function AnnouncementPage({ params, searchParams }: { param
   const uniqueRooms = Array.from(new Set(allRegs.map(r => r.studentProfile.room))).sort((a, b) => parseInt(a) - parseInt(b))
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-transparent font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
+      <div className="bg-linear-to-r from-emerald-600 to-teal-600 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <Link href="/" className="bg-emerald-700/50 hover:bg-emerald-700 border border-emerald-500/30 text-white px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit print:hidden shadow-sm backdrop-blur-sm">
             <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
@@ -118,18 +133,18 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วม
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold mb-6">
-              โครงการ {project.title}
+              {project.title}
             </h2>
             <div className="inline-block bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl text-sm md:text-base border border-white/20 print:border-none print:bg-transparent print:text-black print:p-0">
-              <p>{formatThaiDateWithDay(project.activityDate)} เวลา {project.activityTime || "__________"} ณ {project.activityLocation || "__________"}</p>
+              <p>{formatThaiDateWithDay(project.activityDate)} เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)} ณ {project.activityLocation || "__________"}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10 print:mt-0 print:pt-4">
+      <div className="max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 -mt-12 relative z-10 print:mt-0 print:pt-4">
         {/* Filters Section - Hidden in Print */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-6 print:hidden">
+        <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-slate-200 p-4 sm:p-5 mb-6 print:hidden">
           <form className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 w-full">
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ค้นหารายชื่อ</label>
@@ -172,36 +187,36 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden print:border-none print:shadow-none">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
+        <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden print:border-none print:shadow-none">
+          <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
             <h3 className="font-bold text-lg text-slate-800">รายชื่อตัวจริง ({approvedList.length} คน)</h3>
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
+            <table className="w-full text-left text-sm sm:whitespace-nowrap">
               <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 print:bg-transparent">
                 <tr>
-                  <th className="px-6 py-4 w-16 text-center">ลำดับ</th>
-                  <th className="px-6 py-4 text-center">ชั้น</th>
-                  <th className="px-6 py-4 text-center">เลขที่</th>
-                  <th className="px-6 py-4">ชื่อ - นามสกุล</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16 text-center">ลำดับ</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">ชั้น</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">เลขที่</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4">ชื่อ - นามสกุล</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {approvedList.length > 0 ? (
                   approvedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-3 text-center text-slate-500">{index + 1}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-6 py-3 text-slate-800 font-medium">
+                      <td className="px-3 sm:px-6 py-3 text-center text-slate-500">{index + 1}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
+                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                    <td colSpan={4} className="px-3 sm:px-6 py-8 text-center text-slate-500">
                       ไม่พบรายชื่อ
                     </td>
                   </tr>
@@ -212,28 +227,28 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         </div>
 
         {waitlistedList.length > 0 && (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mt-8 print:hidden">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
+          <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden mt-8 print:hidden">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
               <h3 className="font-bold text-lg text-amber-700">รายชื่อสำรอง ({waitlistedList.length} คน)</h3>
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
+              <table className="w-full text-left text-sm sm:whitespace-nowrap">
                 <thead className="bg-amber-50 text-amber-800 font-semibold border-b border-amber-100 print:bg-transparent print:text-black">
                   <tr>
-                    <th className="px-6 py-4 w-16 text-center">ลำดับสำรอง</th>
-                    <th className="px-6 py-4 text-center">ชั้น</th>
-                    <th className="px-6 py-4 text-center">เลขที่</th>
-                    <th className="px-6 py-4">ชื่อ - นามสกุล</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16 text-center">ลำดับ</th>
+                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">ชั้น</th>
+                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">เลขที่</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4">ชื่อ - นามสกุล</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {waitlistedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-3 text-center text-amber-600 font-medium">{index + 1}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-6 py-3 text-slate-800 font-medium">
+                      <td className="px-3 sm:px-6 py-3 text-center text-amber-600 font-medium">{approvedList.length + index + 1}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
+                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
+                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
                         {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
                       </td>
                     </tr>

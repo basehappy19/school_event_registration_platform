@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, Mail, BookOpen, FileText } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, FileText, LogOut } from "lucide-react"
 import { auth } from "@/auth"
+import { signOutAction } from "@/app/actions/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import CancelRegistrationButton from "../components/CancelRegistrationButton"
@@ -72,11 +73,13 @@ export default async function SuccessPage({
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'Asia/Bangkok'
   }
   const thaiTimeOptions: Intl.DateTimeFormatOptions = {
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit'
+    second: '2-digit',
+    timeZone: 'Asia/Bangkok'
   }
   
   const regDate = new Date(registration.createdAt)
@@ -84,8 +87,8 @@ export default async function SuccessPage({
   const formattedTime = regDate.toLocaleTimeString('th-TH', thaiTimeOptions) + ' น.'
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 max-w-2xl w-full">
+    <div className="min-h-screen bg-transparent font-sans flex flex-col items-center justify-center py-0 sm:py-12 px-0 sm:px-6 lg:px-8">
+      <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 px-5 py-8 sm:p-8 max-w-2xl w-full min-h-screen sm:min-h-0">
         <div className="text-center mb-8">
           {isApproved ? (
             <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white">
@@ -102,9 +105,11 @@ export default async function SuccessPage({
           </h1>
           
           <p className="text-slate-600 text-lg">
-            {isApproved 
-              ? "ระบบได้บันทึกข้อมูลการลงทะเบียนของท่านเรียบร้อยแล้ว ท่านได้รับสิทธิ์ในการเข้าร่วมโครงการ" 
-              : "ตอนนี้จำนวนที่นั่งเต็มแล้ว ระบบได้บันทึกรายชื่อของนักเรียนไว้ในลำดับสำรอง หากมีผู้สละสิทธิ์ นักเรียนจะได้รับการเลื่อนลำดับโดยอัตโนมัติ หรือกรณีที่คุณครูอนุมัติให้เข้าติวได้"}
+            {isApproved ? (
+              <>ระบบได้บันทึกข้อมูลการลงทะเบียนของท่านเรียบร้อยแล้ว<br className="hidden sm:block" />ท่านได้รับสิทธิ์ในการเข้าร่วมโครงการ</>
+            ) : (
+              "ตอนนี้จำนวนที่นั่งเต็มแล้ว ระบบได้บันทึกรายชื่อของนักเรียนไว้ในลำดับสำรอง หากมีผู้สละสิทธิ์ นักเรียนจะได้รับการเลื่อนลำดับโดยอัตโนมัติ หรือกรณีที่คุณครูอนุมัติให้เข้าติวได้"
+            )}
           </p>
         </div>
 
@@ -154,7 +159,7 @@ export default async function SuccessPage({
                   {registration.answers.map(answer => (
                     <div key={answer.id} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
                       <p className="text-xs text-slate-500 mb-1">{answer.field.label}</p>
-                      <p className="font-medium text-sm text-slate-900 break-words whitespace-pre-wrap">
+                      <p className="font-medium text-sm text-slate-900 wrap-break-word whitespace-pre-wrap">
                         {answer.value || "-"}
                       </p>
                     </div>
@@ -167,18 +172,24 @@ export default async function SuccessPage({
         </div>
 
         <div className="mt-8 mb-6 text-center">
-          <p className="text-slate-600 mb-3">หากมีข้อสงสัย ปัญหาต่าง ๆ สามารถทัก IG:base_happy19 ได้</p>
+          <p className="text-slate-600 mb-3">หากมีข้อสงสัย ปัญหาต่าง ๆ สามารถทัก <br/>IG: base_happy19 มาได้เลย</p>
           <a href="https://www.instagram.com/base_happy19/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center text-pink-600 bg-pink-50 hover:bg-pink-100 font-medium px-4 py-2 rounded-lg transition-colors border border-pink-100">
-            @base_happy19
+            กดตรงนี้ @base_happy19
           </a>
         </div>
 
         <Link 
           href="/"
-          className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20"
+          className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20 mb-4"
         >
           <ArrowLeft className="w-5 h-5 mr-3" /> กลับสู่หน้าหลัก
         </Link>
+
+        <form action={signOutAction} className="w-full mb-4">
+          <button type="submit" className="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-6 rounded-xl transition-all border border-slate-200 cursor-pointer">
+            <LogOut className="w-5 h-5 mr-3" /> ออกจากระบบ
+          </button>
+        </form>
 
         <CancelRegistrationButton registrationId={registration.id} />
       </div>

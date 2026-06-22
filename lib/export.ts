@@ -30,7 +30,7 @@ export async function exportToExcel(registrations: any[], projectName: string) {
       room: reg.room,
       number: reg.number,
       status: reg.status,
-      createdAt: new Date(reg.createdAt).toLocaleString(),
+      createdAt: new Date(reg.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }),
     })
   })
 

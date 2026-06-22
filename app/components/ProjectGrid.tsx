@@ -3,22 +3,34 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users } from "lucide-react"
+import { ProjectGridItem } from "@/app/types"
+import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
-export default function ProjectGrid({ projects }: { projects: any[] }) {
+export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] }) {
   const [search, setSearch] = useState("")
 
   const formatDateThai = (dateStr: string | Date) => {
     const date = new Date(dateStr)
-    const day = date.getDate()
-    const monthNames = [
-      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-    ]
-    const month = monthNames[date.getMonth()]
-    const year = date.getFullYear() + 543
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${day} ${month} ${year} เวลา ${hours}:${minutes} น.`
+    if (isNaN(date.getTime())) return ""
+    try {
+      const datePart = new Intl.DateTimeFormat('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(date)
+      
+      const timePart = new Intl.DateTimeFormat('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(date)
+
+      return `${datePart} เวลา ${timePart} น.`
+    } catch (e) {
+      return ""
+    }
   }
 
   const filteredProjects = projects.filter(project => 
@@ -28,7 +40,17 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
 
   return (
     <div>
-      <div className="max-w-2xl mx-auto mb-12">
+      <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-4 sm:px-0">
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white">
+          <img 
+            src="/schedule.jpg" 
+            alt="Schedule Banner" 
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto mb-10 sm:mb-16 px-4 sm:px-0">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input 
@@ -52,29 +74,45 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
           </div>
         ) : (
           filteredProjects.map(project => {
-            const totalCapacity = project.quotas.reduce((sum: number, q: any) => sum + q.capacity, 0)
+            const totalCapacity = project.quotas.reduce((sum, q) => sum + q.capacity, 0)
             const totalRegistered = project.registrations.length
             
+            const isPastEndDate = project.registrationEndDate && new Date() > new Date(project.registrationEndDate)
+            const isManuallyClosed = !project.isRegistrationOpen && (!project.registrationStartDate || new Date() >= new Date(project.registrationStartDate))
+            const isRegistrationAvailable = !isPastEndDate && !isManuallyClosed
+
             const isAnnouncementAvailable = project.isAnnouncementOpen && 
               (!project.announcementStartDate || new Date() >= new Date(project.announcementStartDate)) &&
               (!project.announcementEndDate || new Date() <= new Date(project.announcementEndDate))
 
             return (
-            <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col transform hover:-translate-y-1">
-              <div className="h-48 bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-6 border-b border-slate-100 relative overflow-hidden">
-                <div className="absolute inset-0 bg-grid-slate-100/[0.2] bg-[size:20px_20px]"></div>
-                <h3 className="text-2xl font-bold text-slate-800 text-center line-clamp-3 relative z-10 group-hover:text-indigo-700 transition-colors">
+            <div key={project.id} className="bg-white sm:rounded-2xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col sm:transform hover:-translate-y-1">
+              {project.posterUrl ? (
+                <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100">
+                  <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/90 to-transparent">
+                    <p className="text-lg font-medium text-white/90 line-clamp-2 drop-shadow-md">
+                      {project.description || "เข้าร่วมกิจกรรมที่น่าตื่นเต้นนี้!"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-48 bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex items-center justify-center p-6 border-b border-slate-100 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-grid-slate-100/[0.2] bg-[size:20px_20px]"></div>
+                  <p className="text-lg font-medium text-slate-700 text-center line-clamp-3 relative z-10">
+                    {project.description || "เข้าร่วมกิจกรรมที่น่าตื่นเต้นนี้!"}
+                  </p>
+                </div>
+              )}
+              <div className="p-6 flex-1 flex flex-col bg-white">
+                <h3 className="text-xl font-bold text-slate-800 mb-4 line-clamp-2 group-hover:text-indigo-700 transition-colors">
                   {project.title}
                 </h3>
-              </div>
-              <div className="p-6 flex-1 flex flex-col bg-white">
-                <p className="text-slate-600 text-sm mb-4 line-clamp-2">
-                  {project.description || "เข้าร่วมกิจกรรมที่น่าตื่นเต้นนี้! คลิกเพื่อดูรายละเอียดเพิ่มเติมและสมัคร"}
-                </p>
                 
                 {/* Badges for grades */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.quotas.map((quota: any) => (
+                  {project.quotas.map((quota) => (
                     <span key={quota.id} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                       รับ ม.{quota.grade}
                     </span>
@@ -87,21 +125,23 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
                       <Calendar className="w-4 h-4" />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span>เริ่มลงทะเบียน: {formatDateThai(project.startDate)}</span>
-                      <span>ปิดลงทะเบียน: {formatDateThai(project.endDate)}</span>
+                      <span>เริ่มลงทะเบียน: {formatDateThai(project.registrationStartDate || project.startDate)}</span>
+                      {project.registrationEndDate && (
+                        <span>ปิดลงทะเบียน: {formatDateThai(project.registrationEndDate)}</span>
+                      )}
                     </div>
                   </div>
 
                   {(project.activityDate || project.activityLocation) && (
                     <div className="flex flex-col gap-2 pb-3 border-b border-slate-200">
-                      {(project.activityDate || project.activityTime) && (
+                      {(project.activityDate || project.activityStartTime || project.activityEndTime) && (
                         <div className="flex items-start text-sm font-medium text-slate-700 gap-3">
                           <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
                             <Clock className="w-4 h-4" />
                           </div>
                           <div className="flex flex-col justify-center gap-1 min-h-[2rem]">
-                            {project.activityDate && <span>วันติว: {project.activityDate}</span>}
-                            {project.activityTime && <span>เวลา: {project.activityTime}</span>}
+                            {project.activityDate && <span>วันติว: {formatThaiDateWithDay(project.activityDate)}</span>}
+                            {(project.activityStartTime || project.activityEndTime) && <span>เวลา: {formatTimeRange(project.activityStartTime, project.activityEndTime)}</span>}
                           </div>
                         </div>
                       )}
@@ -124,8 +164,8 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
                       ยอดสมัครรวม: {totalRegistered} / {totalCapacity} คน
                     </div>
                     <div className="space-y-1.5 pl-6">
-                      {project.quotas.map((quota: any) => {
-                        const gradeRegistered = project.registrations.filter((r: any) => r.studentProfile.grade === quota.grade).length
+                      {project.quotas.map((quota) => {
+                        const gradeRegistered = project.registrations.filter((r) => r.studentProfile.grade === quota.grade).length
                         const isFull = gradeRegistered === quota.capacity
                         const isOver = gradeRegistered > quota.capacity
                         
@@ -143,14 +183,16 @@ export default function ProjectGrid({ projects }: { projects: any[] }) {
                 </div>
 
                 <div className="mt-auto flex flex-col gap-3">
-                  <Link 
-                    href={`/detail/${project.id}`}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center group/btn"
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    รายละเอียดและลงทะเบียน
-                    <ArrowRight className="w-4 h-4 ml-2 transform group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
+                  {isRegistrationAvailable && (
+                    <Link 
+                      href={`/detail/${project.id}`}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center group/btn"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      รายละเอียดและลงทะเบียน
+                      <ArrowRight className="w-4 h-4 ml-2 transform group-hover/btn:translate-x-1 transition-transform" />
+                    </Link>
+                  )}
 
                   {isAnnouncementAvailable && (
                     <Link
