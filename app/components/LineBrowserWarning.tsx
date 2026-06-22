@@ -10,9 +10,9 @@ export default function LineBrowserWarning() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const userAgent = navigator.userAgent || navigator.vendor || (window as Window & typeof globalThis & { opera?: string }).opera;
-    const isLine = /Line/i.test(userAgent as string);
-    const isInAppBrowser = /FBAN|FBAV|Instagram|IGApp|TikTok|trill|Twitter|LinkedInApp/i.test(userAgent as string) || isLine;
+    const userAgent = navigator.userAgent || navigator.vendor || (window as Window & typeof globalThis & { opera?: string }).opera || "";
+    const isLine = /Line/i.test(userAgent);
+    const isInAppBrowser = /FBAN|FBAV|Instagram|IGApp|TikTok|trill|Twitter|LinkedInApp/i.test(userAgent) || isLine;
     
     if (isInAppBrowser) {
       // Use setTimeout to avoid synchronous setState inside useEffect warning
