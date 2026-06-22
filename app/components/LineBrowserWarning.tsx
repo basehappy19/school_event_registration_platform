@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { AlertTriangle, ExternalLink, Copy } from "lucide-react"
+import { AlertTriangle, Copy } from "lucide-react"
 import Image from "next/image"
 
 export default function LineBrowserWarning() {
@@ -10,15 +10,19 @@ export default function LineBrowserWarning() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isLine = /Line/i.test(userAgent);
+    const userAgent = navigator.userAgent || navigator.vendor || (window as Window & typeof globalThis & { opera?: string }).opera;
+    const isLine = /Line/i.test(userAgent as string);
     const isInAppBrowser = /FBAN|FBAV|Instagram|IGApp|TikTok|trill|Twitter|LinkedInApp/i.test(userAgent) || isLine;
     
     if (isInAppBrowser) {
-      setIsInLine(true);
-      const currentUrl = window.location.href;
-      setUrl(currentUrl);
+      // Use setTimeout to avoid synchronous setState inside useEffect warning
+      setTimeout(() => {
+        setIsInLine(true);
+        const currentUrl = window.location.href;
+        setUrl(currentUrl);
+      }, 0);
       
+      const currentUrl = window.location.href;
       // 1. LINE's built-in parameter (Works on both Android and iOS LINE)
       if (isLine && !currentUrl.includes('openExternalBrowser=1')) {
         const hasAttempted = sessionStorage.getItem('lineRedirectAttempted');
@@ -46,7 +50,7 @@ export default function LineBrowserWarning() {
   if (!isInLine) return null;
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-slate-900/95 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 bg-slate-900/95 flex items-center justify-center p-4 backdrop-blur-sm" style={{ zIndex: 99999 }}>
       <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-300">
         <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-8 h-8" />
@@ -66,7 +70,7 @@ export default function LineBrowserWarning() {
             เลือก <strong className="text-indigo-600 mx-1">เปิดเบราว์เซอร์เริ่มต้น</strong>
           </p>
           <p className="text-xs text-slate-500 ml-8 mt-1">(หรือ Open in Default Browser / Safari)</p>
-          <div className="flex justify-center gap-4 mt-4 ml-6">
+          <div className="flex justify-center gap-4 mt-4">
             <Image src="/icons/safari_ios_browser_logo_icon_152966.png" alt="Safari" width={28} height={28} className="object-contain" />
             <Image src="/icons/googlechrome_103832.png" alt="Chrome" width={28} height={28} className="object-contain" />
             <Image src="/icons/edge_browser_logo_icon_152998.png" alt="Edge" width={28} height={28} className="object-contain" />
@@ -98,7 +102,7 @@ export default function LineBrowserWarning() {
   )
 }
 
-function CheckCircle(props: any) {
+function CheckCircle(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
