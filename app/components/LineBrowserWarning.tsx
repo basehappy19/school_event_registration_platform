@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { AlertTriangle, ExternalLink, Copy } from "lucide-react"
+import Image from "next/image"
 
 export default function LineBrowserWarning() {
   const [isInLine, setIsInLine] = useState(false)
@@ -65,6 +66,11 @@ export default function LineBrowserWarning() {
             เลือก <strong className="text-indigo-600 mx-1">เปิดเบราว์เซอร์เริ่มต้น</strong>
           </p>
           <p className="text-xs text-slate-500 ml-8 mt-1">(หรือ Open in Default Browser / Safari)</p>
+          <div className="flex justify-center gap-4 mt-4 ml-6">
+            <Image src="/icons/safari_ios_browser_logo_icon_152966.png" alt="Safari" width={28} height={28} className="object-contain" />
+            <Image src="/icons/googlechrome_103832.png" alt="Chrome" width={28} height={28} className="object-contain" />
+            <Image src="/icons/edge_browser_logo_icon_152998.png" alt="Edge" width={28} height={28} className="object-contain" />
+          </div>
         </div>
 
         <div className="relative">
