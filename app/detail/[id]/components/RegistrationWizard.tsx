@@ -142,26 +142,30 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
   return (
     <div className="relative pt-3 sm:pt-4 pb-24 sm:pb-0">
-      {/* Marathon Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-3 sm:h-4 bg-slate-200 z-[100] shadow-sm overflow-visible">
+      {/* Minimal Marathon Progress Bar */}
+      <div className="fixed top-2 sm:top-4 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-[600px] md:w-[768px] h-3 sm:h-4 bg-slate-200/80 backdrop-blur-md rounded-full z-[100] shadow-md border border-slate-300/50 overflow-visible">
         <div 
-          className="h-full bg-indigo-500 animate-marathon transition-all duration-1000 ease-out relative"
+          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out relative"
           style={{ width: `${totalCapacityStatic > 0 ? Math.min(100, (stats.totalRegistered / totalCapacityStatic) * 100) : 0}%` }}
         >
+          {/* Running Icon at the end of the bar */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white rounded-full p-0.5 sm:p-1 shadow-lg border border-indigo-100 flex items-center justify-center animate-bounce z-20">
+            <span className="text-sm sm:text-base leading-none">🏃‍♂️</span>
+          </div>
           {/* Small floating label for current registered */}
-          <div className="absolute right-0 top-full mt-1.5 translate-x-1/2 bg-white text-indigo-700 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-md border border-indigo-100 whitespace-nowrap hidden sm:block">
-            ลงทะเบียนแล้ว {stats.totalRegistered} / {totalCapacityStatic}
+          <div className="absolute right-0 top-full mt-2 sm:mt-2.5 translate-x-1/2 bg-white text-indigo-700 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full shadow-lg border border-indigo-100 whitespace-nowrap hidden sm:block z-20">
+            วิ่งไปแล้ว {stats.totalRegistered} / {totalCapacityStatic}
           </div>
         </div>
         {/* Markers */}
         {markers.map((m, idx) => (
           <div 
             key={m.grade} 
-            className="absolute top-0 bottom-0 w-0.5 bg-slate-900/40 group cursor-help z-10"
-            style={{ left: `${m.percentage}%` }}
+            className="absolute top-[-2px] bottom-[-2px] w-1.5 bg-white border border-slate-300 rounded-full group cursor-help z-10 hover:bg-slate-100 transition-colors"
+            style={{ left: `calc(${m.percentage}% - 3px)` }}
           >
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-lg pointer-events-none whitespace-nowrap">
-              ม.{m.grade} (รวม {m.cumulative} ที่นั่ง)
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] px-2.5 py-1 rounded-md shadow-xl pointer-events-none whitespace-nowrap">
+              ม.{m.grade} (รวม {m.cumulative})
             </div>
           </div>
         ))}
