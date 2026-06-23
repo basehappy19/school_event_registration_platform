@@ -60,15 +60,16 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto mb-10 sm:mb-16 px-4 sm:px-0">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+      <div className="max-w-4xl mx-auto mb-10 sm:mb-16 px-4 sm:px-0">
+        <div className="relative group">
+          <div className="absolute inset-0 bg-indigo-500/5 rounded-2xl blur-xl group-hover:bg-indigo-500/10 transition-colors duration-500"></div>
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-indigo-500 transition-colors w-6 h-6 z-10" />
           <input 
             type="text" 
             placeholder="ค้นหาโครงการ, ค่าย, หรือกิจกรรม..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all text-slate-900 bg-white shadow-sm"
+            className="relative w-full pl-14 pr-6 py-4 sm:py-5 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all text-slate-900 bg-white shadow-lg text-base sm:text-lg font-medium placeholder:font-normal"
           />
         </div>
       </div>
