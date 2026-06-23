@@ -156,7 +156,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                 style={{ left: `${m.percentage}%` }}
               >
                 <div className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-white shadow-sm border border-slate-100 ${colors[idx % colors.length]}`}>
-                  ม.{m.grade} <span className="opacity-75 font-medium">(รวม {m.cumulative})</span>
+                  ม.{m.grade} <span className="opacity-75 font-medium">(รับ {m.capacity})</span>
                 </div>
                 <div className="w-0.5 h-1.5 bg-slate-300 mt-0.5"></div>
               </div>
