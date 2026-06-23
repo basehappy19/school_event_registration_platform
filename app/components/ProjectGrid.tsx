@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users } from "lucide-react"
+import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users, X } from "lucide-react"
 import { ProjectGridItem } from "@/app/types"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
 export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] }) {
   const [search, setSearch] = useState("")
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   const formatDateThai = (dateStr: string | Date) => {
     const date = new Date(dateStr)
@@ -40,8 +41,11 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
 
   return (
     <div>
-      <div className="max-w-4xl mx-auto mb-8 sm:mb-12 px-4 sm:px-0">
-        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white">
+      <div className="max-w-2xl mx-auto mb-8 sm:mb-12 px-4 sm:px-0">
+        <div 
+          className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white cursor-pointer hover:shadow-xl transition-shadow"
+          onClick={() => setSelectedImage("/schedule.jpg")}
+        >
           <img 
             src="/schedule.jpg" 
             alt="Schedule Banner" 
@@ -88,10 +92,13 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
             return (
             <div key={project.id} className="bg-white sm:rounded-2xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col sm:transform hover:-translate-y-1">
               {project.posterUrl ? (
-                <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100">
+                <div 
+                  className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100 cursor-pointer"
+                  onClick={() => project.posterUrl && setSelectedImage(project.posterUrl)}
+                >
                   <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/90 to-transparent">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent pointer-events-none"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/90 to-transparent pointer-events-none">
                     <p className="text-lg font-medium text-white/90 line-clamp-2 drop-shadow-md">
                       {project.description || "เข้าร่วมกิจกรรมที่น่าตื่นเต้นนี้!"}
                     </p>
@@ -218,6 +225,28 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
           })
         )}
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-slate-900/90 backdrop-blur-sm cursor-pointer animate-in fade-in duration-200" 
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center" onClick={e => e.stopPropagation()}>
+            <button 
+              className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Full Size" 
+              className="max-w-full max-h-[85vh] sm:max-h-[90vh] object-contain rounded-2xl shadow-2xl" 
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

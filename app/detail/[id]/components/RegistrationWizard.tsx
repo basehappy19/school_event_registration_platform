@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2, X } from "lucide-react"
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import Image from "next/image"
@@ -19,6 +19,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   const [error, setError] = useState("")
   const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(errorParam === "AccessDenied")
   const [isCopied, setIsCopied] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -152,8 +153,11 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         {/* Top Section: Poster & Info */}
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {project.posterUrl && (
-            <div className="w-full md:w-64 shrink-0 relative sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-3/4">
-              <Image src={project.posterUrl} alt={project.title} fill className="object-cover" unoptimized />
+            <div 
+              className="w-full md:w-64 shrink-0 relative sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-3/4 cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => project.posterUrl && setSelectedImage(project.posterUrl)}
+            >
+              <Image src={project.posterUrl} alt={project.title} fill className="object-cover hover:scale-105 transition-transform duration-500" unoptimized />
             </div>
           )}
           <div className="flex-1">
@@ -415,6 +419,28 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           )}
         </button>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-slate-900/90 backdrop-blur-sm cursor-pointer animate-in fade-in duration-200" 
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center" onClick={e => e.stopPropagation()}>
+            <button 
+              className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Full Size" 
+              className="max-w-full max-h-[85vh] sm:max-h-[90vh] object-contain rounded-2xl shadow-2xl" 
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
