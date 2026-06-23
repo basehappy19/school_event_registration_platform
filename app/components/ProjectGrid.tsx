@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users, X } from "lucide-react"
+import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users, X, ZoomIn } from "lucide-react"
 import { ProjectGridItem } from "@/app/types"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
@@ -43,14 +43,20 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
     <div>
       <div className="max-w-2xl mx-auto mb-8 sm:mb-12 px-4 sm:px-0">
         <div 
-          className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white cursor-pointer hover:shadow-xl transition-shadow"
+          className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white cursor-pointer group/banner"
           onClick={() => setSelectedImage("/schedule.jpg")}
         >
           <img 
             src="/schedule.jpg" 
             alt="Schedule Banner" 
-            className="w-full h-auto object-cover"
+            className="w-full h-auto object-cover group-hover/banner:scale-[1.02] transition-transform duration-500"
           />
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full flex items-center font-medium shadow-xl">
+              <ZoomIn className="w-5 h-5 mr-2" />
+              คลิกเพื่อดูรูปเต็ม
+            </div>
+          </div>
         </div>
       </div>
 
@@ -90,15 +96,24 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
               (!project.announcementEndDate || new Date() <= new Date(project.announcementEndDate))
 
             return (
-            <div key={project.id} className="bg-white sm:rounded-2xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group flex flex-col sm:transform hover:-translate-y-1">
+            <div key={project.id} className="bg-white sm:rounded-2xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden flex flex-col">
               {project.posterUrl ? (
                 <div 
-                  className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100 cursor-pointer"
+                  className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100 cursor-pointer group/img"
                   onClick={() => project.posterUrl && setSelectedImage(project.posterUrl)}
                 >
-                  <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent pointer-events-none"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/90 to-transparent pointer-events-none">
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none z-10">
+                    <div className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full flex items-center font-medium shadow-xl transform translate-y-4 group-hover/img:translate-y-0 transition-transform duration-300">
+                      <ZoomIn className="w-5 h-5 mr-2" />
+                      คลิกเพื่อดูรูปเต็ม
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900/90 to-transparent pointer-events-none z-0">
                     <p className="text-lg font-medium text-white/90 line-clamp-2 drop-shadow-md">
                       {project.description || "เข้าร่วมกิจกรรมที่น่าตื่นเต้นนี้!"}
                     </p>

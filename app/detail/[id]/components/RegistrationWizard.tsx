@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2, X } from "lucide-react"
+import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2, X, ZoomIn } from "lucide-react"
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import Image from "next/image"
@@ -154,10 +154,16 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         <div className="flex flex-col md:flex-row gap-8 items-start">
           {project.posterUrl && (
             <div 
-              className="w-full md:w-64 shrink-0 relative sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-3/4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="w-full md:w-64 shrink-0 relative sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-3/4 cursor-pointer hover:shadow-lg transition-shadow group/img"
               onClick={() => project.posterUrl && setSelectedImage(project.posterUrl)}
             >
-              <Image src={project.posterUrl} alt={project.title} fill className="object-cover hover:scale-105 transition-transform duration-500" unoptimized />
+              <Image src={project.posterUrl} alt={project.title} fill className="object-cover group-hover/img:scale-105 transition-transform duration-500" unoptimized />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none z-10">
+                <div className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full flex items-center font-medium shadow-xl transform translate-y-4 group-hover/img:translate-y-0 transition-transform duration-300">
+                  <ZoomIn className="w-5 h-5 mr-2" />
+                  คลิกเพื่อดูรูปเต็ม
+                </div>
+              </div>
             </div>
           )}
           <div className="flex-1">
