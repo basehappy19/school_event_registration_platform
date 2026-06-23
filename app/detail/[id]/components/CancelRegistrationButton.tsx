@@ -1,30 +1,61 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cancelRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { Loader2, XCircle } from "lucide-react"
+import { Loader2, XCircle, CheckCircle2, AlertCircle } from "lucide-react"
 
 export default function CancelRegistrationButton({ registrationId }: { registrationId: number }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [toast, setToast] = useState<{message: string, type: 'error' | 'success'} | null>(null)
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [toast])
+
+  const showToast = (message: string, type: 'error' | 'success') => {
+    setToast({ message, type })
+  }
 
   const handleCancel = async () => {
     setLoading(true)
     const res = await cancelRegistration(registrationId)
     
     if (res && 'error' in res) {
-      alert("เกิดข้อผิดพลาด: " + res.error)
+      showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
       setLoading(false)
       setShowModal(false)
     } else {
-      router.push("/")
+      showToast("สละสิทธิ์การเข้าร่วมกิจกรรมเรียบร้อยแล้ว", 'success')
+      setShowModal(false)
+      setTimeout(() => {
+        router.push("/")
+      }, 2000)
     }
   }
 
   return (
     <>
+      {toast && (
+        <div className={`fixed top-4 right-4 z-[100] px-4 py-3 rounded-lg shadow-lg border text-sm font-medium flex items-center gap-2 animate-in slide-in-from-top-2 fade-in duration-200 ${
+          toast.type === 'error' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+        }`}>
+          {toast.type === 'error' ? (
+            <AlertCircle className="w-5 h-5" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5" />
+          )}
+          {toast.message}
+        </div>
+      )}
+
       <button 
         onClick={() => setShowModal(true)}
         disabled={loading}

@@ -163,10 +163,9 @@ export async function cancelRegistration(registrationId: number) {
         throw new Error("Unauthorized to cancel this registration")
       }
 
-      // 2. Mark as Cancelled
-      await tx.registration.update({
-        where: { id: registrationId },
-        data: { status: 'CANCELLED' }
+      // 2. Delete Registration Completely
+      await tx.registration.delete({
+        where: { id: registrationId }
       })
 
       // Create Audit Log for Cancellation
