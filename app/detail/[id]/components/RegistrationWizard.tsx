@@ -231,7 +231,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                   <p className="text-emerald-600 text-xs mt-1">💡 ทริค: นักเรียนสามารถเข้าสู่ระบบและกรอกข้อมูลรอไว้ได้เลย เมื่อเปิดลงทะเบียนปุ่มจะเปิดให้กดทันที เพื่อให้ได้ลำดับแรก ๆ</p>
                 )}
               </div>
-              <form action={signInWithGoogle.bind(null, project.id)}>
+              <form action={signInWithGoogle.bind(null, project.id)} className="shrink-0">
                 <button
                   type="submit"
                   className="bg-white hover:bg-slate-50 text-slate-700 font-semibold py-2.5 px-6 rounded-xl transition-all shadow-sm flex items-center shrink-0 border border-slate-200"
@@ -333,7 +333,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             <button
               type="submit"
               disabled={loading || !session || !profile || !isGradeAllowed || !isRegistrationOpen || !isAllRequiredFieldsFilled}
-              className={`hidden xl:flex w-full font-bold py-3 sm:py-4 px-4 rounded-xl transition-all items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10 ${!isRegistrationOpen
+              className={`hidden md:flex w-full font-bold py-3 sm:py-4 px-4 rounded-xl transition-all items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10 ${!isRegistrationOpen
                 ? "bg-slate-300 text-slate-600"
                 : "bg-slate-900 hover:bg-slate-800 text-white"
                 }`}
@@ -388,7 +388,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       </div>
 
       {/* Mobile Sticky Action Bar */}
-      <div className="xl:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 z-50 pb-safe">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 z-50 pb-safe">
         <button
           type={session && profile && isGradeAllowed && isRegistrationOpen && isAllRequiredFieldsFilled ? "submit" : "button"}
           form={session && profile && isGradeAllowed && isRegistrationOpen && isAllRequiredFieldsFilled ? "registrationForm" : undefined}
