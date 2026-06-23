@@ -217,7 +217,9 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               <div>
                 <h3 className="font-bold text-slate-800 text-lg mb-1">เข้าสู่ระบบเพื่อดำเนินการต่อ</h3>
                 <p className="text-slate-600 text-sm">นักเรียนต้องเข้าสู่ระบบก่อนจึงจะสามารถกรอกฟอร์มได้</p>
-                <p className="text-emerald-600 text-xs mt-1">💡 ทริค: นักเรียนสามารถเข้าสู่ระบบและกรอกข้อมูลรอไว้ได้เลย เมื่อเปิดลงทะเบียนปุ่มจะเปิดให้กดทันที เพื่อให้ได้ลำดับแรก ๆ</p>
+                {isBeforeStart && (
+                  <p className="text-emerald-600 text-xs mt-1">💡 ทริค: นักเรียนสามารถเข้าสู่ระบบและกรอกข้อมูลรอไว้ได้เลย เมื่อเปิดลงทะเบียนปุ่มจะเปิดให้กดทันที เพื่อให้ได้ลำดับแรก ๆ</p>
+                )}
               </div>
               <form action={signInWithGoogle.bind(null, project.id)}>
                 <button
@@ -331,7 +333,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               ) : !isRegistrationOpen ? (
                 isBeforeStart ? "ยังไม่เปิดลงทะเบียน" : "ระบบปิดลงทะเบียนแล้ว"
               ) : (
-                "ยืนยันการลงทะเบียนเข้าร่วม"
+                "ลงทะเบียนเข้าร่วม"
               )}
             </button>
           </form>
@@ -378,14 +380,15 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       {/* Mobile Sticky Action Bar */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 z-50 pb-safe">
         <button
-          type={session && profile && isGradeAllowed && isRegistrationOpen ? "submit" : "button"}
-          form={session && profile && isGradeAllowed && isRegistrationOpen ? "registrationForm" : undefined}
+          type={session && profile && isGradeAllowed && isRegistrationOpen && isAllRequiredFieldsFilled ? "submit" : "button"}
+          form={session && profile && isGradeAllowed && isRegistrationOpen && isAllRequiredFieldsFilled ? "registrationForm" : undefined}
           onClick={(e) => {
-            if (!(session && profile && isGradeAllowed && isRegistrationOpen)) {
+            if (!(session && profile && isGradeAllowed && isRegistrationOpen && isAllRequiredFieldsFilled)) {
               e.preventDefault();
-              const section = document.getElementById('registration-section');
-              if (section) {
-                const y = section.getBoundingClientRect().top + window.scrollY - 80;
+              const targetId = (session && profile && isGradeAllowed) ? 'registrationForm' : 'registration-section';
+              const targetEl = document.getElementById(targetId);
+              if (targetEl) {
+                const y = targetEl.getBoundingClientRect().top + window.scrollY - 80;
                 window.scrollTo({ top: y, behavior: 'smooth' });
               }
             }
@@ -408,7 +411,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           ) : !isGradeAllowed ? (
             "ระดับชั้นไม่สามารถสมัครได้"
           ) : (
-            "ยืนยันการลงทะเบียนเข้าร่วม"
+            "ลงทะเบียนเข้าร่วม"
           )}
         </button>
       </div>
