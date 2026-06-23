@@ -142,33 +142,67 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
   return (
     <div className="relative pt-3 sm:pt-4 pb-24 sm:pb-0">
-      {/* Minimal Marathon Progress Bar */}
-      <div className="fixed top-2 sm:top-4 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-[600px] md:w-[768px] h-3 sm:h-4 bg-slate-200/80 backdrop-blur-md rounded-full z-[100] shadow-md border border-slate-300/50 overflow-visible">
+      {/* Segmented Marathon Progress Bar */}
+      <div className="fixed top-6 sm:top-8 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-[600px] md:w-[768px] z-[100] drop-shadow-xl pointer-events-none">
+        
+        {/* Labels above the bar */}
+        <div className="w-full relative h-6 mb-2 pointer-events-auto">
+          {markers.map((m, idx) => {
+            const colors = ['text-amber-600', 'text-emerald-600', 'text-blue-600', 'text-purple-600', 'text-rose-600'];
+            return (
+              <div 
+                key={m.grade}
+                className="absolute bottom-0 -translate-x-1/2 text-[10px] sm:text-xs font-bold whitespace-nowrap flex flex-col items-center"
+                style={{ left: `${m.percentage}%` }}
+              >
+                <div className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-white shadow-sm border border-slate-100 ${colors[idx % colors.length]}`}>
+                  ม.{m.grade} <span className="opacity-75 font-medium">(รวม {m.cumulative})</span>
+                </div>
+                <div className="w-0.5 h-1.5 bg-slate-300 mt-0.5"></div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* The Progress Bar Container */}
+        <div className="w-full h-3 sm:h-4 bg-slate-200 rounded-full shadow-inner border border-slate-300 relative overflow-hidden flex pointer-events-auto">
+          {/* Colored Segments */}
+          {markers.map((m, idx) => {
+            const bgColors = ['bg-amber-400', 'bg-emerald-400', 'bg-blue-400', 'bg-purple-400', 'bg-rose-400'];
+            const prevPercentage = idx === 0 ? 0 : markers[idx - 1].percentage;
+            const widthPercentage = m.percentage - prevPercentage;
+            return (
+              <div 
+                key={m.grade}
+                className={`h-full border-r border-white/50 ${bgColors[idx % bgColors.length]}`}
+                style={{ width: `${widthPercentage}%` }}
+              />
+            )
+          })}
+
+          {/* Unfilled Mask */}
+          <div 
+            className="absolute top-0 bottom-0 right-0 bg-slate-200/95 transition-all duration-1000 ease-out border-l border-indigo-400/30"
+            style={{ width: `${100 - (totalCapacityStatic > 0 ? Math.min(100, (stats.totalRegistered / totalCapacityStatic) * 100) : 0)}%` }}
+          />
+        </div>
+        
+        {/* The Runner & "สมัครไปแล้ว X" Label */}
         <div 
-          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out relative"
-          style={{ width: `${totalCapacityStatic > 0 ? Math.min(100, (stats.totalRegistered / totalCapacityStatic) * 100) : 0}%` }}
+          className="absolute top-8 sm:top-8 -translate-x-1/2 transition-all duration-1000 ease-out z-20 flex flex-col items-center pointer-events-auto"
+          style={{ left: `${totalCapacityStatic > 0 ? Math.min(100, (stats.totalRegistered / totalCapacityStatic) * 100) : 0}%`, marginTop: '-3px' }}
         >
-          {/* Running Icon at the end of the bar */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white rounded-full p-0.5 sm:p-1 shadow-lg border border-indigo-100 flex items-center justify-center animate-bounce z-20">
-            <span className="text-sm sm:text-base leading-none">🏃‍♂️</span>
+          {/* Runner SVG */}
+          <div className="bg-white rounded-full p-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border-2 border-indigo-500 mb-1.5 animate-bounce">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="currentColor">
+              <path d="M256 64a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zm-54.8 141.2c-5.8 28.6-29.6 50.4-58.6 54.3l-59 8c-17.5 2.4-33.6-9.9-36-27.4s9.9-33.6 27.4-36l59-8c9.7-1.3 17.6-8.5 19.5-18.1l21.2-105.9c3.2-16 17.2-27.1 33.5-27.1h21.1c27.1 0 52.3 13.5 67.8 35.8l21.8 31.2 39.5-11.3c16.9-4.8 34.6 4.9 39.4 21.8s-4.9 34.6-21.8 39.4l-64 18.3c-11.9 3.4-24.5-1-32.2-11.2l-22.1-29.4-19.8 99L311 366.5c11.6 18.3 17.6 39.7 17.6 61.5v52c0 17.7-14.3 32-32 32s-32-14.3-32-32V428c0-7.3-2-14.4-5.9-20.5L201.2 284.1 170.8 436.5c-3.4 17-19.9 28-36.9 24.6s-28-19.9-24.6-36.9l40-200c1.4-6.9 4.7-13.2 9.5-18.3l42.4-44.5z"/>
+            </svg>
           </div>
-          {/* Small floating label for current registered */}
-          <div className="absolute right-0 top-full mt-2 sm:mt-2.5 translate-x-1/2 bg-white text-indigo-700 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full shadow-lg border border-indigo-100 whitespace-nowrap hidden sm:block z-20">
-            วิ่งไปแล้ว {stats.totalRegistered} / {totalCapacityStatic}
+          <div className="bg-slate-800 text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap border border-slate-700">
+            สมัครไปแล้ว {stats.totalRegistered}
           </div>
         </div>
-        {/* Markers */}
-        {markers.map((m, idx) => (
-          <div 
-            key={m.grade} 
-            className="absolute top-[-2px] bottom-[-2px] w-1.5 bg-white border border-slate-300 rounded-full group cursor-help z-10 hover:bg-slate-100 transition-colors"
-            style={{ left: `calc(${m.percentage}% - 3px)` }}
-          >
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] px-2.5 py-1 rounded-md shadow-xl pointer-events-none whitespace-nowrap">
-              ม.{m.grade} (รวม {m.cumulative})
-            </div>
-          </div>
-        ))}
+
       </div>
 
     <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700">
