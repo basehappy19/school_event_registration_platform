@@ -446,9 +446,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               >
                 {/* Runner SVG */}
                 <div className="bg-white rounded-full p-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border-2 border-indigo-500 mb-1.5 animate-bounce">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="currentColor">
-                    <path d="M256 64a64 64 0 1 1 -128 0 64 64 0 1 1 128 0zm-54.8 141.2c-5.8 28.6-29.6 50.4-58.6 54.3l-59 8c-17.5 2.4-33.6-9.9-36-27.4s9.9-33.6 27.4-36l59-8c9.7-1.3 17.6-8.5 19.5-18.1l21.2-105.9c3.2-16 17.2-27.1 33.5-27.1h21.1c27.1 0 52.3 13.5 67.8 35.8l21.8 31.2 39.5-11.3c16.9-4.8 34.6 4.9 39.4 21.8s-4.9 34.6-21.8 39.4l-64 18.3c-11.9 3.4-24.5-1-32.2-11.2l-22.1-29.4-19.8 99L311 366.5c11.6 18.3 17.6 39.7 17.6 61.5v52c0 17.7-14.3 32-32 32s-32-14.3-32-32V428c0-7.3-2-14.4-5.9-20.5L201.2 284.1 170.8 436.5c-3.4 17-19.9 28-36.9 24.6s-28-19.9-24.6-36.9l40-200c1.4-6.9 4.7-13.2 9.5-18.3l42.4-44.5z"/>
-                  </svg>
+                  <Image src="/icons/icons8-running.gif" alt="Running" width={24} height={24} className="w-5 h-5 object-contain mix-blend-multiply" unoptimized />
                 </div>
                 <div className="bg-slate-800 text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap border border-slate-700">
                   สมัครไปแล้ว {stats.totalRegistered}
