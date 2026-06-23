@@ -126,8 +126,48 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     }
   }
 
+  // Pre-calculate quotas and markers for the progress bar
+  const totalCapacityStatic = project.quotas.reduce((acc, q) => acc + q.capacity, 0);
+  const sortedQuotas = [...project.quotas].sort((a, b) => Number(a.grade) - Number(b.grade));
+  let cumulative = 0;
+  const markers = sortedQuotas.map((q) => {
+    cumulative += q.capacity;
+    return {
+      grade: q.grade,
+      capacity: q.capacity,
+      cumulative: cumulative,
+      percentage: totalCapacityStatic > 0 ? (cumulative / totalCapacityStatic) * 100 : 0
+    };
+  });
+
   return (
-    <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24 sm:pb-0">
+    <div className="relative pt-3 sm:pt-4 pb-24 sm:pb-0">
+      {/* Marathon Progress Bar */}
+      <div className="fixed top-0 left-0 w-full h-3 sm:h-4 bg-slate-200 z-[100] shadow-sm overflow-visible">
+        <div 
+          className="h-full bg-indigo-500 animate-marathon transition-all duration-1000 ease-out relative"
+          style={{ width: `${totalCapacityStatic > 0 ? Math.min(100, (stats.totalRegistered / totalCapacityStatic) * 100) : 0}%` }}
+        >
+          {/* Small floating label for current registered */}
+          <div className="absolute right-0 top-full mt-1.5 translate-x-1/2 bg-white text-indigo-700 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-md border border-indigo-100 whitespace-nowrap hidden sm:block">
+            ลงทะเบียนแล้ว {stats.totalRegistered} / {totalCapacityStatic}
+          </div>
+        </div>
+        {/* Markers */}
+        {markers.map((m, idx) => (
+          <div 
+            key={m.grade} 
+            className="absolute top-0 bottom-0 w-0.5 bg-slate-900/40 group cursor-help z-10"
+            style={{ left: `${m.percentage}%` }}
+          >
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-lg pointer-events-none whitespace-nowrap">
+              ม.{m.grade} (รวม {m.cumulative} ที่นั่ง)
+            </div>
+          </div>
+        ))}
+      </div>
+
+    <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Access Denied Modal */}
       {showAccessDeniedModal && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
@@ -447,6 +487,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
