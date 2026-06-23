@@ -132,10 +132,15 @@ export default async function AnnouncementPage({ params, searchParams }: { param
             <h1 className="text-2xl md:text-3xl font-bold mb-4">
               ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วม
             </h1>
-            <h2 className="text-xl md:text-2xl font-semibold mb-6">
+            <h2 className="text-xl md:text-2xl font-semibold mb-2">
               {project.title}
             </h2>
-            <div className="inline-block bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl text-sm md:text-base border border-white/20 print:border-none print:bg-transparent print:text-black print:p-0">
+            {project.description && (
+              <p className="text-sm md:text-base text-emerald-50 mb-6 max-w-3xl mx-auto">
+                {project.description}
+              </p>
+            )}
+            <div className="inline-block bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl text-sm md:text-base border border-white/20 print:border-none print:bg-transparent print:text-black print:p-0 mt-2">
               <p>{formatThaiDateWithDay(project.activityDate)} เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)} ณ {project.activityLocation || "__________"}</p>
             </div>
           </div>

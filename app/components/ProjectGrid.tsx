@@ -125,7 +125,14 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                       <Calendar className="w-4 h-4" />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span>เริ่มลงทะเบียน: {formatDateThai(project.registrationStartDate || project.startDate)}</span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span>เริ่มลงทะเบียน: {formatDateThai(project.registrationStartDate || project.startDate)}</span>
+                        {project.registrationStartDate && new Date(project.registrationStartDate) > new Date() && (
+                          <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-bold">
+                            อีก {Math.ceil((new Date(project.registrationStartDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} วัน
+                          </span>
+                        )}
+                      </div>
                       {project.registrationEndDate && (
                         <span>ปิดลงทะเบียน: {formatDateThai(project.registrationEndDate)}</span>
                       )}
