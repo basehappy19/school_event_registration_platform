@@ -126,7 +126,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   }
 
   return (
-    <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24 sm:pb-0">
       {/* Access Denied Modal */}
       {showAccessDeniedModal && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
@@ -203,7 +203,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         </div>
       </div>
 
-      <div className="px-5 py-6 sm:p-8">
+      <div id="registration-section" className="px-5 py-6 sm:p-8">
         {error && (
           <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-600 px-4 py-3 rounded-xl text-sm flex items-start">
             <span className="font-semibold mr-2">ข้อผิดพลาด:</span> {error}
@@ -216,7 +216,8 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             <div className="bg-indigo-50 border border-indigo-100 p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <h3 className="font-bold text-slate-800 text-lg mb-1">เข้าสู่ระบบเพื่อดำเนินการต่อ</h3>
-                <p className="text-slate-600 text-sm">คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถกรอกฟอร์มได้</p>
+                <p className="text-slate-600 text-sm">นักเรียนต้องเข้าสู่ระบบก่อนจึงจะสามารถกรอกฟอร์มได้</p>
+                <p className="text-emerald-600 text-xs mt-1">💡 ทริค: นักเรียนสามารถเข้าสู่ระบบและกรอกข้อมูลรอไว้ได้เลย เมื่อเปิดลงทะเบียนปุ่มจะเปิดให้กดทันที เพื่อให้ได้ลำดับแรก ๆ</p>
               </div>
               <form action={signInWithGoogle.bind(null, project.id)}>
                 <button
@@ -276,7 +277,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           )}
 
           {/* Form Fields Section */}
-          <form onSubmit={handleSubmitRegistration} className="space-y-8">
+          <form id="registrationForm" onSubmit={handleSubmitRegistration} className="space-y-8">
             {project.formFields.length > 0 && (
               <div className={!session || !profile || !isGradeAllowed ? "opacity-60 pointer-events-none" : ""}>
                 <h3 className="text-lg font-bold text-slate-800 mb-5 border-b border-slate-100 pb-3">กรอกรายละเอียดเพิ่มเติม</h3>
@@ -320,7 +321,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             <button
               type="submit"
               disabled={loading || !session || !profile || !isGradeAllowed || !isRegistrationOpen || !isAllRequiredFieldsFilled}
-              className={`w-full font-bold py-3 sm:py-4 px-4 rounded-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10 ${!isRegistrationOpen
+              className={`hidden sm:flex w-full font-bold py-3 sm:py-4 px-4 rounded-xl transition-all items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-900/10 ${!isRegistrationOpen
                 ? "bg-slate-300 text-slate-600"
                 : "bg-slate-900 hover:bg-slate-800 text-white"
                 }`}
@@ -328,7 +329,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : !isRegistrationOpen ? (
-                isBeforeStart ? "ยังไม่เปิดรับสมัคร" : "ระบบปิดรับสมัครแล้ว"
+                isBeforeStart ? "ยังไม่เปิดลงทะเบียน" : "ระบบปิดลงทะเบียนแล้ว"
               ) : (
                 "ยืนยันการลงทะเบียนเข้าร่วม"
               )}
@@ -372,6 +373,44 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Sticky Action Bar */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 z-50 pb-safe">
+        <button
+          type={session && profile && isGradeAllowed && isRegistrationOpen ? "submit" : "button"}
+          form={session && profile && isGradeAllowed && isRegistrationOpen ? "registrationForm" : undefined}
+          onClick={(e) => {
+            if (!(session && profile && isGradeAllowed && isRegistrationOpen)) {
+              e.preventDefault();
+              const section = document.getElementById('registration-section');
+              if (section) {
+                const y = section.getBoundingClientRect().top + window.scrollY - 80;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+              }
+            }
+          }}
+          disabled={loading}
+          className={`w-full font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center shadow-lg ${
+            !isRegistrationOpen
+              ? "bg-slate-200 text-slate-500"
+              : "bg-slate-900 hover:bg-slate-800 text-white"
+          }`}
+        >
+          {loading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : !isRegistrationOpen ? (
+            isBeforeStart ? "ยังไม่เปิดลงทะเบียน" : "ระบบปิดลงทะเบียนแล้ว"
+          ) : !session ? (
+            "เข้าสู่ระบบเพื่อลงทะเบียน"
+          ) : !profile ? (
+            "กรุณาใช้อีเมลโรงเรียน"
+          ) : !isGradeAllowed ? (
+            "ระดับชั้นไม่สามารถสมัครได้"
+          ) : (
+            "ยืนยันการลงทะเบียนเข้าร่วม"
+          )}
+        </button>
       </div>
     </div>
   )
