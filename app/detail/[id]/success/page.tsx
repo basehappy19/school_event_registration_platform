@@ -106,7 +106,7 @@ export default async function SuccessPage({
 
   return (
     <div className="min-h-screen bg-transparent font-sans flex flex-col items-center justify-center py-0 sm:py-12 px-0 sm:px-6 lg:px-8">
-      <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 px-5 py-8 sm:p-8 max-w-2xl w-full min-h-screen sm:min-h-0">
+      <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 px-5 py-8 sm:p-10 md:p-12 max-w-4xl w-full min-h-screen sm:min-h-0">
         <div className="text-center mb-8">
           {isApproved ? (
             <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white">
@@ -171,18 +171,20 @@ export default async function SuccessPage({
               </div>
             </div>
 
-            <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2">
-              <p className="text-sm text-slate-500 mb-1 flex items-center">
-                <User className="w-4 h-4 mr-2" /> ชื่อ-นามสกุล
-              </p>
-              <p className="font-semibold text-slate-900">{profile.prefix}{profile.firstName} {profile.lastName}</p>
-            </div>
+            <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-sm text-slate-500 mb-1 flex items-center">
+                  <User className="w-4 h-4 mr-2" /> ชื่อ-นามสกุล
+                </p>
+                <p className="font-semibold text-slate-900">{profile.prefix}{profile.firstName} {profile.lastName}</p>
+              </div>
 
-            <div>
-              <p className="text-sm text-slate-500 mb-1 flex items-center">
-                <Hash className="w-4 h-4 mr-2" /> ระดับชั้นและเลขที่
-              </p>
-              <p className="font-semibold text-slate-900">ม.{profile.grade}/{profile.room} เลขที่ {profile.number}</p>
+              <div>
+                <p className="text-sm text-slate-500 mb-1 flex items-center">
+                  <Hash className="w-4 h-4 mr-2" /> ระดับชั้นและเลขที่
+                </p>
+                <p className="font-semibold text-slate-900">ม.{profile.grade}/{profile.room} เลขที่ {profile.number}</p>
+              </div>
             </div>
 
             {registration.answers && registration.answers.length > 0 && (
@@ -213,18 +215,20 @@ export default async function SuccessPage({
           </a>
         </div>
 
-        <Link 
-          href="/"
-          className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20 mb-4"
-        >
-          <ArrowLeft className="w-5 h-5 mr-3" /> กลับสู่หน้าหลัก
-        </Link>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <Link 
+            href="/"
+            className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20"
+          >
+            <ArrowLeft className="w-5 h-5 mr-3" /> กลับสู่หน้าหลัก
+          </Link>
 
-        <form action={signOutAction} className="w-full mb-4">
-          <button type="submit" className="flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-6 rounded-xl transition-all border border-slate-200 cursor-pointer">
-            <LogOut className="w-5 h-5 mr-3" /> ออกจากระบบ
-          </button>
-        </form>
+          <form action={signOutAction} className="w-full">
+            <button type="submit" className="flex items-center justify-center w-full h-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-6 rounded-xl transition-all border border-slate-200 cursor-pointer">
+              <LogOut className="w-5 h-5 mr-3" /> ออกจากระบบ
+            </button>
+          </form>
+        </div>
 
         <CancelRegistrationButton registrationId={registration.id} />
       </div>
