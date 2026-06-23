@@ -157,14 +157,14 @@ export default async function SuccessPage({
             <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
                 <p className="text-sm text-indigo-600 mb-1 font-semibold flex items-center">
-                  <Hash className="w-4 h-4 mr-1.5" /> ลำดับการสมัคร (รวมทั้งหมด)
+                  <Hash className="w-4 h-4 mr-1.5" /> ลำดับการสมัคร
                 </p>
                 <p className="font-bold text-2xl text-indigo-900">คนที่ {totalQueueNumber}</p>
                 <p className="text-xs text-indigo-500 mt-1">จากผู้สมัครทั้งหมดในโครงการ</p>
               </div>
               <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
                 <p className="text-sm text-emerald-600 mb-1 font-semibold flex items-center">
-                  <Hash className="w-4 h-4 mr-1.5" /> ลำดับการสมัคร (เฉพาะ ม.{profile.grade})
+                  <Hash className="w-4 h-4 mr-1.5" /> ลำดับการสมัคร
                 </p>
                 <p className="font-bold text-2xl text-emerald-900">คนที่ {gradeQueueNumber}</p>
                 <p className="text-xs text-emerald-500 mt-1">จากผู้สมัครระดับชั้น ม.{profile.grade}</p>

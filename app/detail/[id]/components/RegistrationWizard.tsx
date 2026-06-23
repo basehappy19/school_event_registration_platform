@@ -126,24 +126,24 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     }
   }
 
-  // Pre-calculate quotas and markers for the progress bar
   const totalCapacityStatic = project.quotas.reduce((acc, q) => acc + q.capacity, 0);
   const sortedQuotas = [...project.quotas].sort((a, b) => Number(a.grade) - Number(b.grade));
-  let cumulative = 0;
-  const markers = sortedQuotas.map((q) => {
-    cumulative += q.capacity;
-    return {
+  const markers = sortedQuotas.reduce((acc, q, index) => {
+    const prevCumulative = index === 0 ? 0 : acc[index - 1].cumulative;
+    const currentCumulative = prevCumulative + q.capacity;
+    acc.push({
       grade: q.grade,
       capacity: q.capacity,
-      cumulative: cumulative,
-      percentage: totalCapacityStatic > 0 ? (cumulative / totalCapacityStatic) * 100 : 0
-    };
-  });
+      cumulative: currentCumulative,
+      percentage: totalCapacityStatic > 0 ? (currentCumulative / totalCapacityStatic) * 100 : 0
+    });
+    return acc;
+  }, [] as Array<{ grade: any, capacity: number, cumulative: number, percentage: number }>);
 
   return (
     <div className="relative pt-3 sm:pt-4 pb-24 sm:pb-0">
       {/* Segmented Marathon Progress Bar */}
-      <div className="fixed top-6 sm:top-8 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-[600px] md:w-[768px] z-[100] drop-shadow-xl pointer-events-none">
+      <div className="hidden md:block fixed top-6 sm:top-8 sm:left-1/2 sm:-translate-x-1/2 w-[500px] lg:w-[600px] z-[100] drop-shadow-xl pointer-events-none">
         
         {/* Labels above the bar */}
         <div className="w-full relative h-6 mb-2 pointer-events-auto">
