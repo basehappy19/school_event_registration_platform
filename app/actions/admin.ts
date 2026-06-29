@@ -115,6 +115,35 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
   }
 }
 
+export async function adminSearchStudents(query: string) {
+  await checkAdmin()
+  if (!query || query.trim().length === 0) return []
+  try {
+    const students = await prisma.studentProfile.findMany({
+      where: {
+        OR: [
+          { studentId: { contains: query.trim() } },
+          { firstName: { contains: query.trim() } },
+          { lastName: { contains: query.trim() } }
+        ]
+      },
+      take: 10,
+      select: {
+        studentId: true,
+        prefix: true,
+        firstName: true,
+        lastName: true,
+        grade: true,
+        room: true,
+        number: true
+      }
+    })
+    return students
+  } catch (error) {
+    return []
+  }
+}
+
 export async function adminAddRegistration(projectId: number, studentId: string) {
   await checkAdmin()
   try {

@@ -100,7 +100,12 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
       <div className="p-8 print:p-0 max-w-4xl mx-auto print:max-w-none">
         <div className="text-center mb-6 mt-8 print:mt-0">
           <h1 className="text-lg font-bold mb-3">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
-          <h2 className="text-lg font-bold mb-4">{project.title}</h2>
+          <h2 className="text-lg font-bold mb-2">{project.title}</h2>
+          {project.description && (
+            <p className="text-lg font-bold text-black mb-3 max-w-4xl mx-auto whitespace-pre-wrap">
+              {project.description}
+            </p>
+          )}
           
           <p className="text-base">
             {formattedDate} เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)} ณ {project.activityLocation || "โรงเรียนภูเขียว"}

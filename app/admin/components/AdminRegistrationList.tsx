@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist } from "@/app/actions/admin"
+import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist, adminSearchStudents } from "@/app/actions/admin"
 
 import { useRouter } from "next/navigation"
 import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react"
@@ -19,6 +19,25 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   const [showAcceptAllModal, setShowAcceptAllModal] = useState(false)
   const [isPrinting, setIsPrinting] = useState(false)
   const [isExportingExcel, setIsExportingExcel] = useState(false)
+  const [studentSuggestions, setStudentSuggestions] = useState<any[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isSearchingStudent, setIsSearchingStudent] = useState(false)
+
+  useEffect(() => {
+    if (!studentIdInput || studentIdInput.trim().length < 1) {
+      setStudentSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+    const timer = setTimeout(async () => {
+      setIsSearchingStudent(true)
+      const res = await adminSearchStudents(studentIdInput)
+      setStudentSuggestions(res)
+      setShowSuggestions(true)
+      setIsSearchingStudent(false)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [studentIdInput])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -47,6 +66,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
       showToast(res.error === "Student not found" ? "ไม่พบข้อมูลนักเรียน" : res.error, 'error')
     } else {
       setStudentIdInput("")
+      setShowSuggestions(false)
       showToast("เพิ่มนักเรียนสำเร็จ", "success")
       router.refresh()
     }
@@ -200,13 +220,70 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
           {/* Add Student Form */}
           <form onSubmit={handleAddStudent} className="flex gap-2 w-full sm:w-auto">
-            <input 
-              type="text" 
-              placeholder="กรอกรหัสนักเรียน..." 
-              value={studentIdInput}
-              onChange={e => setStudentIdInput(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors w-full sm:w-56"
-            />
+            <div className="relative w-full sm:w-64">
+              <input 
+                type="text" 
+                placeholder="กรอกรหัส หรือชื่อ..." 
+                value={studentIdInput}
+                onChange={e => {
+                  setStudentIdInput(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onFocus={() => {
+                  if (studentSuggestions.length > 0) setShowSuggestions(true)
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowSuggestions(false), 200)
+                }}
+                className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors w-full"
+              />
+              {showSuggestions && (studentSuggestions.length > 0 || isSearchingStudent) && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100">
+                  {isSearchingStudent ? (
+                    <div className="p-3 text-xs text-slate-500 flex items-center justify-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> กำลังค้นหา...
+                    </div>
+                  ) : (
+                    studentSuggestions.map((st) => {
+                      const isRegistered = project.registrations.some((r) => r.studentId === st.studentId)
+                      return (
+                        <div
+                          key={st.studentId}
+                          onMouseDown={(e) => {
+                            if (isRegistered) {
+                              e.preventDefault()
+                              return
+                            }
+                            setStudentIdInput(st.studentId)
+                            setShowSuggestions(false)
+                          }}
+                          className={`p-2.5 transition-colors text-left ${
+                            isRegistered
+                              ? 'opacity-60 bg-slate-50 cursor-not-allowed'
+                              : 'hover:bg-indigo-50 cursor-pointer'
+                          }`}
+                        >
+                          <div className="text-sm font-semibold text-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <span>{st.studentId}</span>
+                              {isRegistered && (
+                                <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
+                                  มีในระบบแล้ว
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded">ม.{st.grade}/{st.room} เลขที่ {st.number}</span>
+                          </div>
+                          <div className="text-xs text-slate-600 mt-0.5 truncate">
+                            {st.prefix}{st.firstName} {st.lastName}
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              )}
+            </div>
             <button 
               type="submit" 
               disabled={loading || !studentIdInput}
@@ -220,33 +297,36 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
           <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
 
           {/* Export Actions */}
-          <a href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
-            <Eye className="w-4 h-4 mr-2" /> ดูประกาศหน้าเว็บ
+          <a title="ดูประกาศหน้าเว็บ" href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0">
+            <Eye className="w-4 h-4 mr-1.5 shrink-0" /> ดูประกาศ
           </a>
           <button 
             type="button" 
+            title="พิมพ์ประกาศ (PDF)"
             onClick={handlePrint} 
             disabled={isPrinting}
-            className="bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 disabled:opacity-50 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
-            {isPrinting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Printer className="w-4 h-4 mr-2" />} 
-            {isPrinting ? 'กำลังเตรียมพิมพ์...' : 'พิมพ์ประกาศ (PDF)'}
+            className="bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 disabled:opacity-50 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0">
+            {isPrinting ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin shrink-0" /> : <Printer className="w-4 h-4 mr-1.5 shrink-0" />} 
+            {isPrinting ? 'กำลังพิมพ์...' : 'พิมพ์ PDF'}
           </button>
           <button 
             type="button"
+            title="รับสำรองทั้งหมด"
             onClick={handleAcceptAllClick}
             disabled={loading || project.registrations.filter((r) => r.status !== 'APPROVED').length === 0}
-            className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0"
+            className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0"
           >
-            <CheckCircle2 className="w-4 h-4 mr-2 shrink-0" />
-            <span>รับสำรองทั้งหมด</span>
+            <CheckCircle2 className="w-4 h-4 mr-1.5 shrink-0" />
+            <span>รับสำรอง</span>
           </button>
           <button 
             type="button"
+            title="ส่งออก Excel"
             onClick={handleExportExcel}
             disabled={isExportingExcel}
-            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0">
-            {isExportingExcel ? <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" /> : <Download className="w-4 h-4 mr-2 shrink-0" />}
-            {isExportingExcel ? 'กำลังส่งออก...' : 'ส่งออก Excel'}
+            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0">
+            {isExportingExcel ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin shrink-0" /> : <Download className="w-4 h-4 mr-1.5 shrink-0" />}
+            {isExportingExcel ? 'กำลังส่งออก...' : 'Excel'}
           </button>
         </div>
       </div>
@@ -284,10 +364,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             <tr>
               <th className="px-6 py-4 w-16 text-center">ลำดับ</th>
               <th className="px-6 py-4 w-20 text-center">สถานะ</th>
-              <th className="px-6 py-4">รหัสนักเรียน</th>
               <th className="px-6 py-4">ชื่อ - นามสกุล</th>
-              <th className="px-6 py-4 text-center">ชั้น/ห้อง</th>
-              <th className="px-6 py-4 text-center">เลขที่</th>
               <th className="px-6 py-4 w-24 text-center">จัดการ</th>
             </tr>
           </thead>
@@ -309,11 +386,23 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-3 text-slate-600 font-medium">{reg.studentProfile.studentId}</td>
                   <td className="px-6 py-3 text-slate-800 font-medium">
-                    <div>{reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}</div>
+                    <div>
+                      <a 
+                        href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-bold text-slate-800 hover:text-indigo-600 hover:underline inline-flex items-center gap-1"
+                        title="คลิกเพื่อดูหน้าข้อมูลการลงทะเบียน"
+                      >
+                        {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                      </a>
+                    </div>
+                    <div className="text-xs font-semibold text-indigo-600 mt-0.5">
+                      ม.{reg.studentProfile.grade}/{reg.studentProfile.room} เลขที่ {reg.studentProfile.number}
+                    </div>
                     {reg.answers && reg.answers.length > 0 && (
-                      <div className="mt-1 text-xs text-slate-500 font-normal space-y-0.5">
+                      <div className="mt-1.5 pt-1 border-t border-slate-100 text-xs text-slate-500 font-normal space-y-0.5">
                         {reg.answers.map((ans) => {
                           const field = project.formFields?.find((f) => f.id === ans.fieldId)
                           return field ? <div key={ans.id}><span className="font-medium text-slate-600">{field.label}:</span> {ans.value}</div> : null
@@ -321,10 +410,18 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                  <td className="px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                   <td className="px-6 py-3 text-center">
                     <div className="flex items-center justify-center gap-2">
+                      <a
+                        href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-indigo-50 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-100 border border-indigo-200 px-2 py-1.5 rounded transition-colors flex items-center gap-1.5 text-xs font-medium"
+                        title="ดูข้อมูลหน้าสำเร็จ"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        ดูข้อมูล
+                      </a>
                       {reg.status !== 'APPROVED' && (
                         <button 
                           onClick={() => handleAccept(reg.id)}
@@ -351,7 +448,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
                   ไม่พบรายชื่อในระบบ
                 </td>
               </tr>

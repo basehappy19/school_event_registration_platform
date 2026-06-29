@@ -284,7 +284,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               <ShieldCheck className="w-8 h-8 text-rose-500 shrink-0" />
               <div>
                 <p className="text-slate-600 text-sm">
-                  ระดับชั้น ม.{profile.grade} ไม่สามารถสมัครกิจกรรมนี้ได้ (รับเฉพาะ ม.{allowedGrades.join(', ม.')})
+                  ระดับชั้น ม.{profile.grade} ไม่สามารถลงทะเบียนกิจกรรมนี้ได้ (รับเฉพาะ ม.{allowedGrades.join(', ม.')})
                 </p>
               </div>
             </div>
@@ -449,7 +449,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                   <Image src="/icons/icons8-running.gif" alt="Running" width={24} height={24} className="w-5 h-5 object-contain mix-blend-multiply" unoptimized />
                 </div>
                 <div className="bg-slate-800 text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap border border-slate-700">
-                  สมัครไปแล้ว {stats.totalRegistered}
+                  ลงทะเบียนไปแล้ว {stats.totalRegistered}
                 </div>
               </div>
             </div>
@@ -489,7 +489,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           ) : !profile ? (
             "กรุณาใช้อีเมลโรงเรียน"
           ) : !isGradeAllowed ? (
-            "ระดับชั้นไม่สามารถสมัครได้"
+            "ระดับชั้นไม่สามารถลงทะเบียนได้"
           ) : (
             "ลงทะเบียนเข้าร่วม"
           )}

@@ -1,7 +1,6 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, FileText, LogOut } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen } from "lucide-react"
 import { auth } from "@/auth"
-import { signOutAction } from "@/app/actions/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import CancelRegistrationButton from "../components/CancelRegistrationButton"
@@ -27,22 +26,47 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function SuccessPage({ 
   params,
+  searchParams,
 }: { 
   params: Promise<{ id: string }>,
+  searchParams?: Promise<{ studentId?: string }>
 }) {
   const { id } = await params
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const targetStudentId = resolvedSearchParams.studentId
+
   const numericId = parseInt(id, 10)
   if (isNaN(numericId)) redirect("/")
 
   const session = await auth()
+  const role = (session?.user as { role?: string })?.role
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
 
-  if (!session?.user?.email) {
-    redirect(`/detail/${numericId}`)
+  let profile = null
+
+  if (session?.user?.email) {
+    const userProfile = await prisma.studentProfile.findUnique({
+      where: { email: session.user.email }
+    })
+
+    if (targetStudentId) {
+      if (isAdmin) {
+        profile = await prisma.studentProfile.findUnique({
+          where: { studentId: targetStudentId }
+        })
+      } else if (userProfile && userProfile.studentId === targetStudentId) {
+        profile = userProfile
+      } else {
+        redirect(`/detail/${numericId}`)
+      }
+    } else {
+      profile = userProfile
+    }
+  } else if (isAdmin && targetStudentId) {
+    profile = await prisma.studentProfile.findUnique({
+      where: { studentId: targetStudentId }
+    })
   }
-
-  const profile = await prisma.studentProfile.findUnique({
-    where: { email: session.user.email }
-  })
 
   if (!profile) {
     redirect(`/detail/${numericId}`)
@@ -140,71 +164,54 @@ export default async function SuccessPage({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-slate-500 mb-1 flex items-center">
-                <Calendar className="w-4 h-4 mr-2" /> วันที่และเวลาที่ลงทะเบียน
+                <User className="w-4 h-4 mr-2" /> ชื่อ-นามสกุล
               </p>
-              <p className="font-semibold text-slate-900">{formattedDate} เวลา {formattedTime}</p>
+              <p className="font-semibold text-slate-900">{profile.prefix}{profile.firstName} {profile.lastName}</p>
             </div>
-            
+
             <div>
               <p className="text-sm text-slate-500 mb-1 flex items-center">
-                <CheckCircle2 className="w-4 h-4 mr-2" /> สถานะการได้รับสิทธิ์
+                <Hash className="w-4 h-4 mr-2" /> ระดับชั้นและเลขที่
               </p>
-              <p className={`font-semibold ${isApproved ? 'text-emerald-600' : 'text-amber-600'}`}>
-                {isApproved ? "ได้รับสิทธิ์ (ตัวจริง)" : "รอเรียกสิทธิ์ (สำรอง)"}
-              </p>
+              <p className="font-semibold text-slate-900">ม.{profile.grade}/{profile.room} เลขที่ {profile.number}</p>
             </div>
 
             <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
-                <p className="text-sm text-indigo-600 mb-1 font-semibold flex items-center">
-                  <Hash className="w-4 h-4 mr-1.5" /> ลำดับการสมัคร
+              <div>
+                <p className="text-sm text-slate-500 mb-1 flex items-center">
+                  <Calendar className="w-4 h-4 mr-2" /> วันที่และเวลาที่ลงทะเบียน
                 </p>
-                <p className="font-bold text-2xl text-indigo-900">คนที่ {totalQueueNumber}</p>
-                <p className="text-xs text-indigo-500 mt-1">จากผู้สมัครทั้งหมดในโครงการ</p>
+                <p className="font-semibold text-slate-900">{formattedDate} เวลา {formattedTime}</p>
               </div>
-              <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
-                <p className="text-sm text-emerald-600 mb-1 font-semibold flex items-center">
-                  <Hash className="w-4 h-4 mr-1.5" /> ลำดับการสมัคร
+              
+              <div>
+                <p className="text-sm text-slate-500 mb-1 flex items-center">
+                  <CheckCircle2 className="w-4 h-4 mr-2" /> สถานะการได้รับสิทธิ์
                 </p>
-                <p className="font-bold text-2xl text-emerald-900">คนที่ {gradeQueueNumber}</p>
-                <p className="text-xs text-emerald-500 mt-1">จากผู้สมัครระดับชั้น ม.{profile.grade}</p>
+                <p className={`font-semibold ${isApproved ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {isApproved ? "ได้รับสิทธิ์ (ตัวจริง)" : "รอเรียกสิทธิ์ (สำรอง)"}
+                </p>
               </div>
             </div>
 
-            <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <p className="text-sm text-slate-500 mb-1 flex items-center">
-                  <User className="w-4 h-4 mr-2" /> ชื่อ-นามสกุล
+                  <Hash className="w-4 h-4 mr-2" /> ลำดับการลงทะเบียน (ในโครงการ)
                 </p>
-                <p className="font-semibold text-slate-900">{profile.prefix}{profile.firstName} {profile.lastName}</p>
+                <p className="font-semibold text-slate-900">
+                  คนที่ {totalQueueNumber}
+                </p>
               </div>
-
               <div>
                 <p className="text-sm text-slate-500 mb-1 flex items-center">
-                  <Hash className="w-4 h-4 mr-2" /> ระดับชั้นและเลขที่
+                  <Hash className="w-4 h-4 mr-2" /> ลำดับการลงทะเบียน (ระดับชั้น ม.{profile.grade})
                 </p>
-                <p className="font-semibold text-slate-900">ม.{profile.grade}/{profile.room} เลขที่ {profile.number}</p>
+                <p className="font-semibold text-slate-900">
+                  คนที่ {gradeQueueNumber}
+                </p>
               </div>
             </div>
-
-            {registration.answers && registration.answers.length > 0 && (
-              <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2">
-                <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center">
-                  <FileText className="w-4 h-4 mr-2 text-indigo-500" /> ข้อมูลเพิ่มเติมที่กรอก
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {registration.answers.map(answer => (
-                    <div key={answer.id} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                      <p className="text-xs text-slate-500 mb-1">{answer.field.label}</p>
-                      <p className="font-medium text-sm text-slate-900 wrap-break-word whitespace-pre-wrap">
-                        {answer.value || "-"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
           </div>
         </div>
 
@@ -215,19 +222,13 @@ export default async function SuccessPage({
           </a>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="mb-4">
           <Link 
             href="/"
             className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20"
           >
             <ArrowLeft className="w-5 h-5 mr-3" /> กลับสู่หน้าหลัก
           </Link>
-
-          <form action={signOutAction} className="w-full">
-            <button type="submit" className="flex items-center justify-center w-full h-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-6 rounded-xl transition-all border border-slate-200 cursor-pointer">
-              <LogOut className="w-5 h-5 mr-3" /> ออกจากระบบ
-            </button>
-          </form>
         </div>
 
         <CancelRegistrationButton registrationId={registration.id} />

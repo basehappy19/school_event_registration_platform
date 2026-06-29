@@ -136,7 +136,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               {project.title}
             </h2>
             {project.description && (
-              <p className="text-sm md:text-base text-emerald-50 mb-6 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl font-semibold text-emerald-50 print:text-black mb-4 max-w-3xl mx-auto whitespace-pre-wrap">
                 {project.description}
               </p>
             )}
