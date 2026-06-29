@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Calendar, Plus, ArrowLeft, Loader2, GripVertical, ChevronUp, ChevronDown } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Calendar, Plus, Loader2, GripVertical, ChevronUp, ChevronDown, Users, Eye, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
 import AdminProjectSettings from "./AdminProjectSettings"
 import AdminRegistrationList from "./AdminRegistrationList"
 import AdminProjectStats from "./AdminProjectStats"
 import { createProject, updateProjectsOrder } from "@/app/actions/admin"
-import Link from "next/link"
 import { ProjectWithRelations } from "@/app/types"
 import {
   DndContext,
@@ -16,7 +15,8 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent
+  DragEndEvent,
+  DragStartEvent
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -34,7 +34,8 @@ function SortableProjectItem({
   onMoveUp,
   onMoveDown,
   isFirst,
-  isLast
+  isLast,
+  viewerCount
 }: { 
   project: ProjectWithRelations, 
   isActive: boolean, 
@@ -42,7 +43,8 @@ function SortableProjectItem({
   onMoveUp: () => void,
   onMoveDown: () => void,
   isFirst: boolean,
-  isLast: boolean
+  isLast: boolean,
+  viewerCount: number
 }) {
   const {
     attributes,
@@ -105,9 +107,17 @@ function SortableProjectItem({
         )}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <div className="line-clamp-2 leading-snug text-xs sm:text-sm">{project.title}</div>
-          <div className={`text-[10px] mt-1 flex items-center gap-1.5 ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${project.isPublished ? 'bg-emerald-400' : 'bg-slate-300'}`}></span>
-            {project.isPublished ? "เปิดเผยแพร่" : "ซ่อน"}
+          <div className={`text-[10px] mt-1.5 flex items-center justify-between ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${project.isPublished ? 'bg-emerald-400' : 'bg-slate-300'}`}></span>
+              {project.isPublished ? "เปิดเผยแพร่" : "ซ่อน"}
+            </div>
+            <div className={`px-2 py-0.5 rounded-full flex items-center gap-1 font-bold transition-all ${
+              isActive ? 'bg-indigo-500/80 text-white shadow-inner' : 'bg-slate-100 text-slate-600 border border-slate-200'
+            }`}>
+              <Eye className="w-3 h-3" />
+              {viewerCount} คนกำลังดู
+            </div>
           </div>
         </div>
       </button>
@@ -120,6 +130,9 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
   const [projects, setProjects] = useState(initialProjects)
   const [activeProjectId, setActiveProjectId] = useState<number | null>(projects[0]?.id || null)
   const [isCreating, setIsCreating] = useState(false)
+  const [viewerCounts, setViewerCounts] = useState<Record<number, number>>({})
+  const [activeTab, setActiveTab] = useState<'registrations' | 'settings'>('registrations')
+  const isDraggingRef = useRef(false)
 
   useEffect(() => {
     setProjects(initialProjects)
@@ -127,6 +140,34 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
         setActiveProjectId(initialProjects[0]?.id || null)
     }
   }, [initialProjects])
+
+  useEffect(() => {
+    setActiveTab('registrations')
+  }, [activeProjectId])
+
+  // Realtime polling without page refresh
+  useEffect(() => {
+    const fetchRealtime = async () => {
+      try {
+        const res = await fetch('/api/admin/realtime', { cache: 'no-store' })
+        if (res.ok) {
+          const data = await res.json()
+          if (!isDraggingRef.current && data.projects) {
+            setProjects(data.projects)
+          }
+          if (data.viewerCounts) {
+            setViewerCounts(data.viewerCounts)
+          }
+        }
+      } catch (e) {
+        // Ignore errors during polling
+      }
+    }
+
+    fetchRealtime()
+    const interval = setInterval(fetchRealtime, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -147,7 +188,12 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
     router.refresh();
   }
 
+  const handleDragStart = (event: DragStartEvent) => {
+    isDraggingRef.current = true;
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    isDraggingRef.current = false;
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
@@ -158,6 +204,10 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
       setProjects(newProjects);
       saveOrder(newProjects);
     }
+  };
+
+  const handleDragCancel = () => {
+    isDraggingRef.current = false;
   };
 
   const handleMoveUp = (index: number) => {
@@ -199,10 +249,6 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
     <div className="flex flex-col md:flex-row gap-6">
       {/* Sidebar: Project Selector */}
       <div className="w-full md:w-80 shrink-0 space-y-4">
-        <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors mb-2">
-          <ArrowLeft className="w-4 h-4" />
-          กลับหน้าหลัก
-        </Link>
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">โครงการทั้งหมด</h2>
           <button 
@@ -217,7 +263,9 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
         <DndContext 
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
           <div className="flex flex-col gap-2">
             {projects.length === 0 ? (
@@ -237,6 +285,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
                     onMoveDown={() => handleMoveDown(index)}
                     isFirst={index === 0}
                     isLast={index === projects.length - 1}
+                    viewerCount={viewerCounts[p.id] || 0}
                   />
                 ))}
               </SortableContext>
@@ -256,10 +305,48 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
         ) : (
           <div className="space-y-6">
             <AdminProjectStats key={`stats-${activeProject.id}`} project={activeProject} />
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <AdminProjectSettings key={`settings-${activeProject.id}`} project={activeProject} />
+            
+            {/* Tab Navigation & Live Viewer Count */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab('registrations')}
+                  className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
+                    activeTab === 'registrations'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  <Users className="w-4 h-4" />
+                  รายชื่อผู้สมัคร ({activeProject.registrations?.length || 0})
+                </button>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
+                    activeTab === 'settings'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  ตั้งค่าโครงการ
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-sm font-medium">
+                <Eye className="w-4 h-4 text-slate-500" />
+                <span>กำลังดูหน้านี้: <strong className="text-slate-900 font-bold">{viewerCounts[activeProject.id] || 0}</strong> คน</span>
+              </div>
             </div>
-            <AdminRegistrationList key={`regs-${activeProject.id}`} project={activeProject} />
+
+            {/* Tab Content */}
+            {activeTab === 'registrations' ? (
+              <AdminRegistrationList key={`regs-${activeProject.id}`} project={activeProject} />
+            ) : (
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <AdminProjectSettings key={`settings-${activeProject.id}`} project={activeProject} />
+              </div>
+            )}
           </div>
         )}
       </div>

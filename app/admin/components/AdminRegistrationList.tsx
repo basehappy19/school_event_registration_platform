@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist } from "@/app/actions/admin"
 
 import { useRouter } from "next/navigation"
-import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle } from "lucide-react"
+import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react"
 import { ProjectWithRelations } from "@/app/types"
 
 export default function AdminRegistrationList({ project }: { project: ProjectWithRelations }) {
@@ -12,11 +12,17 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   const [loading, setLoading] = useState(false)
   const [studentIdInput, setStudentIdInput] = useState("")
   const [search, setSearch] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(50)
   
   const [toast, setToast] = useState<{message: string, type: 'error' | 'success'} | null>(null)
   const [showAcceptAllModal, setShowAcceptAllModal] = useState(false)
   const [isPrinting, setIsPrinting] = useState(false)
   const [isExportingExcel, setIsExportingExcel] = useState(false)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, itemsPerPage, project.id])
 
   useEffect(() => {
     if (toast) {
@@ -132,6 +138,9 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
            r.studentProfile.lastName.toLowerCase().includes(term)
   })
 
+  const totalPages = Math.ceil(regs.length / itemsPerPage) || 1
+  const paginatedRegs = regs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-6">
       {/* Toast Notification */}
@@ -226,24 +235,24 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             type="button"
             onClick={handleAcceptAllClick}
             disabled={loading || project.registrations.filter((r) => r.status !== 'APPROVED').length === 0}
-            className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center"
+            className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0"
           >
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">รับสำรองทั้งหมด</span>
+            <CheckCircle2 className="w-4 h-4 mr-2 shrink-0" />
+            <span>รับสำรองทั้งหมด</span>
           </button>
           <button 
             type="button"
             onClick={handleExportExcel}
             disabled={isExportingExcel}
-            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
-            {isExportingExcel ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+            className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0">
+            {isExportingExcel ? <Loader2 className="w-4 h-4 mr-2 animate-spin shrink-0" /> : <Download className="w-4 h-4 mr-2 shrink-0" />}
             {isExportingExcel ? 'กำลังส่งออก...' : 'ส่งออก Excel'}
           </button>
         </div>
       </div>
 
-      <div className="p-4 bg-slate-50 border-b border-slate-100">
-        <div className="relative max-w-sm">
+      <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input 
             type="text" 
@@ -253,13 +262,28 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
           />
         </div>
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 self-end sm:self-auto">
+          <span>แสดงหน้าละ:</span>
+          <select 
+            value={itemsPerPage} 
+            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+          >
+            <option value={20}>20 คน</option>
+            <option value={50}>50 คน</option>
+            <option value={100}>100 คน</option>
+            <option value={200}>200 คน</option>
+            <option value={999999}>ทั้งหมด</option>
+          </select>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
             <tr>
-              <th className="px-6 py-4 w-16 text-center">สถานะ</th>
+              <th className="px-6 py-4 w-16 text-center">ลำดับ</th>
+              <th className="px-6 py-4 w-20 text-center">สถานะ</th>
               <th className="px-6 py-4">รหัสนักเรียน</th>
               <th className="px-6 py-4">ชื่อ - นามสกุล</th>
               <th className="px-6 py-4 text-center">ชั้น/ห้อง</th>
@@ -268,9 +292,12 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {regs.length > 0 ? (
-              regs.map((reg) => (
+            {paginatedRegs.length > 0 ? (
+              paginatedRegs.map((reg, index) => (
                 <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-3 text-center text-slate-400 font-mono text-xs">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
                   <td className="px-6 py-3 text-center">
                     {reg.status === 'APPROVED' ? (
                       <div className="inline-flex items-center text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-100">
@@ -324,13 +351,44 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                   ไม่พบรายชื่อในระบบ
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Footer */}
+      <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-600">
+        <div>
+          <span>แสดง <strong className="text-slate-900">{regs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, regs.length)}</strong> จากทั้งหมด <strong className="text-slate-900">{regs.length}</strong> คน</span>
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white text-slate-700 transition-colors flex items-center gap-1 font-medium text-xs"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" /> ก่อนหน้า
+            </button>
+            
+            <div className="flex items-center gap-1 px-2 font-medium">
+              <span>หน้า <strong className="text-slate-900">{currentPage}</strong> / {totalPages}</span>
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white text-slate-700 transition-colors flex items-center gap-1 font-medium text-xs"
+            >
+              ถัดไป <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
