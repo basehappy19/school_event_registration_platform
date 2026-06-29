@@ -14,13 +14,13 @@ export default function NotFound() {
         {/* Animated Icon */}
         <div className="relative w-32 h-32 mx-auto mb-8">
           <div className="absolute inset-0 bg-indigo-100 rounded-full animate-ping opacity-20"></div>
-          <div className="absolute inset-0 bg-indigo-50 rounded-full flex items-center justify-center animate-in zoom-in duration-500 shadow-sm border border-indigo-100">
-            <SearchX className="w-14 h-14 text-indigo-500 animate-in slide-in-from-bottom-2 duration-700 delay-200 fill-mode-both" />
+          <div className="absolute inset-0 bg-indigo-50 rounded-full flex items-center justify-center shadow-sm border border-indigo-100">
+            <SearchX className="w-14 h-14 text-indigo-500" />
           </div>
         </div>
 
         {/* Text Content */}
-        <div className="space-y-4 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
+        <div className="space-y-4 mb-10">
           <h1 className="text-4xl font-black tracking-tight text-slate-900">404</h1>
           <h2 className="text-2xl font-bold text-slate-800 bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-pink-500">
             ไม่พบหน้าที่คุณค้นหา
@@ -31,7 +31,7 @@ export default function NotFound() {
         </div>
 
         {/* Action Buttons */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-both">
+        <div>
           <Link 
             href="/" 
             className="inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"

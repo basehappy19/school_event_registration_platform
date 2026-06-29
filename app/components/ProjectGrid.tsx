@@ -248,7 +248,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-slate-900/90 backdrop-blur-sm cursor-pointer animate-in fade-in duration-200" 
           onClick={() => setSelectedImage(null)}
         >
-          <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center" onClick={e => e.stopPropagation()}>
+          <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
             <button 
               className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
               onClick={() => setSelectedImage(null)}

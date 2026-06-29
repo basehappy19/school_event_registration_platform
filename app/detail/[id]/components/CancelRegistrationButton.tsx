@@ -25,20 +25,19 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
   }
 
   const handleCancel = async () => {
-    setLoading(true)
-    const res = await cancelRegistration(registrationId)
+    setShowModal(false)
+    showToast("สละสิทธิ์การเข้าร่วมกิจกรรมเรียบร้อยแล้ว", 'success')
     
-    if (res && 'error' in res) {
-      showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
-      setLoading(false)
-      setShowModal(false)
-    } else {
-      showToast("สละสิทธิ์การเข้าร่วมกิจกรรมเรียบร้อยแล้ว", 'success')
-      setShowModal(false)
-      setTimeout(() => {
-        router.push("/")
-      }, 2000)
-    }
+    cancelRegistration(registrationId).then((res) => {
+      if (res && 'error' in res) {
+        showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
+      } else {
+        setTimeout(() => {
+          router.push("/")
+          router.refresh()
+        }, 1500)
+      }
+    })
   }
 
   return (
@@ -59,19 +58,15 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
       <button 
         onClick={() => setShowModal(true)}
         disabled={loading}
-        className="flex items-center justify-center w-full bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 font-semibold py-4 px-6 rounded-xl transition-all mt-4 border border-rose-200"
+        className="flex items-center justify-center w-full bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 font-semibold py-4 px-6 rounded-xl transition-all mt-4 border border-rose-200 cursor-pointer shadow-2xs hover:shadow-sm active:scale-[0.99]"
       >
-        {loading ? (
-          <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-        ) : (
-          <XCircle className="w-5 h-5 mr-3" />
-        )}
+        <XCircle className="w-5 h-5 mr-3" />
         สละสิทธิ์การเข้าร่วมกิจกรรม
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <XCircle className="w-8 h-8" />
             </div>
@@ -82,17 +77,15 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowModal(false)}
-                disabled={loading}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl transition-all cursor-pointer active:scale-95"
               >
                 ยกเลิก
               </button>
               <button 
                 onClick={handleCancel}
-                disabled={loading}
-                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center"
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-sm hover:shadow active:scale-95"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ยืนยันการสละสิทธิ์"}
+                ยืนยันการสละสิทธิ์
               </button>
             </div>
           </div>

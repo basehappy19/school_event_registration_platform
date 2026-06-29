@@ -1,11 +1,13 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import prisma from "@/lib/prisma"
 import Link from "next/link"
-import { ArrowLeft, Search } from "lucide-react"
+import { ArrowLeft, Search, Calendar, Clock, MapPin } from "lucide-react"
 import AutoPrint from "./components/AutoPrint"
+import AnnouncementInteractive from "./components/AnnouncementInteractive"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { Metadata } from "next"
 import { auth } from "@/auth"
+import { signInWithGoogleCustomRedirect } from "@/app/actions/auth"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -25,9 +27,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 }
 
-export default async function AnnouncementPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ q?: string, grade?: string, room?: string }> }) {
+export default async function AnnouncementPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ q?: string, grade?: string, room?: string, from_login?: string }> }) {
   const { id } = await params
-  const { q, grade, room } = await searchParams
+  const { q, grade, room, from_login } = await searchParams
   
   const numericId = parseInt(id, 10)
   if (isNaN(numericId)) return notFound()
@@ -47,9 +49,35 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     (!project.announcementStartDate || now >= project.announcementStartDate) &&
     (!project.announcementEndDate || now <= project.announcementEndDate)
 
+  const isRegistrationOpen = project.isRegistrationOpen &&
+    (!project.registrationStartDate || now >= project.registrationStartDate) &&
+    (!project.registrationEndDate || now <= project.registrationEndDate)
+
   const session = await auth()
   const role = (session?.user as { role?: string })?.role
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
+
+  let userProfile = null
+  let userRegistration = null
+
+  if (session?.user?.email) {
+    userProfile = await prisma.studentProfile.findUnique({
+      where: { email: session.user.email }
+    })
+    if (userProfile) {
+      userRegistration = await prisma.registration.findFirst({
+        where: {
+          projectId: numericId,
+          studentId: userProfile.studentId,
+          status: { not: 'CANCELLED' }
+        }
+      })
+    }
+  }
+
+  if (from_login === "1" && userRegistration) {
+    redirect(`/detail/${numericId}/success`)
+  }
 
   if (!isAnnouncementOpen && !isAdmin) {
     return (
@@ -65,35 +93,13 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     )
   }
 
-  // Fetch registrations
-  const registrations = await prisma.registration.findMany({
-    where: {
-      projectId: numericId,
-      status: { in: ['APPROVED', 'WAITLISTED'] },
-      studentProfile: {
-        ...(q ? {
-          OR: [
-            { firstName: { contains: q, mode: 'insensitive' } },
-            { lastName: { contains: q, mode: 'insensitive' } },
-            { studentId: { contains: q } }
-          ]
-        } : {}),
-        ...(grade ? { grade } : {}),
-        ...(room ? { room } : {})
-      }
-    },
-    include: {
-      studentProfile: true
-    },
-    orderBy: [
-      { status: 'asc' }, // APPROVED comes before WAITLISTED
-      { studentProfile: { grade: 'asc' } },
-      { studentProfile: { room: 'asc' } },
-      { studentProfile: { number: 'asc' } }
-    ]
+  // Fetch all approved and waitlisted registrations once
+  const allRegs = await prisma.registration.findMany({
+    where: { projectId: numericId, status: { in: ['APPROVED', 'WAITLISTED'] } },
+    include: { studentProfile: true }
   })
 
-  registrations.sort((a, b) => {
+  allRegs.sort((a, b) => {
     if (a.status !== b.status) return a.status === 'APPROVED' ? -1 : 1;
     const sA = a.studentProfile;
     const sB = b.studentProfile;
@@ -107,162 +113,111 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     const nB = parseInt(sB.number) || 0;
     return nA - nB;
   });
-
-  const approvedList = registrations.filter(r => r.status === 'APPROVED')
-  const waitlistedList = registrations.filter(r => r.status === 'WAITLISTED')
-
-  // Get unique grades and rooms for filters
-  const allRegs = await prisma.registration.findMany({
-    where: { projectId: numericId, status: { in: ['APPROVED', 'WAITLISTED'] } },
-    include: { studentProfile: true }
-  })
   
   const uniqueGrades = Array.from(new Set(allRegs.map(r => r.studentProfile.grade))).sort()
   const uniqueRooms = Array.from(new Set(allRegs.map(r => r.studentProfile.room))).sort((a, b) => parseInt(a) - parseInt(b))
 
   return (
-    <div className="min-h-screen bg-transparent font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
-      <div className="bg-linear-to-r from-emerald-600 to-teal-600 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
+      <div className="bg-white border-b border-slate-200 pt-8 pb-12 px-4 sm:px-6 lg:px-8 shadow-xs">
         <div className="max-w-5xl mx-auto">
-          <Link href="/" className="bg-emerald-700/50 hover:bg-emerald-700 border border-emerald-500/30 text-white px-4 py-2.5 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit print:hidden shadow-sm backdrop-blur-sm">
+          <Link href="/" className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit print:hidden shadow-2xs">
             <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
           </Link>
           
-          <div className="text-center print:text-black">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">
-              ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วม
-            </h1>
-            <h2 className="text-xl md:text-2xl font-semibold mb-2">
+          <div className="text-center">
+            <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600 mb-3 border border-indigo-100">
+              ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ
+            </span>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 mb-3 max-w-4xl mx-auto leading-relaxed">
               {project.title}
-            </h2>
+            </h1>
             {project.description && (
-              <p className="text-xl md:text-2xl font-semibold text-emerald-50 print:text-black mb-4 max-w-3xl mx-auto whitespace-pre-wrap">
+              <p className="text-base md:text-lg font-medium text-slate-600 mb-6 max-w-2xl mx-auto whitespace-pre-wrap leading-relaxed">
                 {project.description}
               </p>
             )}
-            <div className="inline-block bg-white/20 backdrop-blur-sm px-6 py-3 rounded-2xl text-sm md:text-base border border-white/20 print:border-none print:bg-transparent print:text-black print:p-0 mt-2">
-              <p>{formatThaiDateWithDay(project.activityDate)} เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)} ณ {project.activityLocation || "__________"}</p>
+            <div className="inline-flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 bg-slate-100/90 px-5 py-4 rounded-2xl text-xs sm:text-sm md:text-base text-slate-700 font-medium border border-slate-200/80 print:border-none print:bg-transparent print:p-0 w-full sm:w-auto max-w-full">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>{formatThaiDateWithDay(project.activityDate)}</span>
+              </div>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)}</span>
+              </div>
+              <span className="hidden sm:inline text-slate-300">•</span>
+              <div className="flex items-center gap-2 text-center">
+                <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>ณ {project.activityLocation || "__________"}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 -mt-12 relative z-10 print:mt-0 print:pt-4">
-        {/* Filters Section - Hidden in Print */}
-        <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-slate-200 p-4 sm:p-5 mb-6 print:hidden">
-          <form className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ค้นหารายชื่อ</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  name="q"
-                  defaultValue={q}
-                  placeholder="รหัสนักเรียน หรือ ชื่อ-นามสกุล..." 
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-10 print:mt-0 print:pt-4">
+        {/* User CTA Banner */}
+        {!session ? (
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 print:hidden">
+            <div className="text-center md:text-left">
+              <h3 className="font-bold text-base sm:text-lg md:text-xl mb-1 break-keep">ต้องการดูข้อมูลการลงทะเบียน หรือแจ้งสละสิทธิ์?</h3>
+              <p className="text-indigo-100 text-xs sm:text-sm break-keep leading-relaxed">เข้าสู่ระบบด้วยบัญชี Google ของโรงเรียนเพื่อตรวจสอบสถานะ</p>
+            </div>
+            <form action={signInWithGoogleCustomRedirect.bind(null, `/announcement/${numericId}?from_login=1`)} className="shrink-0 w-full md:w-auto">
+              <button type="submit" className="w-full md:w-auto bg-white text-slate-800 hover:bg-slate-50 font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2 border border-slate-100">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+                <span>เข้าสู่ระบบด้วย Google</span>
+              </button>
+            </form>
+          </div>
+        ) : userRegistration ? (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 print:hidden">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <h3 className="font-bold text-emerald-950 text-base sm:text-lg break-keep">คุณได้ลงทะเบียนในโครงการนี้แล้ว</h3>
               </div>
+              <p className="text-emerald-700 text-xs sm:text-sm break-keep leading-relaxed">ตรวจสอบรายละเอียดข้อมูลที่ลงทะเบียนไว้ หรือดำเนินการแจ้งสละสิทธิ์ได้ที่นี้</p>
             </div>
-            
-            <div className="w-full md:w-32">
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ระดับชั้น</label>
-              <select name="grade" defaultValue={grade || ""} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">ทุกชั้น</option>
-                {uniqueGrades.map(g => (
-                  <option key={g} value={g}>ม.{g}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="w-full md:w-32">
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ห้อง</label>
-              <select name="room" defaultValue={room || ""} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">ทุกห้อง</option>
-                {uniqueRooms.map(r => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-
-            <button type="submit" className="w-full md:w-auto bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors shrink-0">
-              ค้นหา
-            </button>
-          </form>
-        </div>
-
-        {/* Content */}
-        <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden print:border-none print:shadow-none">
-          <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
-            <h3 className="font-bold text-lg text-slate-800">รายชื่อตัวจริง ({approvedList.length} คน)</h3>
+            <Link href={`/detail/${numericId}/success`} className="w-full md:w-auto text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
+              ดูข้อมูลการลงทะเบียน / สละสิทธิ์
+            </Link>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm sm:whitespace-nowrap">
-              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 print:bg-transparent">
-                <tr>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16 text-center">ลำดับ</th>
-                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">ชั้น</th>
-                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">เลขที่</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4">ชื่อ - นามสกุล</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {approvedList.length > 0 ? (
-                  approvedList.map((reg, index) => (
-                    <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-3 sm:px-6 py-3 text-center text-slate-500">{index + 1}</td>
-                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
-                        {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-3 sm:px-6 py-8 text-center text-slate-500">
-                      ไม่พบรายชื่อ
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        ) : !isRegistrationOpen ? (
+          <div className="bg-slate-100 border border-slate-300 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 print:hidden">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-rose-500 shrink-0"></span>
+                <h3 className="font-bold text-slate-800 text-base sm:text-lg break-keep">หมดเวลารับสมัครลงทะเบียนแล้ว</h3>
+              </div>
+              <p className="text-slate-600 text-xs sm:text-sm break-keep leading-relaxed">คุณไม่ได้ลงทะเบียนเข้าร่วมโครงการนี้ในช่วงเวลาที่เปิดรับสมัคร จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
+            </div>
+            <Link href={`/detail/${numericId}`} className="w-full md:w-auto text-center bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-2xs shrink-0">
+              ดูรายละเอียดโครงการ
+            </Link>
           </div>
-        </div>
-
-        {waitlistedList.length > 0 && (
-          <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden mt-8 print:hidden">
-            <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
-              <h3 className="font-bold text-lg text-amber-700">รายชื่อสำรอง ({waitlistedList.length} คน)</h3>
+        ) : (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 print:hidden">
+            <div className="text-center md:text-left">
+              <h3 className="font-bold text-amber-950 text-base sm:text-lg mb-1 break-keep">คุณยังไม่ได้ลงทะเบียนในโครงการนี้</h3>
+              <p className="text-amber-700 text-xs sm:text-sm break-keep leading-relaxed">หากต้องการเข้าร่วมกิจกรรม สามารถเข้าไปอ่านรายละเอียดและลงทะเบียนได้ที่หน้าฟอร์มรับสมัคร</p>
             </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm sm:whitespace-nowrap">
-                <thead className="bg-amber-50 text-amber-800 font-semibold border-b border-amber-100 print:bg-transparent print:text-black">
-                  <tr>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16 text-center">ลำดับ</th>
-                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">ชั้น</th>
-                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">เลขที่</th>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4">ชื่อ - นามสกุล</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {waitlistedList.map((reg, index) => (
-                    <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-3 sm:px-6 py-3 text-center text-amber-600 font-medium">{approvedList.length + index + 1}</td>
-                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
-                        {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Link href={`/detail/${numericId}`} className="w-full md:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
+              ไปที่หน้าฟอร์มลงทะเบียน
+            </Link>
           </div>
         )}
+        {/* Interactive Filters and Table */}
+        <AnnouncementInteractive 
+          allRegistrations={allRegs}
+          uniqueGrades={uniqueGrades} 
+          uniqueRooms={uniqueRooms} 
+          initialQ={q} 
+          initialGrade={grade} 
+          initialRoom={room} 
+        />
       </div>
       
       <AutoPrint />

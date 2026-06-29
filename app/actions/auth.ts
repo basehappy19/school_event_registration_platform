@@ -11,6 +11,12 @@ export async function signInWithGoogle(projectId?: number) {
   await signIn("google", { redirectTo: projectId ? `/detail/${projectId}` : "/" })
 }
 
+export async function signInWithGoogleCustomRedirect(customUrl: string) {
+  const cookieStore = await cookies()
+  cookieStore.set("auth_return_url", customUrl, { maxAge: 3600 })
+  await signIn("google", { redirectTo: customUrl })
+}
+
 export async function signOutAction() {
   await signOut()
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2, X, ZoomIn } from "lucide-react"
+import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2, X, ZoomIn, AlertCircle } from "lucide-react"
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import Image from "next/image"
@@ -144,11 +144,11 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     <div className="relative pt-3 sm:pt-4 pb-24 sm:pb-0">
 
 
-    <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 overflow-hidden relative">
       {/* Access Denied Modal */}
       {showAccessDeniedModal && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShieldCheck className="w-8 h-8" />
             </div>
@@ -223,7 +223,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         </div>
 
         {/* Bottom Section: Countdown & Stats */}
-        <div className="bg-white animate-in fade-in zoom-in duration-500 delay-150 fill-mode-both">
+        <div className="bg-white">
           <CountdownTimer startDate={project.registrationStartDate} endDate={project.registrationEndDate} />
 
 
@@ -237,7 +237,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           </div>
         )}
 
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
+        <div className="space-y-8">
           {/* User Status Section */}
           {!session ? (
             <div className="bg-indigo-50 border border-indigo-100 p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -305,10 +305,25 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             </div>
           )}
 
+          {!isRegistrationOpen && !isBeforeStart && (
+            <div className="bg-slate-100 border border-slate-300 p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-xs">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-800 text-base sm:text-lg break-keep">โครงการนี้ปิดรับสมัครแล้ว</h3>
+                <p className="text-slate-600 text-xs sm:text-sm mt-1 break-keep leading-relaxed">หมดเวลาหรือปิดรับสมัครลงทะเบียนสำหรับโครงการนี้แล้ว คุณไม่ได้ทำการลงทะเบียนไว้จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
+              </div>
+              <Link href={`/announcement/${project.id}`} className="w-full sm:w-auto text-center bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-black transition-colors shrink-0 shadow-sm">
+                ดูประกาศรายชื่อ
+              </Link>
+            </div>
+          )}
+
           {/* Form Fields Section */}
           <form id="registrationForm" onSubmit={handleSubmitRegistration} className="space-y-8">
             {project.formFields.length > 0 && (
-              <div className={!session || !profile || !isGradeAllowed ? "opacity-60 pointer-events-none" : ""}>
+              <div className={!session || !profile || !isGradeAllowed || !isRegistrationOpen ? "opacity-60 pointer-events-none" : ""}>
                 <h3 className="text-lg font-bold text-slate-800 mb-5 border-b border-slate-100 pb-3">กรอกรายละเอียดเพิ่มเติม</h3>
                 <div className="space-y-6">
                   {project.formFields.map((field) => (
@@ -502,7 +517,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 bg-slate-900/90 backdrop-blur-sm cursor-pointer animate-in fade-in duration-200" 
           onClick={() => setSelectedImage(null)}
         >
-          <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center" onClick={e => e.stopPropagation()}>
+          <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
             <button 
               className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
               onClick={() => setSelectedImage(null)}
