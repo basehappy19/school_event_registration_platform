@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users, X, ZoomIn } from "lucide-react"
 import { ProjectGridItem } from "@/app/types"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
@@ -46,9 +47,13 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
           className="relative w-full overflow-hidden rounded-2xl shadow-lg border border-slate-200 bg-white cursor-pointer group/banner"
           onClick={() => setSelectedImage("/schedule.jpg")}
         >
-          <img 
+          <Image 
             src="/schedule.jpg" 
-            alt="Schedule Banner" 
+            alt="ตารางกำหนดการลงทะเบียนกิจกรรม โรงเรียนภูเขียว" 
+            width={1200}
+            height={630}
+            priority={true}
+            sizes="(max-width: 768px) 100vw, 800px"
             className="w-full h-auto object-cover group-hover/banner:scale-[1.02] transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
@@ -66,6 +71,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-indigo-500 transition-colors w-6 h-6 z-10" />
           <input 
             type="text" 
+            aria-label="ค้นหาโครงการ ค่าย หรือกิจกรรม"
             placeholder="ค้นหาโครงการ, ค่าย, หรือกิจกรรม..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -103,7 +109,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                   className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100 border-b border-slate-100 cursor-pointer group/img"
                   onClick={() => project.posterUrl && setSelectedImage(project.posterUrl)}
                 >
-                  <img src={project.posterUrl} alt={project.title} className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500" />
+                  <Image src={project.posterUrl} alt={project.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover/img:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent pointer-events-none"></div>
                   
                   {/* Hover Overlay */}
@@ -188,26 +194,21 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                     </div>
                   )}
 
-                  <div className="pt-1">
-                    <div className="flex items-center text-sm font-semibold text-slate-800 mb-2">
-                      <UserPlus className="w-4 h-4 mr-2 text-violet-600" />
-                      ยอดสมัครรวม: {totalRegistered} / {totalCapacity} คน
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
+                      <span className="flex items-center text-indigo-600">
+                        <Users className="w-4 h-4 mr-1.5" />
+                        ยอดสมัครรวม
+                      </span>
+                      <span>{totalRegistered} / {totalCapacity} คน</span>
                     </div>
-                    <div className="space-y-1.5 pl-6">
-                      {project.quotas.map((quota) => {
-                        const gradeRegistered = project.registrations.filter((r) => r.studentProfile.grade === quota.grade).length
-                        const isFull = gradeRegistered === quota.capacity
-                        const isOver = gradeRegistered > quota.capacity
-                        
-                        return (
-                          <div key={quota.id} className="flex justify-between text-xs text-slate-600">
-                            <span>ม.{quota.grade}</span>
-                            <span className={isFull || isOver ? "text-amber-600 font-medium" : ""}>
-                              {gradeRegistered} / {quota.capacity} {isFull && "(เต็ม)"} {isOver && "(เกิน)"}
-                            </span>
-                          </div>
-                        )
-                      })}
+                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          totalRegistered >= totalCapacity ? 'bg-amber-500' : 'bg-gradient-to-r from-indigo-500 to-violet-500'
+                        }`}
+                        style={{ width: `${totalCapacity > 0 ? Math.min(100, (totalRegistered / totalCapacity) * 100) : 0}%` }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -216,7 +217,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                   {isRegistrationAvailable && (
                     <Link 
                       href={`/detail/${project.id}`}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center group/btn"
+                      className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold py-3.5 px-4 rounded-xl text-center transition-all duration-300 shadow-md hover:shadow-indigo-500/25 flex items-center justify-center group/btn"
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
                       รายละเอียดและลงทะเบียน
@@ -227,7 +228,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                   {isAnnouncementAvailable && (
                     <Link
                       href={`/announcement/${project.id}`}
-                      className="flex-1 bg-white hover:bg-emerald-50 text-emerald-600 border border-emerald-200 hover:border-emerald-300 font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-sm flex items-center justify-center group/ann"
+                      className="flex-1 bg-white hover:bg-emerald-50 text-emerald-600 border border-emerald-200 hover:border-emerald-300 font-semibold py-2.5 px-4 rounded-xl text-center text-sm transition-all duration-300 shadow-xs flex items-center justify-center group/ann"
                     >
                       <Megaphone className="w-4 h-4 mr-2 text-emerald-500" />
                       ดูประกาศรายชื่อ
@@ -250,7 +251,8 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
         >
           <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
             <button 
-              className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
+              aria-label="ปิดหน้าต่างรูปภาพ"
+              className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
               onClick={() => setSelectedImage(null)}
             >
               <X className="w-6 h-6" />
