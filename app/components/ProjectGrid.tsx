@@ -194,22 +194,60 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                     </div>
                   )}
 
-                  <div className="pt-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
-                      <span className="flex items-center text-indigo-600">
-                        <Users className="w-4 h-4 mr-1.5" />
-                        ยอดสมัครรวม
-                      </span>
-                      <span>{totalRegistered} / {totalCapacity} คน</span>
+                  <div className="pt-2 space-y-3">
+                    {/* ยอดสมัครรวม */}
+                    <div>
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
+                        <span className="flex items-center text-indigo-600">
+                          <Users className="w-4 h-4 mr-1.5" />
+                          ยอดสมัครรวม
+                        </span>
+                        <span>{totalRegistered} / {totalCapacity} คน</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            totalRegistered >= totalCapacity ? 'bg-amber-500' : 'bg-gradient-to-r from-indigo-500 to-violet-500'
+                          }`}
+                          style={{ width: `${totalCapacity > 0 ? Math.min(100, (totalRegistered / totalCapacity) * 100) : 0}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          totalRegistered >= totalCapacity ? 'bg-amber-500' : 'bg-gradient-to-r from-indigo-500 to-violet-500'
-                        }`}
-                        style={{ width: `${totalCapacity > 0 ? Math.min(100, (totalRegistered / totalCapacity) * 100) : 0}%` }}
-                      />
-                    </div>
+
+                    {/* แยกแต่ละมอ */}
+                    {project.quotas && project.quotas.length > 0 && (
+                      <div className="pt-1 border-t border-slate-100">
+                        <div className="text-[11px] font-semibold text-slate-500 mb-1.5 flex items-center justify-between">
+                          <span>โควตาแยกระดับชั้น</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                          {project.quotas.map((quota) => {
+                            const gradeRegistered = project.registrations.filter((r) => r.studentProfile.grade === quota.grade).length
+                            const isFull = gradeRegistered >= quota.capacity
+                            const pct = quota.capacity > 0 ? Math.min(100, Math.round((gradeRegistered / quota.capacity) * 100)) : 0
+
+                            return (
+                              <div key={quota.id} className="bg-slate-50 p-2 rounded-lg border border-slate-200/80 flex flex-col justify-between">
+                                <div className="flex items-center justify-between text-[11px] mb-1">
+                                  <span className="font-bold text-slate-800">ม.{quota.grade}</span>
+                                  <span className={isFull ? "text-amber-600 font-bold" : "text-slate-600 font-medium"}>
+                                    {gradeRegistered}/{quota.capacity}
+                                  </span>
+                                </div>
+                                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      isFull ? 'bg-amber-500' : 'bg-indigo-600'
+                                    }`}
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

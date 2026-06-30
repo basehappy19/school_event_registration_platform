@@ -33,7 +33,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   }
 
   // Real-time Stats State
-  const [stats, setStats] = useState({ totalCapacity: 0, totalRegistered: 0, viewersCount: 1 })
+  const [stats, setStats] = useState<{ totalCapacity: number; totalRegistered: number; viewersCount: number; gradeStats?: Array<{ grade: string; capacity: number; registered: number }> }>({ totalCapacity: 0, totalRegistered: 0, viewersCount: 1 })
   const [sessionId] = useState(() => Math.random().toString(36).substring(2, 15))
 
   useEffect(() => {
@@ -481,6 +481,29 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                 </div>
               </div>
             </div>
+
+            {/* แยกแต่ละมอ (Live Grade Stats) */}
+            {stats.gradeStats && stats.gradeStats.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100">
+                {stats.gradeStats.map((gs: any) => {
+                  const isFull = gs.registered >= gs.capacity;
+                  const pct = gs.capacity > 0 ? Math.min(100, Math.round((gs.registered / gs.capacity) * 100)) : 0;
+                  return (
+                    <div key={gs.grade} className="bg-slate-50/90 p-2.5 rounded-xl border border-slate-200/80 flex flex-col justify-between shadow-2xs">
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="font-bold text-slate-800">ม.{gs.grade}</span>
+                        <span className={isFull ? "text-amber-600 font-bold" : "text-slate-600 font-medium"}>
+                          {gs.registered}/{gs.capacity} คน
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-500 ${isFull ? 'bg-amber-500' : 'bg-indigo-600'}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Segmented Marathon Progress Bar */}
             <div className="relative w-full mt-10 mb-4 z-10 pointer-events-none">

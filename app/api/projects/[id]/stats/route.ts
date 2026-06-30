@@ -48,10 +48,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       select: {
-        quotas: { select: { capacity: true } },
-        _count: {
+        quotas: { select: { grade: true, capacity: true } },
+        registrations: {
+          where: { status: { in: ['APPROVED', 'WAITLISTED'] } },
           select: {
-            registrations: { where: { status: { in: ['APPROVED', 'WAITLISTED'] } } }
+            studentProfile: { select: { grade: true } }
           }
         }
       }
@@ -60,15 +61,21 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
     const totalCapacity = project.quotas.reduce((acc, q) => acc + q.capacity, 0)
-    const totalRegistered = project._count.registrations
+    const totalRegistered = project.registrations.length
+    const gradeStats = project.quotas.map(q => ({
+      grade: q.grade,
+      capacity: q.capacity,
+      registered: project.registrations.filter(r => r.studentProfile?.grade === q.grade).length
+    }))
 
-    statsData = { totalCapacity, totalRegistered }
+    statsData = { totalCapacity, totalRegistered, gradeStats }
     cachedStats[projectId] = { data: statsData, timestamp: now }
   }
 
   return NextResponse.json({
     totalCapacity: statsData.totalCapacity,
     totalRegistered: statsData.totalRegistered,
+    gradeStats: statsData.gradeStats,
     viewersCount
   })
 }
