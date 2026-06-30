@@ -342,7 +342,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           {/* Form Fields Section */}
           <form id="registrationForm" onSubmit={handleSubmitRegistration} className="space-y-8">
             {project.formFields.length > 0 && (
-              <div className={!session || !profile || !isGradeAllowed || !isRegistrationOpen ? "opacity-60 pointer-events-none" : ""}>
+              <div className={!session || !profile || !isGradeAllowed || (!isRegistrationOpen && !isBeforeStart) ? "opacity-60 pointer-events-none" : ""}>
                 <h3 className="text-lg font-bold text-slate-800 mb-5 border-b border-slate-100 pb-3">กรอกรายละเอียดเพิ่มเติม</h3>
                 <div className="space-y-6">
                   {project.formFields.map((field) => (
@@ -354,7 +354,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                         <input
                           type="text"
                           required={field.isRequired}
-                          disabled={!session || !profile || !isGradeAllowed}
+                          disabled={!session || !profile || !isGradeAllowed || (!isRegistrationOpen && !isBeforeStart)}
                           value={answers[field.id] || ""}
                           onChange={e => setAnswers({ ...answers, [field.id]: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow text-slate-900"
