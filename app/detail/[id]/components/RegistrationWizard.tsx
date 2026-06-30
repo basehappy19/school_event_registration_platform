@@ -76,6 +76,34 @@ export default function RegistrationWizard({ project, session, profile, errorPar
   // Custom Answers State
   const [answers, setAnswers] = useState<Record<string, string>>({})
 
+  // Load draft from localStorage per project and student
+  useEffect(() => {
+    try {
+      const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (typeof parsed === 'object' && parsed !== null) {
+          setAnswers(parsed);
+        }
+      }
+    } catch {
+      // ignore parsing errors
+    }
+  }, [project.id, profile?.studentId]);
+
+  // Save draft to localStorage whenever answers change
+  useEffect(() => {
+    try {
+      const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
+      if (Object.keys(answers).length > 0) {
+        localStorage.setItem(draftKey, JSON.stringify(answers));
+      }
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [answers, project.id, profile?.studentId]);
+
   const allowedGrades = project.quotas.map((q) => q.grade)
   const isGradeAllowed = profile ? allowedGrades.includes(profile.grade) : false
 
@@ -123,6 +151,10 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       setError(res.error || "An error occurred")
       setLoading(false)
     } else {
+      try {
+        const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
+        localStorage.removeItem(draftKey);
+      } catch {}
       router.push(`/detail/${project.id}/success?status=${res.status}`)
     }
   }
@@ -343,7 +375,29 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           <form id="registrationForm" onSubmit={handleSubmitRegistration} className="space-y-8">
             {project.formFields.length > 0 && (
               <div className={!session || !profile || !isGradeAllowed || (!isRegistrationOpen && !isBeforeStart) ? "opacity-60 pointer-events-none" : ""}>
-                <h3 className="text-lg font-bold text-slate-800 mb-5 border-b border-slate-100 pb-3">กรอกรายละเอียดเพิ่มเติม</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5 border-b border-slate-100 pb-3">
+                  <h3 className="text-lg font-bold text-slate-800">กรอกรายละเอียดเพิ่มเติม</h3>
+                  {Object.keys(answers).length > 0 && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full font-medium flex items-center shadow-2xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-500" /> บันทึกร่างอัตโนมัติแล้ว
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAnswers({});
+                          try {
+                            const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
+                            localStorage.removeItem(draftKey);
+                          } catch {}
+                        }}
+                        className="text-xs text-slate-400 hover:text-rose-500 underline transition-colors"
+                      >
+                        ล้างข้อมูล
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="space-y-6">
                   {project.formFields.map((field) => (
                     <div key={field.id} className="bg-slate-50 p-3 sm:p-5 rounded-xl border border-slate-100">
