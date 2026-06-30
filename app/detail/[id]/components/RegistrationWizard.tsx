@@ -38,6 +38,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (document.hidden) return;
       try {
         const res = await fetch(`/api/projects/${project.id}/stats?sessionId=${sessionId}`)
         if (res.ok) {
@@ -174,7 +175,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
               className="w-full md:w-64 shrink-0 relative sm:rounded-2xl overflow-hidden sm:shadow-md bg-slate-100 sm:border border-slate-200 aspect-3/4 cursor-pointer hover:shadow-lg transition-shadow group/img"
               onClick={() => project.posterUrl && setSelectedImage(project.posterUrl)}
             >
-              <Image src={project.posterUrl} alt={project.title} fill className="object-cover group-hover/img:scale-105 transition-transform duration-500" unoptimized />
+              <Image src={project.posterUrl} alt={project.title} fill sizes="(max-width: 768px) 100vw, 300px" className="object-cover group-hover/img:scale-105 transition-transform duration-500" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none z-10">
                 <div className="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full flex items-center font-medium shadow-xl transform translate-y-4 group-hover/img:translate-y-0 transition-transform duration-300">
                   <ZoomIn className="w-5 h-5 mr-2" />
@@ -231,6 +232,24 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       </div>
 
       <div id="registration-section" className="px-5 py-6 sm:p-8">
+        {/* Step Progress Tracker (Zeigarnik Effect) */}
+        <div className="mb-8 p-4 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-center justify-between gap-2 text-xs sm:text-sm font-medium">
+          <div className={`flex items-center gap-2 ${session ? 'text-emerald-600 font-semibold' : 'text-indigo-600 font-bold'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${session ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-600 text-white shadow-sm'}`}>1</span>
+            <span>ยืนยันตัวตน</span>
+          </div>
+          <div className="h-0.5 flex-1 bg-slate-200 mx-1 sm:mx-2"></div>
+          <div className={`flex items-center gap-2 ${session && profile && isGradeAllowed ? 'text-indigo-600 font-bold' : 'text-slate-400'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${session && profile && isGradeAllowed ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-200 text-slate-600'}`}>2</span>
+            <span>กรอกข้อมูล</span>
+          </div>
+          <div className="h-0.5 flex-1 bg-slate-200 mx-1 sm:mx-2"></div>
+          <div className="flex items-center gap-2 text-slate-400">
+            <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs bg-slate-200 text-slate-600">3</span>
+            <span>เสร็จสิ้น</span>
+          </div>
+        </div>
+
         {error && (
           <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-600 px-4 py-3 rounded-xl text-sm flex items-start">
             <span className="font-semibold mr-2">ข้อผิดพลาด:</span> {error}
@@ -519,7 +538,8 @@ export default function RegistrationWizard({ project, session, profile, errorPar
         >
           <div className="relative max-w-5xl w-full max-h-full flex justify-center items-center animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
             <button 
-              className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
+              aria-label="ปิดหน้าต่างรูปภาพ"
+              className="absolute -top-12 right-0 sm:-right-12 sm:top-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md transition-colors"
               onClick={() => setSelectedImage(null)}
             >
               <X className="w-6 h-6" />
