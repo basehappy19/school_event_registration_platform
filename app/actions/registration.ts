@@ -43,13 +43,20 @@ export async function submitRegistration(data: {
   }
   const validData = parsed.data
 
-  // Handle Registration in Transaction with Redis lock per student/project
+  // Handle Registration in Transaction with Redis lock per student/project (Fail open if unconfigured/down)
   const lockKey = `lock:reg:${student.studentId}:${validData.projectId}`
-  try {
-    const acquired = await redis.set(lockKey, 'locked', { nx: true, ex: 8 })
-    if (!acquired) {
-      return { error: 'ระบบกำลังดำเนินการลงทะเบียนอยู่ กรุณารอสักครู่แล้วลองอีกครั้ง' }
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    try {
+      const acquired = await redis.set(lockKey, 'locked', { nx: true, ex: 8 })
+      if (!acquired) {
+        return { error: 'ระบบกำลังดำเนินการลงทะเบียนอยู่ กรุณารอสักครู่แล้วลองอีกครั้ง' }
+      }
+    } catch (redisErr) {
+      console.error("Redis lock error:", redisErr)
     }
+  }
+
+  try {
 
     const result = await prisma.$transaction(async (tx) => {
       // Lock Project row to serialize capacity calculations safely across parallel transactions
@@ -135,15 +142,15 @@ export async function submitRegistration(data: {
           projectId: data.projectId,
           ipAddress: ip,
           userAgent: userAgent,
-          payload: JSON.stringify({ formAnswers: data.formAnswers, status })
+          payload: JSON.stringify({ formAnswers: validData.formAnswers, status })
         }
       })
 
-      const proj = await tx.project.findUnique({ where: { id: data.projectId }, select: { title: true } })
+      const proj = await tx.project.findUnique({ where: { id: validData.projectId }, select: { title: true } })
       await tx.registrationLog.create({
         data: {
           action: "REGISTER",
-          projectId: data.projectId,
+          projectId: validData.projectId,
           projectTitle: proj?.title || "",
           studentId: student.studentId,
           studentName: `${student.prefix}${student.firstName} ${student.lastName}`,
@@ -165,7 +172,9 @@ export async function submitRegistration(data: {
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
   } finally {
-    try { await redis.del(lockKey) } catch (e) {}
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      try { await redis.del(lockKey) } catch (e) {}
+    }
   }
 }
 
