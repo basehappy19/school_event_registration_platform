@@ -33,11 +33,8 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
       showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
       setLoading(false)
     } else {
-      showToast("สละสิทธิ์การเข้าร่วมกิจกรรมเรียบร้อยแล้ว", 'success')
-      setTimeout(() => {
-        router.push("/")
-        router.refresh()
-      }, 1000)
+      router.push("/?cancelled=1")
+      router.refresh()
     }
   }
 

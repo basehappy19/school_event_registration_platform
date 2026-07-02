@@ -3,6 +3,7 @@ import Link from "next/link"
 import prisma from "@/lib/prisma"
 import ProjectGrid from "./components/ProjectGrid"
 import { auth } from "@/auth"
+import CancelledModal from "./components/CancelledModal"
 
 export const revalidate = 60 // Revalidate every minute
 
@@ -75,6 +76,8 @@ export default async function Home() {
         {/* Projects Grid with Search */}
         <ProjectGrid projects={projects} />
       </main>
+
+      <CancelledModal />
     </div>
   )
 }
