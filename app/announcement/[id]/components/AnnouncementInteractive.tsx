@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { Search } from "lucide-react"
 
 export interface RegistrationItem {
-  id: number
+  id: string
   status: string
   studentProfile: {
     studentId: string

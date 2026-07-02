@@ -148,7 +148,7 @@ export async function submitRegistration(data: {
   }
 }
 
-export async function cancelRegistration(registrationId: number) {
+export async function cancelRegistration(registrationId: string) {
   const session = await auth()
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for') || '127.0.0.1'

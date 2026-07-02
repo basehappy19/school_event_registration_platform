@@ -73,7 +73,7 @@ export default function AdminSeatAssistantModal({
     })
   }
 
-  const handleIndividualAccept = (regId: number, studentName: string) => {
+  const handleIndividualAccept = (regId: string, studentName: string) => {
     setConfirmModal({
       isOpen: true,
       title: "ยืนยันปรับสถานะเป็นตัวจริง",

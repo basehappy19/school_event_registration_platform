@@ -77,7 +77,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     }
   }
 
-  const handleDelete = async (regId: number) => {
+  const handleDelete = async (regId: string) => {
     if (!confirm("คุณแน่ใจหรือไม่ที่จะลบรายชื่อนี้?")) return
     setLoading(true)
     const res = await adminDeleteRegistration(regId)
@@ -126,7 +126,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     }
   }
 
-  const handleAccept = async (regId: number) => {
+  const handleAccept = async (regId: string) => {
     setLoading(true)
     const res = await adminAcceptRegistration(regId)
     setLoading(false)
@@ -138,7 +138,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     }
   }
 
-  const handleReject = async (regId: number) => {
+  const handleReject = async (regId: string) => {
     setLoading(true)
     const res = await adminRejectRegistration(regId)
     setLoading(false)
@@ -150,7 +150,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     }
   }
 
-  const handleWaitlist = async (regId: number) => {
+  const handleWaitlist = async (regId: string) => {
     setLoading(true)
     const res = await adminWaitlistRegistration(regId)
     setLoading(false)

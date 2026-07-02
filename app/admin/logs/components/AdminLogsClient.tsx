@@ -4,7 +4,7 @@ import { useState } from "react"
 import { History, FileText, Lock, User, Calendar, ShieldCheck, ShieldAlert, ArrowRight, RefreshCw, Search } from "lucide-react"
 
 interface RegistrationLog {
-  id: number
+  id: string
   action: string
   projectId: number
   projectTitle: string | null

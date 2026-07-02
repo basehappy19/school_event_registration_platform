@@ -233,7 +233,7 @@ export async function adminAddRegistration(projectId: number, studentId: string)
   }
 }
 
-export async function adminDeleteRegistration(registrationId: number) {
+export async function adminDeleteRegistration(registrationId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
@@ -272,7 +272,7 @@ export async function adminDeleteRegistration(registrationId: number) {
   }
 }
 
-export async function adminAcceptRegistration(regId: number) {
+export async function adminAcceptRegistration(regId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
@@ -308,7 +308,7 @@ export async function adminAcceptRegistration(regId: number) {
   }
 }
 
-export async function adminRejectRegistration(regId: number) {
+export async function adminRejectRegistration(regId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
@@ -344,7 +344,7 @@ export async function adminRejectRegistration(regId: number) {
   }
 }
 
-export async function adminWaitlistRegistration(regId: number) {
+export async function adminWaitlistRegistration(regId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'

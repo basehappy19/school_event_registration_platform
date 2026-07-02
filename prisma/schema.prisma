@@ -115,8 +115,8 @@ model FormField {
 }
 
 model FormAnswer {
-  id             Int    @id @default(autoincrement())
-  registrationId Int
+  id             String @id @default(cuid())
+  registrationId String
   fieldId        Int
   value          String // Stored as a string, parse if needed based on FormField type
 
@@ -132,7 +132,7 @@ enum RegistrationStatus {
 }
 
 model Registration {
-  id              Int                @id @default(autoincrement())
+  id              String             @id @default(cuid())
   projectId       Int
   studentId       String
   status          RegistrationStatus @default(WAITLISTED)
@@ -147,7 +147,7 @@ model Registration {
 }
 
 model AuditLog {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(cuid())
   action     String
   adminEmail String?
   studentId  String?
@@ -159,7 +159,7 @@ model AuditLog {
 }
 
 model RegistrationLog {
-  id             Int      @id @default(autoincrement())
+  id             String   @id @default(cuid())
   action         String   // e.g. "REGISTER", "CANCEL", "ADMIN_DELETE", "ADMIN_APPROVE", "ADMIN_REJECT", "ADMIN_WAITLIST", "AUTO_PROMOTE"
   projectId      Int
   projectTitle   String?

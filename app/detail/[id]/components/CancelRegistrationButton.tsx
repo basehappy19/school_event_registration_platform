@@ -5,7 +5,7 @@ import { cancelRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
 import { Loader2, XCircle, CheckCircle2, AlertCircle } from "lucide-react"
 
-export default function CancelRegistrationButton({ registrationId }: { registrationId: number }) {
+export default function CancelRegistrationButton({ registrationId }: { registrationId: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
