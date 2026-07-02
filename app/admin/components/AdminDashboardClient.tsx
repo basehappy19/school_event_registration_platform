@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Calendar, Plus, Loader2, GripVertical, ChevronUp, ChevronDown, Users, Eye, Settings } from "lucide-react"
+import { Calendar, Plus, Loader2, GripVertical, ChevronUp, ChevronDown, Users, Eye, Settings, ChevronLeft, ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import AdminProjectSettings from "./AdminProjectSettings"
 import AdminRegistrationList from "./AdminRegistrationList"
@@ -106,7 +106,12 @@ function SortableProjectItem({
           </div>
         )}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <div className="line-clamp-2 leading-snug text-xs sm:text-sm">{project.title}</div>
+          <div title={project.title} className="text-xs sm:text-sm font-semibold leading-normal break-words">{project.title}</div>
+          {project.description ? (
+            <div className={`text-xs mt-1 line-clamp-2 ${isActive ? 'text-indigo-100' : 'text-slate-500'}`}>{project.description}</div>
+          ) : (
+            <div className={`text-[11px] mt-0.5 ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>วันที่จัดกิจกรรม: {new Date(project.activityDate || project.startDate).toLocaleDateString('th-TH')}</div>
+          )}
           <div className={`text-[10px] mt-1.5 flex items-center justify-between ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>
             <div className="flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${project.isPublished ? 'bg-emerald-400' : 'bg-slate-300'}`}></span>
@@ -132,16 +137,44 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
   const [isCreating, setIsCreating] = useState(false)
   const [viewerCounts, setViewerCounts] = useState<Record<number, number>>({})
   const [activeTab, setActiveTab] = useState<'registrations' | 'settings'>('registrations')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const isDraggingRef = useRef(false)
+  const isInitialMount = useRef(true)
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('admin_active_project_id')
+    if (saved) {
+      const id = Number(saved)
+      if (initialProjects.some(p => p.id === id)) {
+        setActiveProjectId(id)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (activeProjectId !== null) {
+      sessionStorage.setItem('admin_active_project_id', String(activeProjectId))
+    }
+  }, [activeProjectId])
 
   useEffect(() => {
     setProjects(initialProjects)
     if (!initialProjects.find(p => p.id === activeProjectId)) {
+      const saved = sessionStorage.getItem('admin_active_project_id')
+      const savedId = saved ? Number(saved) : null
+      if (savedId && initialProjects.some(p => p.id === savedId)) {
+        setActiveProjectId(savedId)
+      } else {
         setActiveProjectId(initialProjects[0]?.id || null)
+      }
     }
   }, [initialProjects])
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
     setActiveTab('registrations')
   }, [activeProjectId])
 
@@ -248,54 +281,103 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
   return (
     <div className="flex flex-col md:flex-row gap-6">
       {/* Sidebar: Project Selector */}
-      <div className="w-full md:w-80 shrink-0 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">โครงการทั้งหมด</h2>
-          <button 
-            onClick={handleCreateProject}
-            disabled={isCreating}
-            className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 p-1.5 rounded-lg transition-colors"
-          >
-            {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-          </button>
-        </div>
-        
-        <DndContext 
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <div className="flex flex-col gap-2">
-            {projects.length === 0 ? (
-              <p className="text-sm text-slate-500 italic">ไม่มีโครงการ</p>
-            ) : (
-              <SortableContext 
-                items={projects.map(p => p.id)}
-                strategy={verticalListSortingStrategy}
+      {/* Sidebar: Project Selector with smooth fade & slide animation */}
+      <div className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
+        isSidebarOpen 
+          ? "w-full max-h-[2000px] opacity-100 mb-4 md:w-80 lg:w-[380px] md:max-h-none md:mb-0" 
+          : "w-full max-h-0 opacity-0 mb-0 pointer-events-none md:w-0 md:max-h-none"
+      }`}>
+        <div className="w-full md:w-80 lg:w-[380px] space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">โครงการทั้งหมด ({projects.length})</h2>
+            <div className="flex items-center gap-1.5">
+              <button 
+                onClick={handleCreateProject}
+                disabled={isCreating}
+                title="สร้างโครงการใหม่"
+                className="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 p-1.5 rounded-lg transition-colors"
               >
-                {projects.map((p, index) => (
-                  <SortableProjectItem
-                    key={p.id}
-                    project={p}
-                    isActive={activeProjectId === p.id}
-                    onClick={() => setActiveProjectId(p.id)}
-                    onMoveUp={() => handleMoveUp(index)}
-                    onMoveDown={() => handleMoveDown(index)}
-                    isFirst={index === 0}
-                    isLast={index === projects.length - 1}
-                    viewerCount={viewerCounts[p.id] || 0}
-                  />
-                ))}
-              </SortableContext>
-            )}
+                {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                title="ย่อแถบโครงการ"
+                className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4 hidden md:block" />
+                <ChevronUp className="w-4 h-4 block md:hidden" />
+              </button>
+            </div>
           </div>
-        </DndContext>
+          
+          <DndContext 
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            <div className="flex flex-col gap-2">
+              {projects.length === 0 ? (
+                <p className="text-sm text-slate-500 italic">ไม่มีโครงการ</p>
+              ) : (
+                <SortableContext 
+                  items={projects.map(p => p.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {projects.map((p, index) => (
+                    <SortableProjectItem
+                      key={p.id}
+                      project={p}
+                      isActive={activeProjectId === p.id}
+                      onClick={() => setActiveProjectId(p.id)}
+                      onMoveUp={() => handleMoveUp(index)}
+                      onMoveDown={() => handleMoveDown(index)}
+                      isFirst={index === 0}
+                      isLast={index === projects.length - 1}
+                      viewerCount={viewerCounts[p.id] || 0}
+                    />
+                  ))}
+                </SortableContext>
+              )}
+            </div>
+          </DndContext>
+        </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 transition-all duration-300">
+        {!isSidebarOpen && (
+          <div className="mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in duration-300">
+            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                title="แสดงรายการโครงการ"
+                className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors shrink-0 mt-0.5 sm:mt-0"
+              >
+                <ChevronRight className="w-5 h-5 hidden md:block" />
+                <ChevronDown className="w-5 h-5 block md:hidden" />
+              </button>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-semibold text-indigo-600 flex items-center gap-1.5">
+                  <span>กำลังทำงานในโครงการ:</span>
+                </div>
+                <div className="text-sm sm:text-base font-bold text-slate-900 break-words leading-snug mt-0.5">
+                  {activeProject ? activeProject.title : "ยังไม่ได้เลือกโครงการ"}
+                </div>
+                {activeProject?.description && (
+                  <div className="text-xs text-slate-500 break-words leading-normal mt-1">{activeProject.description}</div>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors shrink-0 self-end sm:self-auto"
+            >
+              เลือกโครงการอื่น ({projects.length})
+            </button>
+          </div>
+        )}
         {!activeProject ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500 flex flex-col items-center">
             <Calendar className="w-12 h-12 text-slate-300 mb-4" />
@@ -318,7 +400,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
                   }`}
                 >
                   <Users className="w-4 h-4" />
-                  รายชื่อผู้สมัคร ({activeProject.registrations?.length || 0})
+                  รายชื่อผู้ลงทะเบียน ({activeProject.registrations?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('settings')}

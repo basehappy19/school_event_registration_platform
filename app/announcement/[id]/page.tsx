@@ -190,9 +190,9 @@ export default async function AnnouncementPage({ params, searchParams }: { param
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
                 <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-rose-500 shrink-0"></span>
-                <h3 className="font-bold text-slate-800 text-base sm:text-lg break-keep">หมดเวลารับสมัครลงทะเบียนแล้ว</h3>
+                <h3 className="font-bold text-slate-800 text-base sm:text-lg break-keep">หมดเวลารับลงทะเบียนแล้ว</h3>
               </div>
-              <p className="text-slate-600 text-xs sm:text-sm break-keep leading-relaxed">คุณไม่ได้ลงทะเบียนเข้าร่วมโครงการนี้ในช่วงเวลาที่เปิดรับสมัคร จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
+              <p className="text-slate-600 text-xs sm:text-sm break-keep leading-relaxed">คุณไม่ได้ลงทะเบียนเข้าร่วมโครงการนี้ในช่วงเวลาที่เปิดรับลงทะเบียน จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
             </div>
             <Link href={`/detail/${numericId}`} className="w-full md:w-auto text-center bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-2xs shrink-0">
               ดูรายละเอียดโครงการ
@@ -202,7 +202,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 print:hidden">
             <div className="text-center md:text-left">
               <h3 className="font-bold text-amber-950 text-base sm:text-lg mb-1 break-keep">คุณยังไม่ได้ลงทะเบียนในโครงการนี้</h3>
-              <p className="text-amber-700 text-xs sm:text-sm break-keep leading-relaxed">หากต้องการเข้าร่วมกิจกรรม สามารถเข้าไปอ่านรายละเอียดและลงทะเบียนได้ที่หน้าฟอร์มรับสมัคร</p>
+              <p className="text-amber-700 text-xs sm:text-sm break-keep leading-relaxed">หากต้องการเข้าร่วมกิจกรรม สามารถเข้าไปอ่านรายละเอียดและลงทะเบียนได้ที่หน้าฟอร์มลงทะเบียน</p>
             </div>
             <Link href={`/detail/${numericId}`} className="w-full md:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
               ไปที่หน้าฟอร์มลงทะเบียน

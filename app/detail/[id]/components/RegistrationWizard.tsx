@@ -362,8 +362,8 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                 <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-slate-800 text-base sm:text-lg break-keep">โครงการนี้ปิดรับสมัครแล้ว</h3>
-                <p className="text-slate-600 text-xs sm:text-sm mt-1 break-keep leading-relaxed">หมดเวลาหรือปิดรับสมัครลงทะเบียนสำหรับโครงการนี้แล้ว คุณไม่ได้ทำการลงทะเบียนไว้จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
+                <h3 className="font-bold text-slate-800 text-base sm:text-lg break-keep">โครงการนี้ปิดรับลงทะเบียนแล้ว</h3>
+                <p className="text-slate-600 text-xs sm:text-sm mt-1 break-keep leading-relaxed">หมดเวลาหรือปิดรับลงทะเบียนสำหรับโครงการนี้แล้ว คุณไม่ได้ทำการลงทะเบียนไว้จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
               </div>
               <Link href={`/announcement/${project.id}`} className="w-full sm:w-auto text-center bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-black transition-colors shrink-0 shadow-sm">
                 ดูประกาศรายชื่อ

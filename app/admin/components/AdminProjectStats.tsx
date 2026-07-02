@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Users, CheckCircle2, Clock, Calendar as CalendarIcon, TrendingUp, BarChart3 } from "lucide-react"
+import { Users, CheckCircle2, Clock, Calendar as CalendarIcon, TrendingUp, BarChart3, AlertCircle } from "lucide-react"
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell
@@ -22,8 +22,11 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
 
     const regByGrade: Record<string, number> = {}
     const approvedByGrade: Record<string, number> = {}
+    const waitlistedByGrade: Record<string, number> = {}
+    const rejectedByGrade: Record<string, number> = {}
     let totalApproved = 0
     let totalWaitlisted = 0
+    let totalRejected = 0
     
     // For Line Chart (Time Series)
     const timeSeriesMap: Record<string, Record<string, number>> = {}
@@ -44,7 +47,11 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
         approvedByGrade[grade] = (approvedByGrade[grade] || 0) + 1
         totalApproved++
       } else if (r.status === 'WAITLISTED') {
+        waitlistedByGrade[grade] = (waitlistedByGrade[grade] || 0) + 1
         totalWaitlisted++
+      } else {
+        rejectedByGrade[grade] = (rejectedByGrade[grade] || 0) + 1
+        totalRejected++
       }
       
       statusCounts[r.status] = (statusCounts[r.status] || 0) + 1
@@ -90,14 +97,16 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
       grade: `ม.${g}`,
       quota: quotaByGrade[g] || 0,
       registered: regByGrade[g] || 0,
-      approved: approvedByGrade[g] || 0
+      approved: approvedByGrade[g] || 0,
+      waitlisted: waitlistedByGrade[g] || 0,
+      rejected: rejectedByGrade[g] || 0,
     }))
 
     // Prepare Status Pie Chart Array
     const statusData = [
-      { name: 'ตัวจริง', value: statusCounts['APPROVED'] || 0, color: '#10b981' },
-      { name: 'สำรอง', value: statusCounts['WAITLISTED'] || 0, color: '#f59e0b' },
-      { name: 'ไม่ได้รับสิทธิ์', value: statusCounts['REJECTED'] || 0, color: '#f43f5e' },
+      { name: 'ตัวจริง', value: totalApproved, color: '#10b981' },
+      { name: 'สำรอง', value: totalWaitlisted, color: '#f59e0b' },
+      { name: 'ไม่ได้รับสิทธิ์', value: totalRejected, color: '#f43f5e' },
     ].filter(d => d.value > 0)
 
     return {
@@ -105,6 +114,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
       totalRegistered: registrations.length,
       totalApproved,
       totalWaitlisted,
+      totalRejected,
       gradeBreakdown,
       timeSeriesData,
       statusData,
@@ -117,60 +127,85 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
   return (
     <div className="space-y-6 mb-6">
       {/* Top Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-start gap-4 h-full">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
-            <Users className="w-6 h-6" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left 1/2: Combined Registration & Status Overview */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between h-full">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                <Users className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500 leading-tight">ยอดลงทะเบียนทั้งหมด</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.totalRegistered}</span>
+                  <span className="text-sm font-medium text-slate-500">/ {stats.totalQuota || '?'} คน</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-col justify-between h-full w-full min-h-12">
-            <p className="text-sm font-medium text-slate-500 mb-1 leading-tight">ยอดรับสมัครทั้งหมด</p>
-            <div className="flex items-baseline gap-2 mt-auto">
-              <span className="text-2xl font-bold text-slate-900">{stats.totalRegistered}</span>
-              <span className="text-sm text-slate-500 font-medium">/ {stats.totalQuota || '?'} คน</span>
+
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-4 border-t border-slate-100 mt-auto">
+            <div className="bg-emerald-50/60 rounded-xl p-3 border border-emerald-100/80 flex flex-col justify-between">
+              <div className="flex items-center gap-1.5 text-emerald-700 text-xs font-semibold mb-1.5">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>ตัวจริง</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg sm:text-xl font-bold text-emerald-950">{stats.totalApproved}</span>
+                <span className="text-xs text-emerald-700/80">คน</span>
+              </div>
+            </div>
+
+            <div className="bg-amber-50/60 rounded-xl p-3 border border-amber-100/80 flex flex-col justify-between">
+              <div className="flex items-center gap-1.5 text-amber-700 text-xs font-semibold mb-1.5">
+                <Clock className="w-4 h-4 shrink-0" />
+                <span>สำรอง</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg sm:text-xl font-bold text-amber-950">{stats.totalWaitlisted}</span>
+                <span className="text-xs text-amber-700/80">คน</span>
+              </div>
+            </div>
+
+            <div className="bg-rose-50/60 rounded-xl p-3 border border-rose-100/80 flex flex-col justify-between">
+              <div className="flex items-center gap-1.5 text-rose-700 text-xs font-semibold mb-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span className="truncate">ไม่ได้รับสิทธิ์</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg sm:text-xl font-bold text-rose-950">{stats.totalRejected}</span>
+                <span className="text-xs text-rose-700/80">คน</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-start gap-4 h-full">
-          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6" />
+        {/* Right 1/2: Grade Breakdown */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+            <BarChart3 className="w-32 h-32" />
           </div>
-          <div className="flex flex-col justify-between h-full w-full min-h-12">
-            <p className="text-sm font-medium text-slate-500 mb-1 leading-tight">ตัวจริง</p>
-            <div className="flex items-baseline gap-2 mt-auto">
-              <span className="text-2xl font-bold text-slate-900">{stats.totalApproved}</span>
-              <span className="text-sm text-slate-500 font-medium">คน</span>
+          <div className="relative z-10 flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-bold text-slate-700">สรุปตามระดับชั้น</p>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-start gap-4 h-full">
-          <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div className="flex flex-col justify-between h-full w-full min-h-12">
-            <p className="text-sm font-medium text-slate-500 mb-1 leading-tight">สำรอง</p>
-            <div className="flex items-baseline gap-2 mt-auto">
-              <span className="text-2xl font-bold text-slate-900">{stats.totalWaitlisted}</span>
-              <span className="text-sm text-slate-500 font-medium">คน</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <BarChart3 className="w-16 h-16" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-sm font-medium text-slate-500 mb-3">สรุปตามระดับชั้น</p>
-            <div className="space-y-1.5 max-h-20 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-3 my-auto">
               {stats.gradeBreakdown.length > 0 ? stats.gradeBreakdown.map((gb, i) => (
-                <div key={i} className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-slate-700">{gb.grade}</span>
-                  <span className="text-slate-500"><strong className="text-slate-900">{gb.registered}</strong> / {gb.quota || '?'}</span>
+                <div key={i} className="flex items-center justify-between text-sm gap-2 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-800 text-base">{gb.grade}</span>
+                    <span className="text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 px-2 py-0.5 rounded-full">
+                      สำรอง {gb.waitlisted} คน
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-bold text-slate-900 text-base">{gb.registered}</span>
+                    <span className="text-xs text-slate-500 font-medium">/ {gb.quota || '?'} คน</span>
+                  </div>
                 </div>
               )) : (
-                <p className="text-sm text-slate-400">ยังไม่มีข้อมูล</p>
+                <p className="text-sm text-slate-400 py-4 text-center">ยังไม่มีข้อมูล</p>
               )}
             </div>
           </div>
@@ -184,7 +219,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-indigo-500" />
-              <h3 className="font-bold text-slate-800">แนวโน้มการสมัครตามเวลา</h3>
+              <h3 className="font-bold text-slate-800">แนวโน้มการลงทะเบียนตามเวลา</h3>
             </div>
             <select 
               value={timeFilter}
@@ -253,55 +288,70 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                 <CalendarIcon className="w-10 h-10 mb-2 opacity-50" />
-                <p>ยังไม่มีข้อมูลการสมัคร</p>
+                <p>ยังไม่มีข้อมูลการลงทะเบียน</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Status Pie Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-6">
-            <BarChart3 className="w-5 h-5 text-indigo-500" />
-            <h3 className="font-bold text-slate-800">สัดส่วนสถานะนักเรียน</h3>
-          </div>
-          <div className="h-64 w-full relative">
-            {stats.statusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={stats.statusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {stats.statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-400">
-                <p>ยังไม่มีข้อมูลสถานะ</p>
-              </div>
-            )}
-            {stats.statusData.length > 0 && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center -mt-5">
-                  <p className="text-3xl font-bold text-slate-800">{stats.totalRegistered}</p>
-                  <p className="text-xs text-slate-500">รวมทั้งหมด</p>
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-indigo-500" />
+              <h3 className="font-bold text-slate-800">สัดส่วนสถานะนักเรียน</h3>
+            </div>
+            <div className="h-56 w-full relative">
+              {stats.statusData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats.statusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={58}
+                      outerRadius={80}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {stats.statusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip 
+                      contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
+                      formatter={(val: any) => [`${val} คน`, 'จำนวน']}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                  <p>ยังไม่มีข้อมูลสถานะ</p>
                 </div>
-              </div>
-            )}
+              )}
+              {stats.statusData.length > 0 && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center">
+                    <p className="text-2xl font-black text-slate-800 leading-none">{stats.totalRegistered}</p>
+                    <p className="text-[11px] font-medium text-slate-500 mt-1">รวมทั้งหมด</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Custom Legend with Counts Below Chart */}
+          {stats.statusData.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-around gap-2 text-xs">
+              {stats.statusData.map((entry, index) => (
+                <div key={index} className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: entry.color }}></span>
+                  <span className="text-slate-600 font-medium">{entry.name}:</span>
+                  <span className="text-slate-900 font-bold">{entry.value} คน</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

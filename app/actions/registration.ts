@@ -22,7 +22,7 @@ export async function submitRegistration(data: {
 
   const session = await auth()
   if (!session?.user?.email) {
-    return { error: 'กรุณาเข้าสู่ระบบก่อนทำการสมัคร' }
+    return { error: 'กรุณาเข้าสู่ระบบก่อนทำการลงทะเบียน' }
   }
 
   // Validate Student via Google Email
@@ -56,7 +56,7 @@ export async function submitRegistration(data: {
       const quota = allQuotas.find(q => q.grade === student.grade)
 
       if (!quota) {
-        throw new Error(`ระดับชั้น ม.${student.grade} ไม่สามารถสมัครกิจกรรมนี้ได้`)
+        throw new Error(`ระดับชั้น ม.${student.grade} ไม่สามารถลงทะเบียนกิจกรรมนี้ได้`)
       }
 
       const totalProjectCapacity = allQuotas.reduce((sum, q) => sum + Number(q.capacity || 0), 0)

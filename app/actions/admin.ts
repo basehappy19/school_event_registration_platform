@@ -385,7 +385,7 @@ export async function adminAcceptAllWaitlist(projectId: number) {
   await checkAdmin()
   try {
     await prisma.registration.updateMany({
-      where: { projectId, status: { not: 'APPROVED' } },
+      where: { projectId, status: 'WAITLISTED' },
       data: { status: 'APPROVED' }
     })
     revalidatePath('/admin')
@@ -585,6 +585,7 @@ export async function adminAnalyzeAllocation(projectId: number) {
 
     const gradeAnalysis: any[] = []
     let currentRollover = 0
+    let remainingProjectSeats = totalRemaining
 
     for (const grade of sortedGrades) {
       const q = project.quotas.find(item => item.grade === grade)
@@ -596,8 +597,9 @@ export async function adminAnalyzeAllocation(projectId: number) {
       const waitlisted = project.registrations.filter(r => r.status === 'WAITLISTED' && r.studentProfile.grade === grade)
       const waitlistCount = waitlisted.length
 
-      const willPromote = Math.min(waitlistCount, pool, totalRemaining)
+      const willPromote = Math.min(waitlistCount, pool, remainingProjectSeats)
       const unusedAfterPromote = Math.max(0, pool - willPromote)
+      remainingProjectSeats -= willPromote
 
       gradeAnalysis.push({
         grade,
@@ -616,6 +618,16 @@ export async function adminAnalyzeAllocation(projectId: number) {
 
     const waitlistedStudents = project.registrations
       .filter(r => r.status === 'WAITLISTED')
+      .sort((a, b) => {
+        const timeA = new Date(a.createdAt || 0).getTime()
+        const timeB = new Date(b.createdAt || 0).getTime()
+        if (timeA !== timeB) {
+          return timeA - timeB
+        }
+        const gradeA = Number(a.studentProfile?.grade || 0)
+        const gradeB = Number(b.studentProfile?.grade || 0)
+        return gradeB - gradeA
+      })
       .map((reg, index) => {
         const grade = reg.studentProfile.grade
         const ga = gradeAnalysis.find(g => g.grade === grade)
@@ -629,8 +641,10 @@ export async function adminAnalyzeAllocation(projectId: number) {
           adviceType = "VACANT_OWN"
           adviceText = `✅ โควตา ม.${grade} ยังว่างอยู่ (${ga.approved}/${ga.capacity}) สามารถรับเข้าโควตาชั้นตัวเองได้ทันที`
         } else if (ga && ga.receivedRollover > 0) {
+          const gaIdx = gradeAnalysis.findIndex(g => g.grade === grade)
+          const donorGrade = gaIdx > 0 ? gradeAnalysis[gaIdx - 1].grade : 'ก่อนหน้า'
           adviceType = "ROLLOVER_DONOR"
-          adviceText = `💡 โควตา ม.${grade} เต็มแล้ว แต่สามารถยืมโควตาว่างที่ส่งต่อมาจากรุ่นพี่ได้ (มีที่นั่งส่งต่อมา ${ga.receivedRollover} ที่นั่ง)`
+          adviceText = `💡 โควตา ม.${grade} เต็มแล้ว แต่สามารถใช้โควตาว่างที่ส่งต่อจาก ม.${donorGrade} (จำนวน ${ga.receivedRollover} ที่นั่ง)`
         } else {
           adviceType = "NO_QUOTA"
           adviceText = `🔸 โควตาชั้นตัวเองเต็มแล้ว (แต่โควตารวมโครงการยังเหลืออีก ${totalRemaining} ที่นั่ง สามารถรับพิเศษได้)`

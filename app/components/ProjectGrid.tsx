@@ -200,7 +200,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                       <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
                         <span className="flex items-center text-indigo-600">
                           <Users className="w-4 h-4 mr-1.5" />
-                          ยอดสมัครรวม
+                          ยอดลงทะเบียนรวม
                         </span>
                         <span>{totalRegistered} / {totalCapacity} คน</span>
                       </div>

@@ -58,7 +58,7 @@ export default function AdminLogsClient({
     switch (action) {
       case "REGISTER":
       case "SUBMIT_REGISTRATION":
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">นักเรียนสมัครเอง</span>
+        return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">นักเรียนลงทะเบียนเอง</span>
       case "CANCEL":
       case "CANCEL_REGISTRATION":
         return <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-100 text-rose-700">นักเรียนสละสิทธิ์</span>
@@ -144,10 +144,10 @@ export default function AdminLogsClient({
         <div>
           <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
             <History className="w-7 h-7 text-indigo-600" />
-            บันทึกประวัติการทำงานระบบ (System Logs)
+            บันทึกประวัติการทำงานระบบ
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            ตรวจสอบการสมัคร สละสิทธิ์ การแก้ไขโครงการ และประวัติการเข้าสู่ระบบอย่างละเอียด
+            ตรวจสอบการลงทะเบียน สละสิทธิ์ การแก้ไขโครงการ และประวัติการเข้าสู่ระบบอย่างละเอียด
           </p>
         </div>
 
@@ -174,7 +174,7 @@ export default function AdminLogsClient({
           }`}
         >
           <User className="w-4 h-4" />
-          ประวัติการสมัคร / สละสิทธิ์ ({filteredRegLogs.length})
+          ประวัติการลงทะเบียน / สละสิทธิ์ ({filteredRegLogs.length})
         </button>
 
         <button
@@ -255,7 +255,7 @@ export default function AdminLogsClient({
                 ) : (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
-                      ไม่พบข้อมูลประวัติการสมัคร/สละสิทธิ์
+                      ไม่พบข้อมูลประวัติการลงทะเบียน/สละสิทธิ์
                     </td>
                   </tr>
                 )}

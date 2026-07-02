@@ -9,7 +9,7 @@ import { Home, LogOut, User, ArrowLeft } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "บันทึกประวัติการทำงานระบบ (Logs)",
-  description: "ประวัติการสมัคร การแก้ไข และการเข้าสู่ระบบ",
+  description: "ประวัติการลงทะเบียน การแก้ไข และการเข้าสู่ระบบ",
 }
 
 export default async function AdminLogsPage() {

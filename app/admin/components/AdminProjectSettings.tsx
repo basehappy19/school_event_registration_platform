@@ -372,11 +372,11 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
                   className="mt-1 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <div>
-                  <span className="block font-medium text-slate-800">เปิดรับสมัคร</span>
+                  <span className="block font-medium text-slate-800">เปิดลงทะเบียน</span>
                   <span className="block text-xs text-slate-500 mt-0.5">อนุญาตให้นักเรียนกดลงทะเบียนได้</span>
                   {isPastEndDate && (
                     <div className="mt-2 text-[11px] leading-tight text-rose-600 bg-rose-50/80 px-2 py-1.5 rounded border border-rose-100">
-                      เลยเวลาปิดรับสมัครแล้ว หากต้องการเปิดอีกครั้ง<br/>กรุณาล้างค่าเวลาปิดรับสมัครด้านล่าง หรือขยายเวลา
+                      เลยเวลาปิดลงทะเบียนแล้ว หากต้องการเปิดอีกครั้ง<br/>กรุณาล้างค่าเวลาปิดลงทะเบียนด้านล่าง หรือขยายเวลา
                     </div>
                   )}
                 </div>
@@ -402,13 +402,13 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
         <div className="mt-4 p-4 bg-sky-50 text-sky-800 text-sm rounded-xl flex items-start gap-3 border border-sky-100">
           <Info className="w-5 h-5 shrink-0 text-sky-600 mt-0.5" />
           <div>
-            <strong className="block text-sky-900 mb-1">หลักการเปิดรับสมัคร:</strong>
-            การรับสมัครจะเปิดให้นักเรียนลงทะเบียนได้ก็ต่อเมื่อ 
+            <strong className="block text-sky-900 mb-1">หลักการเปิดลงทะเบียน:</strong>
+            การลงทะเบียนจะเปิดให้นักเรียนลงทะเบียนได้ก็ต่อเมื่อ 
             <ol className="list-decimal ml-5 mt-1.5 space-y-1 text-sky-800">
-              <li>สวิตช์ <b className="text-sky-900">&quot;เปิดรับสมัคร&quot;</b> ด้านบนถูกเปิดอยู่ <u>และ</u></li>
-              <li>เวลาปัจจุบันอยู่ในช่วง <b className="text-sky-900">วัน/เวลา เปิด-ปิดรับสมัคร</b> ด้านล่าง (ถ้าไม่ได้ตั้งเวลาไว้ ระบบจะยึดตามสวิตช์ด้านบนเป็นหลัก)</li>
+              <li>สวิตช์ <b className="text-sky-900">&quot;เปิดลงทะเบียน&quot;</b> ด้านบนถูกเปิดอยู่ <u>และ</u></li>
+              <li>เวลาปัจจุบันอยู่ในช่วง <b className="text-sky-900">วัน/เวลา เปิด-ปิดลงทะเบียน</b> ด้านล่าง (ถ้าไม่ได้ตั้งเวลาไว้ ระบบจะยึดตามสวิตช์ด้านบนเป็นหลัก)</li>
             </ol>
-            <p className="mt-2 text-xs text-sky-700 bg-sky-100/50 px-2 py-1.5 rounded-md inline-block">* หากปิดสวิตช์ด้านบน จะเป็นการปิดรับสมัครทันทีโดยไม่สนใจช่วงเวลาด้านล่าง</p>
+            <p className="mt-2 text-xs text-sky-700 bg-sky-100/50 px-2 py-1.5 rounded-md inline-block">* หากปิดสวิตช์ด้านบน จะเป็นการปิดลงทะเบียนทันทีโดยไม่สนใจช่วงเวลาด้านล่าง</p>
           </div>
         </div>
         
@@ -498,7 +498,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
       {/* Quotas Section */}
       <div>
         <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">โควตารับสมัครแต่ละชั้น</h3>
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">โควตารับลงทะเบียนแต่ละชั้น</h3>
           <span className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">รวมทั้งหมด {totalCapacity} คน</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
