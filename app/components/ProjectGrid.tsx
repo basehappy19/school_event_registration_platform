@@ -35,6 +35,26 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
     }
   }
 
+  const formatCountdown = (dateStr: string | Date) => {
+    const target = new Date(dateStr).getTime()
+    const now = new Date().getTime()
+    const diffMs = target - now
+    if (diffMs <= 0) return null
+
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    if (diffDays >= 1) {
+      return `อีก ${diffDays} วัน`
+    }
+
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    if (diffHours >= 1) {
+      return `อีก ${diffHours} ชม.`
+    }
+
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
+    return `อีก ${Math.max(1, diffMinutes)} นาที`
+  }
+
   const filteredProjects = projects.filter(project => 
     project.title.toLowerCase().includes(search.toLowerCase()) || 
     (project.description && project.description.toLowerCase().includes(search.toLowerCase()))
@@ -156,9 +176,9 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span>เริ่มลงทะเบียน: {formatDateThai(project.registrationStartDate || project.startDate)}</span>
-                        {project.registrationStartDate && new Date(project.registrationStartDate) > new Date() && (
+                        {project.registrationStartDate && formatCountdown(project.registrationStartDate) && (
                           <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-bold">
-                            อีก {Math.ceil((new Date(project.registrationStartDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} วัน
+                            {formatCountdown(project.registrationStartDate)}
                           </span>
                         )}
                       </div>
