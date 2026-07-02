@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import NextAuth from 'next-auth'
 import { authConfig } from './auth.config'
+import { getClientIp } from './lib/ip'
 import { Redis } from '@upstash/redis'
 
 const { auth } = NextAuth(authConfig)
@@ -13,7 +14,7 @@ const redis = new Redis({
 
 export default auth(async (req) => {
   const path = req.nextUrl.pathname
-  const ip = req.headers.get('x-forwarded-for') || (req as any).ip || '127.0.0.1'
+  const ip = getClientIp(req.headers) || (req as any).ip || '127.0.0.1'
 
   // Admin Route Protection
   const isAdminRoute = path.startsWith('/admin')

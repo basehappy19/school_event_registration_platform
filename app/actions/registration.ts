@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma"
 import { promoteEligibleWaitlist } from "@/lib/quota"
 import { headers } from "next/headers"
+import { getClientIp } from "@/lib/ip"
 import { Redis } from "@upstash/redis"
 
 const redis = new Redis({
@@ -17,7 +18,7 @@ export async function submitRegistration(data: {
   formAnswers: { fieldId: number, value: string }[]
 }) {
   const headersList = await headers()
-  const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(headersList)
   const userAgent = headersList.get('user-agent') || 'Unknown'
 
   const session = await auth()
@@ -151,7 +152,7 @@ export async function submitRegistration(data: {
 export async function cancelRegistration(registrationId: string) {
   const session = await auth()
   const headersList = await headers()
-  const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(headersList)
   const userAgent = headersList.get('user-agent') || 'Unknown'
 
   if (!session?.user?.email) {
@@ -241,7 +242,7 @@ export async function cancelRegistration(registrationId: string) {
 
 export async function approveAllWaitlist(projectId: number) {
   const headersList = await headers()
-  const ip = headersList.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(headersList)
   const userAgent = headersList.get('user-agent') || 'Unknown'
 
   try {

@@ -2,6 +2,7 @@ import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import prisma from "@/lib/prisma"
 import { headers } from "next/headers"
+import { getClientIp } from "@/lib/ip"
 
 import { authConfig } from "./auth.config"
 
@@ -30,7 +31,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         let userAgent = null
         try {
           const hdrs = await headers()
-          ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+          ip = getClientIp(hdrs)
           userAgent = hdrs.get('user-agent') || 'Unknown'
         } catch (e) {}
 

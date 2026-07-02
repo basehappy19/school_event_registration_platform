@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma"
 import { promoteEligibleWaitlist } from "@/lib/quota"
 import { auth } from "@/auth"
 import { headers } from "next/headers"
+import { getClientIp } from "@/lib/ip"
 import { revalidatePath } from "next/cache"
 import { UpdateProjectPayload } from "@/app/types"
 import fs from "fs"
@@ -20,7 +21,7 @@ async function checkAdmin() {
 export async function createProject(data: { title: string, description?: string, startDate: Date, endDate: Date }) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const project = await prisma.project.create({
@@ -55,7 +56,7 @@ export async function createProject(data: { title: string, description?: string,
 export async function updateProjectSettings(projectId: number, payload: UpdateProjectPayload) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const { quotas, formFields, ...data } = payload
@@ -191,7 +192,7 @@ export async function adminSearchStudents(query: string) {
 export async function adminAddRegistration(projectId: number, studentId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const student = await prisma.studentProfile.findUnique({ where: { studentId } })
@@ -236,7 +237,7 @@ export async function adminAddRegistration(projectId: number, studentId: string)
 export async function adminDeleteRegistration(registrationId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     await prisma.$transaction(async (tx) => {
@@ -275,7 +276,7 @@ export async function adminDeleteRegistration(registrationId: string) {
 export async function adminAcceptRegistration(regId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const reg = await prisma.registration.findUnique({ where: { id: regId }, include: { studentProfile: true } })
@@ -311,7 +312,7 @@ export async function adminAcceptRegistration(regId: string) {
 export async function adminRejectRegistration(regId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const reg = await prisma.registration.findUnique({ where: { id: regId }, include: { studentProfile: true } })
@@ -347,7 +348,7 @@ export async function adminRejectRegistration(regId: string) {
 export async function adminWaitlistRegistration(regId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const reg = await prisma.registration.findUnique({ where: { id: regId }, include: { studentProfile: true } })
@@ -397,7 +398,7 @@ export async function adminAcceptAllWaitlist(projectId: number) {
 export async function deleteProject(projectId: number) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const project = await prisma.project.findUnique({ where: { id: projectId }, select: { title: true, posterUrl: true } })
@@ -477,7 +478,7 @@ export async function getSystemLogs(limit = 100) {
 export async function adminRolloverPromoteWaitlist(projectId: number) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
-  const ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+  const ip = getClientIp(hdrs)
   const userAgent = hdrs.get('user-agent') || 'Unknown'
   try {
     const result = await prisma.$transaction(async (tx) => {
