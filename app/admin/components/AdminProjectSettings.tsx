@@ -40,7 +40,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   // State for Quotas
   const [quotas, setQuotas] = useState<{grade: string, capacity: number}[]>(
     project.quotas?.length > 0 
-      ? project.quotas.map((q: any) => ({ grade: q.grade, capacity: q.capacity }))
+      ? [...project.quotas].sort((a: any, b: any) => Number(a.grade) - Number(b.grade)).map((q: any) => ({ grade: q.grade, capacity: q.capacity }))
       : []
   )
 
@@ -207,7 +207,7 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     setPosterUrl(project.posterUrl || "")
     setQuotas(
       project.quotas?.length > 0 
-        ? project.quotas.map((q: ProjectWithRelations['quotas'][0]) => ({ grade: q.grade, capacity: q.capacity }))
+        ? [...project.quotas].sort((a: any, b: any) => Number(a.grade) - Number(b.grade)).map((q: ProjectWithRelations['quotas'][0]) => ({ grade: q.grade, capacity: q.capacity }))
         : []
     )
     setFormFields(

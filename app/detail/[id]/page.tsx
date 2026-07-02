@@ -24,7 +24,9 @@ const getCachedProject = unstable_cache(
       where: { id, isPublished: true },
       include: {
         formFields: true,
-        quotas: true
+        quotas: {
+          orderBy: { grade: 'asc' }
+        }
       }
     })
   },

@@ -161,7 +161,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                 
                 {/* Badges for grades */}
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.quotas.map((quota) => (
+                  {[...project.quotas].sort((a, b) => Number(a.grade) - Number(b.grade)).map((quota) => (
                     <span key={quota.id} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                       รับ ม.{quota.grade}
                     </span>
@@ -241,7 +241,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] 
                           <span>โควตาแยกระดับชั้น</span>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                          {project.quotas.map((quota) => {
+                          {[...project.quotas].sort((a, b) => Number(a.grade) - Number(b.grade)).map((quota) => {
                             const gradeRegistered = project.registrations.filter((r) => r.studentProfile.grade === quota.grade).length
                             const isFull = gradeRegistered >= quota.capacity
                             const pct = quota.capacity > 0 ? Math.min(100, Math.round((gradeRegistered / quota.capacity) * 100)) : 0

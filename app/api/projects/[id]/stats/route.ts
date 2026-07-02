@@ -66,7 +66,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       grade: q.grade,
       capacity: q.capacity,
       registered: project.registrations.filter(r => r.studentProfile?.grade === q.grade).length
-    }))
+    })).sort((a, b) => Number(a.grade) - Number(b.grade))
 
     statsData = { totalCapacity, totalRegistered, gradeStats }
     cachedStats[projectId] = { data: statsData, timestamp: now }

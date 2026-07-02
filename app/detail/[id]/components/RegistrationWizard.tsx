@@ -485,7 +485,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             {/* แยกแต่ละมอ (Live Grade Stats) */}
             {stats.gradeStats && stats.gradeStats.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100">
-                {stats.gradeStats.map((gs: any) => {
+                {[...stats.gradeStats].sort((a: any, b: any) => Number(a.grade) - Number(b.grade)).map((gs: any) => {
                   const isFull = gs.registered >= gs.capacity;
                   const pct = gs.capacity > 0 ? Math.min(100, Math.round((gs.registered / gs.capacity) * 100)) : 0;
                   return (
