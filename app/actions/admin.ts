@@ -5,7 +5,7 @@ import { promoteEligibleWaitlist } from "@/lib/quota"
 import { auth } from "@/auth"
 import { headers } from "next/headers"
 import { getClientIp } from "@/lib/ip"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { UpdateProjectPayload } from "@/app/types"
 import fs from "fs"
 import path from "path"
@@ -228,6 +228,7 @@ export async function adminAddRegistration(projectId: number, studentId: string)
     })
 
     revalidatePath('/admin')
+    revalidateTag('announcements', 'default')
     return { success: true, registration }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -267,6 +268,7 @@ export async function adminDeleteRegistration(registrationId: string) {
       }
     })
     revalidatePath('/admin')
+    revalidateTag('announcements', 'default')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -303,6 +305,7 @@ export async function adminAcceptRegistration(regId: string) {
       })
     }
     revalidatePath('/admin')
+    revalidateTag('announcements', 'default')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -339,6 +342,7 @@ export async function adminRejectRegistration(regId: string) {
       })
     }
     revalidatePath('/admin')
+    revalidateTag('announcements', 'default')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -375,6 +379,7 @@ export async function adminWaitlistRegistration(regId: string) {
       })
     }
     revalidatePath('/admin')
+    revalidateTag('announcements', 'default')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -389,6 +394,7 @@ export async function adminAcceptAllWaitlist(projectId: number) {
       data: { status: 'APPROVED' }
     })
     revalidatePath('/admin')
+    revalidateTag('announcements', 'default')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -556,6 +562,7 @@ export async function adminRolloverPromoteWaitlist(projectId: number) {
     })
 
     revalidatePath('/admin')
+    revalidateTag('announcements', 'default')
     return { success: true, totalPromoted: result.totalPromoted }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }

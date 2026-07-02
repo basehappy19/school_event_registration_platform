@@ -3,7 +3,9 @@
 import prisma from "@/lib/prisma"
 import { promoteEligibleWaitlist } from "@/lib/quota"
 import { headers } from "next/headers"
+import { revalidateTag } from "next/cache"
 import { getClientIp } from "@/lib/ip"
+import { submitRegistrationSchema } from "@/lib/validations"
 import { Redis } from "@upstash/redis"
 
 const redis = new Redis({
@@ -35,12 +37,27 @@ export async function submitRegistration(data: {
     return { error: 'อีเมลของคุณยังไม่ได้รับการลงทะเบียนเป็นนักเรียนในระบบ' }
   }
 
-  // Handle Registration in Transaction
+  const parsed = submitRegistrationSchema.safeParse(data)
+  if (!parsed.success) {
+    return { error: 'ข้อมูลที่ส่งมาไม่ถูกต้อง หรือมีตัวอักษรยาวเกินไป' }
+  }
+  const validData = parsed.data
+
+  // Handle Registration in Transaction with Redis lock per student/project
+  const lockKey = `lock:reg:${student.studentId}:${validData.projectId}`
   try {
+    const acquired = await redis.set(lockKey, 'locked', { nx: true, ex: 8 })
+    if (!acquired) {
+      return { error: 'ระบบกำลังดำเนินการลงทะเบียนอยู่ กรุณารอสักครู่แล้วลองอีกครั้ง' }
+    }
+
     const result = await prisma.$transaction(async (tx) => {
+      // Lock Project row to serialize capacity calculations safely across parallel transactions
+      await tx.$queryRaw`SELECT id FROM "Project" WHERE id = ${validData.projectId} FOR UPDATE`
+
       // a. Check if already registered for this project
       const existing = await tx.registration.findFirst({
-        where: { projectId: data.projectId, studentId: student.studentId }
+        where: { projectId: validData.projectId, studentId: student.studentId }
       })
 
       if (existing && existing.status !== 'CANCELLED') {
@@ -50,7 +67,7 @@ export async function submitRegistration(data: {
       // b. Check and lock all Project Quotas for the project to prevent race conditions across grades
       const allQuotas: any[] = await tx.$queryRaw`
         SELECT * FROM "ProjectQuota" 
-        WHERE "projectId" = ${data.projectId}
+        WHERE "projectId" = ${validData.projectId}
         FOR UPDATE
       `
 
@@ -64,11 +81,11 @@ export async function submitRegistration(data: {
 
       // c. Count current APPROVED registrations for this grade and across all grades in the project
       const approvedGradeCount = await tx.registration.count({
-        where: { projectId: data.projectId, studentProfile: { grade: student.grade }, status: 'APPROVED' }
+        where: { projectId: validData.projectId, studentProfile: { grade: student.grade }, status: 'APPROVED' }
       })
 
       const approvedTotalCount = await tx.registration.count({
-        where: { projectId: data.projectId, status: 'APPROVED' }
+        where: { projectId: validData.projectId, status: 'APPROVED' }
       })
 
       const status: 'APPROVED' | 'WAITLISTED' = (approvedGradeCount < quota.capacity && approvedTotalCount < totalProjectCapacity)
@@ -87,7 +104,7 @@ export async function submitRegistration(data: {
             status: status,
             createdAt: new Date(), // Reset timestamp for new queue position
             answers: {
-              create: data.formAnswers.map(ans => ({
+              create: validData.formAnswers.map(ans => ({
                 fieldId: ans.fieldId,
                 value: ans.value
               }))
@@ -97,11 +114,11 @@ export async function submitRegistration(data: {
       } else {
         registration = await tx.registration.create({
           data: {
-            projectId: data.projectId,
+            projectId: validData.projectId,
             studentId: student.studentId,
             status: status,
             answers: {
-              create: data.formAnswers.map(ans => ({
+              create: validData.formAnswers.map(ans => ({
                 fieldId: ans.fieldId,
                 value: ans.value
               }))
@@ -135,17 +152,20 @@ export async function submitRegistration(data: {
           performedBy: `STUDENT:${student.studentId}`,
           ipAddress: ip,
           userAgent: userAgent,
-          details: JSON.stringify({ formAnswers: data.formAnswers })
+          details: JSON.stringify({ formAnswers: validData.formAnswers })
         }
       })
 
       return registration
     })
 
+    revalidateTag('announcements', 'default')
     return { success: true, status: result.status, registrationId: result.id }
 
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
+  } finally {
+    try { await redis.del(lockKey) } catch (e) {}
   }
 }
 
@@ -233,6 +253,7 @@ export async function cancelRegistration(registrationId: string) {
       return { success: true }
     })
 
+    revalidateTag('announcements', 'default')
     return result
 
   } catch (error) {
@@ -274,6 +295,7 @@ export async function approveAllWaitlist(projectId: number) {
       return { success: true, count: waitlisted.length }
     })
 
+    revalidateTag('announcements', 'default')
     return result
 
   } catch (error) {
