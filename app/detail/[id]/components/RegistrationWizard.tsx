@@ -92,12 +92,14 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     }
   }, [project.id, profile?.studentId]);
 
-  // Save draft to localStorage whenever answers change
+  // Save or clear draft to localStorage whenever answers change
   useEffect(() => {
     try {
       const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
       if (Object.keys(answers).length > 0) {
         localStorage.setItem(draftKey, JSON.stringify(answers));
+      } else {
+        localStorage.removeItem(draftKey);
       }
     } catch {
       // ignore storage quota errors
@@ -151,6 +153,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       setError(res.error || "An error occurred")
       setLoading(false)
     } else {
+      setAnswers({})
       try {
         const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
         localStorage.removeItem(draftKey);
