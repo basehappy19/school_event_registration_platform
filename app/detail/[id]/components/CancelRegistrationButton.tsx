@@ -25,19 +25,19 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
   }
 
   const handleCancel = async () => {
+    setLoading(true)
     setShowModal(false)
-    showToast("สละสิทธิ์การเข้าร่วมกิจกรรมเรียบร้อยแล้ว", 'success')
     
-    cancelRegistration(registrationId).then((res) => {
-      if (res && 'error' in res) {
-        showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
-      } else {
-        setTimeout(() => {
-          router.push("/")
-          router.refresh()
-        }, 1500)
-      }
-    })
+    const res = await cancelRegistration(registrationId)
+    if (res && 'error' in res) {
+      showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
+      setLoading(false)
+    } else {
+      showToast("สละสิทธิ์การเข้าร่วมกิจกรรมเรียบร้อยแล้ว", 'success')
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 1000)
+    }
   }
 
   return (

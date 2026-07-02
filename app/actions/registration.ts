@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma"
 import { promoteEligibleWaitlist } from "@/lib/quota"
 import { headers } from "next/headers"
-import { revalidateTag } from "next/cache"
+import { revalidateTag, revalidatePath } from "next/cache"
 import { getClientIp } from "@/lib/ip"
 import { submitRegistrationSchema } from "@/lib/validations"
 import { Redis } from "@upstash/redis"
@@ -167,6 +167,8 @@ export async function submitRegistration(data: {
     })
 
     revalidateTag('announcements', 'default')
+    revalidatePath('/')
+    revalidatePath(`/detail/${validData.projectId}`)
     return { success: true, status: result.status, registrationId: result.id }
 
   } catch (error) {
@@ -184,17 +186,23 @@ export async function cancelRegistration(registrationId: string) {
   const ip = getClientIp(headersList)
   const userAgent = headersList.get('user-agent') || 'Unknown'
 
+  const role = (session?.user as { role?: string })?.role
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
+
   if (!session?.user?.email) {
     return { error: 'Unauthorized' }
   }
 
   try {
-    const profile = await prisma.studentProfile.findUnique({
-      where: { email: session.user.email }
-    })
-
-    if (!profile) {
-      return { error: 'Student profile not found' }
+    let studentId = ""
+    if (!isAdmin) {
+      const profile = await prisma.studentProfile.findUnique({
+        where: { email: session.user.email }
+      })
+      if (!profile) {
+        return { error: 'Student profile not found' }
+      }
+      studentId = profile.studentId
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -215,7 +223,7 @@ export async function cancelRegistration(registrationId: string) {
       `
 
       // Verify ownership
-      if (reg.studentId !== profile.studentId) {
+      if (!isAdmin && reg.studentId !== studentId) {
         throw new Error("Unauthorized to cancel this registration")
       }
 
@@ -259,10 +267,14 @@ export async function cancelRegistration(registrationId: string) {
         await promoteEligibleWaitlist(tx, reg.projectId)
       }
 
-      return { success: true }
+      return { success: true, projectId: reg.projectId }
     })
 
     revalidateTag('announcements', 'default')
+    revalidatePath('/')
+    if (result.projectId) {
+      revalidatePath(`/detail/${result.projectId}`)
+    }
     return result
 
   } catch (error) {
