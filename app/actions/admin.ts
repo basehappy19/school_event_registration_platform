@@ -87,8 +87,7 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
           data: quotas.map((q) => ({
             projectId,
             grade: q.grade,
-            capacity: q.capacity,
-            waitlistCapacity: q.waitlistCapacity ?? null
+            capacity: q.capacity
           }))
         })
       }

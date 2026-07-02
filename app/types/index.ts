@@ -48,6 +48,6 @@ export interface UpdateProjectPayload {
   activityStartTime?: Date | null
   activityEndTime?: Date | null
   activityLocation?: string
-  quotas?: { grade: string; capacity: number; waitlistCapacity?: number | null }[]
+  quotas?: { grade: string; capacity: number }[]
   formFields?: { id?: number; label: string; type: FieldType; options?: string; isRequired: boolean }[]
 }

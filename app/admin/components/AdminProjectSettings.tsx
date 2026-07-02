@@ -38,9 +38,9 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
   const [uploadingPoster, setUploadingPoster] = useState(false)
 
   // State for Quotas
-  const [quotas, setQuotas] = useState<{grade: string, capacity: number, waitlistCapacity?: number | null}[]>(
+  const [quotas, setQuotas] = useState<{grade: string, capacity: number}[]>(
     project.quotas?.length > 0 
-      ? project.quotas.map((q: any) => ({ grade: q.grade, capacity: q.capacity, waitlistCapacity: q.waitlistCapacity }))
+      ? project.quotas.map((q: any) => ({ grade: q.grade, capacity: q.capacity }))
       : []
   )
 
@@ -78,17 +78,12 @@ export default function AdminProjectSettings({ project }: { project: ProjectWith
     if (quotas.find(q => q.grade === grade)) {
       setQuotas(quotas.filter(q => q.grade !== grade))
     } else {
-      setQuotas([...quotas, { grade, capacity: 0, waitlistCapacity: null }].sort((a, b) => Number(a.grade) - Number(b.grade)))
+      setQuotas([...quotas, { grade, capacity: 0 }].sort((a, b) => Number(a.grade) - Number(b.grade)))
     }
   }
 
   const handleCapacityChange = (grade: string, capacity: number) => {
     setQuotas(quotas.map(q => q.grade === grade ? { ...q, capacity: isNaN(capacity) ? 0 : capacity } : q))
-  }
-
-  const handleWaitlistCapacityChange = (grade: string, val: string) => {
-    const num = val === "" ? null : parseInt(val)
-    setQuotas(quotas.map(q => q.grade === grade ? { ...q, waitlistCapacity: (num === null || isNaN(num)) ? null : num } : q))
   }
 
   const addFormField = () => {
