@@ -159,7 +159,8 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
           localStorage.removeItem(draftKey);
         } catch {}
-        window.location.href = `/detail/${project.id}/success?status=${res.status}`
+        router.push(`/detail/${project.id}/success?status=${res.status}`)
+        router.refresh()
       } else {
         setError("ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง")
         setLoading(false)

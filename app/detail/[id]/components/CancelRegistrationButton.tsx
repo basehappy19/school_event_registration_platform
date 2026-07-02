@@ -35,7 +35,8 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
     } else {
       showToast("สละสิทธิ์การเข้าร่วมกิจกรรมเรียบร้อยแล้ว", 'success')
       setTimeout(() => {
-        window.location.href = "/"
+        router.push("/")
+        router.refresh()
       }, 1000)
     }
   }
