@@ -1,15 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users, X, ZoomIn } from "lucide-react"
 import { ProjectGridItem } from "@/app/types"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
-export default function ProjectGrid({ projects }: { projects: ProjectGridItem[] }) {
+export default function ProjectGrid({ projects: initialProjects }: { projects: ProjectGridItem[] }) {
+  const [projects, setProjects] = useState<ProjectGridItem[]>(initialProjects)
   const [search, setSearch] = useState("")
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+
+  useEffect(() => {
+    setProjects(initialProjects)
+  }, [initialProjects])
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (document.hidden) return;
+      try {
+        const res = await fetch('/api/projects')
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data)) {
+            setProjects(data)
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    const interval = setInterval(fetchProjects, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   const formatDateThai = (dateStr: string | Date) => {
     const date = new Date(dateStr)
