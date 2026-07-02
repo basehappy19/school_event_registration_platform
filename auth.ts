@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import prisma from "@/lib/prisma"
+import { headers } from "next/headers"
 
 import { authConfig } from "./auth.config"
 
@@ -25,6 +26,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!emailAttempt) return false
 
+        let ip = null
+        let userAgent = null
+        try {
+          const hdrs = await headers()
+          ip = hdrs.get('x-forwarded-for') || '127.0.0.1'
+          userAgent = hdrs.get('user-agent') || 'Unknown'
+        } catch (e) {}
+
         try {
           // Check Admin
           const adminUser = await prisma.adminUser.findUnique({
@@ -33,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (adminUser) {
             await prisma.adminLoginLog.create({
-              data: { emailAttempt, status: 'SUCCESS' },
+              data: { emailAttempt, status: 'SUCCESS', ipAddress: ip, userAgent },
             })
             return true
           }
@@ -49,7 +58,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           // Neither Admin nor Student
           await prisma.adminLoginLog.create({
-            data: { emailAttempt, status: 'FAILED' },
+            data: { 
+              emailAttempt, 
+              status: 'FAILED', 
+              failureReason: 'อีเมลไม่พบในระบบผู้ดูแลหรือนักเรียน',
+              ipAddress: ip, 
+              userAgent 
+            },
           })
           return false
         } catch (error) {

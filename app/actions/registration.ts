@@ -1,6 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma"
+import { promoteEligibleWaitlist } from "@/lib/quota"
 import { headers } from "next/headers"
 import { Redis } from "@upstash/redis"
 
@@ -45,25 +46,33 @@ export async function submitRegistration(data: {
         throw new Error("Student is already registered for this project")
       }
 
-      // b. Check and lock Project Quota for student's grade
-      const quotas: any[] = await tx.$queryRaw`
+      // b. Check and lock all Project Quotas for the project to prevent race conditions across grades
+      const allQuotas: any[] = await tx.$queryRaw`
         SELECT * FROM "ProjectQuota" 
-        WHERE "projectId" = ${data.projectId} AND "grade" = ${student.grade} 
+        WHERE "projectId" = ${data.projectId}
         FOR UPDATE
       `
 
-      const quota = quotas[0]
+      const quota = allQuotas.find(q => q.grade === student.grade)
 
       if (!quota) {
         throw new Error(`ระดับชั้น ม.${student.grade} ไม่สามารถสมัครกิจกรรมนี้ได้`)
       }
 
-      // c. Count current APPROVED registrations for this grade
-      const approvedCount = await tx.registration.count({
+      const totalProjectCapacity = allQuotas.reduce((sum, q) => sum + Number(q.capacity || 0), 0)
+
+      // c. Count current APPROVED registrations for this grade and across all grades in the project
+      const approvedGradeCount = await tx.registration.count({
         where: { projectId: data.projectId, studentProfile: { grade: student.grade }, status: 'APPROVED' }
       })
 
-      const status = approvedCount < quota.capacity ? 'APPROVED' : 'WAITLISTED'
+      const approvedTotalCount = await tx.registration.count({
+        where: { projectId: data.projectId, status: 'APPROVED' }
+      })
+
+      const status: 'APPROVED' | 'WAITLISTED' = (approvedGradeCount < quota.capacity && approvedTotalCount < totalProjectCapacity)
+        ? 'APPROVED'
+        : 'WAITLISTED'
 
       // d. Create or Update Registration
       let registration;
@@ -100,7 +109,7 @@ export async function submitRegistration(data: {
         })
       }
 
-      // e. Create Audit Log
+      // e. Create Audit Log and Registration Log
       await tx.auditLog.create({
         data: {
           action: "SUBMIT_REGISTRATION",
@@ -109,6 +118,23 @@ export async function submitRegistration(data: {
           ipAddress: ip,
           userAgent: userAgent,
           payload: JSON.stringify({ formAnswers: data.formAnswers, status })
+        }
+      })
+
+      const proj = await tx.project.findUnique({ where: { id: data.projectId }, select: { title: true } })
+      await tx.registrationLog.create({
+        data: {
+          action: "REGISTER",
+          projectId: data.projectId,
+          projectTitle: proj?.title || "",
+          studentId: student.studentId,
+          studentName: `${student.prefix}${student.firstName} ${student.lastName}`,
+          gradeRoom: `ม.${student.grade}/${student.room}`,
+          newStatus: status,
+          performedBy: `STUDENT:${student.studentId}`,
+          ipAddress: ip,
+          userAgent: userAgent,
+          details: JSON.stringify({ formAnswers: data.formAnswers })
         }
       })
 
@@ -168,7 +194,7 @@ export async function cancelRegistration(registrationId: number) {
         where: { id: registrationId }
       })
 
-      // Create Audit Log for Cancellation
+      // Create Audit Log and Registration Log for Cancellation
       await tx.auditLog.create({
         data: {
           action: "CANCEL_REGISTRATION",
@@ -180,30 +206,27 @@ export async function cancelRegistration(registrationId: number) {
         }
       })
 
-      // 3. Auto-Replacement: If it was APPROVED, we need to promote a WAITLISTED student
-      if (reg.status === 'APPROVED') {
-        // Find the first WAITLISTED student in the same project and grade
-        const nextInLine = await tx.registration.findFirst({
-          where: { projectId: reg.projectId, studentProfile: { grade: reg.studentProfile.grade }, status: 'WAITLISTED' },
-          orderBy: { createdAt: 'asc' }
-        })
-
-        if (nextInLine) {
-          await tx.registration.update({
-            where: { id: nextInLine.id },
-            data: { status: 'APPROVED' }
-          })
-          
-          // Add an AuditLog entry for the auto-promotion
-          await tx.auditLog.create({
-            data: {
-              action: "AUTO_PROMOTE_WAITLIST",
-              projectId: reg.projectId,
-              studentId: nextInLine.studentId,
-              payload: JSON.stringify({ previousStatus: 'WAITLISTED', newStatus: 'APPROVED', promotedDueToCancellationOf: registrationId })
-            }
-          })
+      const cancelProj = await tx.project.findUnique({ where: { id: reg.projectId }, select: { title: true } })
+      await tx.registrationLog.create({
+        data: {
+          action: "CANCEL",
+          projectId: reg.projectId,
+          projectTitle: cancelProj?.title || "",
+          studentId: reg.studentId,
+          studentName: `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`,
+          gradeRoom: `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
+          previousStatus: reg.status,
+          newStatus: "CANCELLED",
+          performedBy: `STUDENT:${reg.studentId}`,
+          ipAddress: ip,
+          userAgent: userAgent,
+          details: JSON.stringify({ registrationId })
         }
+      })
+
+      // 3. Auto-Replacement: If it was APPROVED, we need to promote eligible waitlisted students
+      if (reg.status === 'APPROVED') {
+        await promoteEligibleWaitlist(tx, reg.projectId)
       }
 
       return { success: true }

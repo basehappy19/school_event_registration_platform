@@ -97,6 +97,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
     const statusData = [
       { name: 'ตัวจริง', value: statusCounts['APPROVED'] || 0, color: '#10b981' },
       { name: 'สำรอง', value: statusCounts['WAITLISTED'] || 0, color: '#f59e0b' },
+      { name: 'ไม่ได้รับสิทธิ์', value: statusCounts['REJECTED'] || 0, color: '#f43f5e' },
     ].filter(d => d.value > 0)
 
     return {

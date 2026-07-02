@@ -72,7 +72,6 @@ export default function AnnouncementInteractive({
   }, [allRegistrations, q, grade, room])
 
   const approvedList = filteredRegistrations.filter(r => r.status === 'APPROVED')
-  const waitlistedList = filteredRegistrations.filter(r => r.status === 'WAITLISTED')
 
   return (
     <div>
@@ -125,7 +124,7 @@ export default function AnnouncementInteractive({
       <div className={`transition-all duration-200 ${isAnimating ? 'opacity-50 scale-[0.998]' : 'opacity-100 scale-100'}`}>
         <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden print:border-none print:shadow-none">
           <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
-            <h3 className="font-bold text-lg text-slate-800">รายชื่อตัวจริง ({approvedList.length} คน)</h3>
+            <h3 className="font-bold text-lg text-slate-800">รายชื่อผู้มีสิทธิ์เข้าร่วม ({approvedList.length} คน)</h3>
           </div>
           
           <div className="overflow-x-auto">
@@ -161,39 +160,6 @@ export default function AnnouncementInteractive({
             </table>
           </div>
         </div>
-
-        {waitlistedList.length > 0 && (
-          <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden mt-8 print:hidden">
-            <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">
-              <h3 className="font-bold text-lg text-amber-700">รายชื่อสำรอง ({waitlistedList.length} คน)</h3>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm sm:whitespace-nowrap">
-                <thead className="bg-amber-50 text-amber-800 font-semibold border-b border-amber-100 print:bg-transparent print:text-black">
-                  <tr>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4 w-12 sm:w-16 text-center">ลำดับ</th>
-                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">ชั้น</th>
-                    <th className="px-2 sm:px-6 py-3 sm:py-4 text-center">เลขที่</th>
-                    <th className="px-3 sm:px-6 py-3 sm:py-4">ชื่อ - นามสกุล</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {waitlistedList.map((reg, index) => (
-                    <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-3 sm:px-6 py-3 text-center text-amber-600 font-medium">{approvedList.length + index + 1}</td>
-                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                      <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
-                      <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
-                        {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

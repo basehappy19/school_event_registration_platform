@@ -5,7 +5,7 @@ import AdminDashboardClient from "./components/AdminDashboardClient"
 import { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import { Home, LogOut, User } from "lucide-react"
+import { Home, LogOut, User, History } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "ระบบจัดการผู้ดูแลระบบ",
@@ -55,6 +55,15 @@ export default async function AdminDashboard() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <Link 
+              href="/admin/logs" 
+              className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition-all shadow-sm"
+              title="ดูประวัติการทำงานระบบ (Logs)"
+            >
+              <History className="w-4 h-4 text-indigo-600" />
+              <span className="hidden sm:inline">ประวัติระบบ (Logs)</span>
+            </Link>
+
             <Link 
               href="/" 
               className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-all"

@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminAcceptAllWaitlist, adminSearchStudents } from "@/app/actions/admin"
+import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminRejectRegistration, adminWaitlistRegistration, adminAcceptAllWaitlist, adminSearchStudents } from "@/app/actions/admin"
 
 import { useRouter } from "next/navigation"
-import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 import { ProjectWithRelations } from "@/app/types"
+import AdminSeatAssistantModal from "./AdminSeatAssistantModal"
 
 export default function AdminRegistrationList({ project }: { project: ProjectWithRelations }) {
   const router = useRouter()
@@ -22,6 +23,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   const [studentSuggestions, setStudentSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isSearchingStudent, setIsSearchingStudent] = useState(false)
+  const [showSeatAssistantModal, setShowSeatAssistantModal] = useState(false)
 
   useEffect(() => {
     if (!studentIdInput || studentIdInput.trim().length < 1) {
@@ -133,6 +135,30 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     }
   }
 
+  const handleReject = async (regId: number) => {
+    setLoading(true)
+    const res = await adminRejectRegistration(regId)
+    setLoading(false)
+    if (res.error) {
+      showToast(res.error, 'error')
+    } else {
+      showToast("ปรับสถานะเป็นไม่ได้รับสิทธิ์สำเร็จ", "success")
+      router.refresh()
+    }
+  }
+
+  const handleWaitlist = async (regId: number) => {
+    setLoading(true)
+    const res = await adminWaitlistRegistration(regId)
+    setLoading(false)
+    if (res.error) {
+      showToast(res.error, 'error')
+    } else {
+      showToast("ปรับสถานะเป็นสำรองสำเร็จ", "success")
+      router.refresh()
+    }
+  }
+
   const handleAcceptAllClick = () => {
     setShowAcceptAllModal(true)
   }
@@ -209,6 +235,18 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             </div>
           </div>
         </div>
+      )}
+
+      {/* Seat Assistant Modal */}
+      {showSeatAssistantModal && (
+        <AdminSeatAssistantModal 
+          projectId={project.id} 
+          onClose={() => setShowSeatAssistantModal(false)} 
+          onSuccess={(msg) => {
+            showToast(msg, 'success')
+            router.refresh()
+          }} 
+        />
       )}
 
       <div className="p-6 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
@@ -317,7 +355,16 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shrink-0"
           >
             <CheckCircle2 className="w-4 h-4 mr-1.5 shrink-0" />
-            <span>รับสำรอง</span>
+            <span>รับสำรองทั้งหมด</span>
+          </button>
+          <button 
+            type="button"
+            title="ผู้ช่วยจัดสรรที่นั่งว่าง (Rollover ม.6 -> ม.5 -> ม.4)"
+            onClick={() => setShowSeatAssistantModal(true)}
+            className="bg-gradient-to-r from-amber-500 to-indigo-600 text-white hover:opacity-95 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-md flex items-center shrink-0 active:scale-95"
+          >
+            <Sparkles className="w-4 h-4 mr-1.5 shrink-0 animate-pulse text-amber-300" />
+            <span>จัดสรรที่นั่งว่างส่งต่อ</span>
           </button>
           <button 
             type="button"
@@ -380,9 +427,13 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                       <div className="inline-flex items-center text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-100">
                         <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> ตัวจริง
                       </div>
-                    ) : (
+                    ) : reg.status === 'WAITLISTED' ? (
                       <div className="inline-flex items-center text-xs font-medium bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-100">
                         <Clock className="w-3.5 h-3.5 mr-1" /> สำรอง
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center text-xs font-medium bg-rose-50 text-rose-700 px-2.5 py-1 rounded-full border border-rose-100">
+                        <AlertCircle className="w-3.5 h-3.5 mr-1" /> ไม่ได้รับสิทธิ์
                       </div>
                     )}
                   </td>
@@ -431,6 +482,28 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           รับเป็นตัวจริง
+                        </button>
+                      )}
+                      {reg.status !== 'REJECTED' && (
+                        <button 
+                          onClick={() => handleReject(reg.id)}
+                          disabled={loading}
+                          className="bg-rose-50 text-rose-600 hover:text-rose-700 hover:bg-rose-100 border border-rose-200 px-2 py-1.5 rounded transition-colors flex items-center gap-1.5 text-xs font-medium"
+                          title="ปรับเป็นไม่ได้รับสิทธิ์"
+                        >
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          ไม่ได้รับสิทธิ์
+                        </button>
+                      )}
+                      {reg.status !== 'WAITLISTED' && (
+                        <button 
+                          onClick={() => handleWaitlist(reg.id)}
+                          disabled={loading}
+                          className="bg-amber-50 text-amber-600 hover:text-amber-700 hover:bg-amber-100 border border-amber-200 px-2 py-1.5 rounded transition-colors flex items-center gap-1.5 text-xs font-medium"
+                          title="ปรับเป็นสำรอง"
+                        >
+                          <Clock className="w-3.5 h-3.5" />
+                          ปรับสำรอง
                         </button>
                       )}
                       <button 

@@ -32,6 +32,7 @@ model AdminLoginLog {
   ipAddress    String?
   userAgent    String?
   status       LoginStatus
+  failureReason String?
   createdAt    DateTime    @default(now())
 }
 
@@ -85,10 +86,10 @@ model Project {
 }
 
 model ProjectQuota {
-  id        Int    @id @default(autoincrement())
-  projectId Int
-  grade     String
-  capacity  Int
+  id               Int    @id @default(autoincrement())
+  projectId        Int
+  grade            String
+  capacity         Int
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
@@ -155,4 +156,33 @@ model AuditLog {
   userAgent  String?
   payload    String?
   createdAt  DateTime @default(now())
+}
+
+model RegistrationLog {
+  id             Int      @id @default(autoincrement())
+  action         String   // e.g. "REGISTER", "CANCEL", "ADMIN_DELETE", "ADMIN_APPROVE", "ADMIN_REJECT", "ADMIN_WAITLIST", "AUTO_PROMOTE"
+  projectId      Int
+  projectTitle   String?
+  studentId      String
+  studentName    String?
+  gradeRoom      String?
+  previousStatus String?
+  newStatus      String?
+  performedBy    String   // e.g. "STUDENT", "ADMIN:xxx@email.com", "SYSTEM"
+  ipAddress      String?
+  userAgent      String?
+  details        String?
+  createdAt      DateTime @default(now())
+}
+
+model ProjectEditLog {
+  id           Int      @id @default(autoincrement())
+  projectId    Int
+  projectTitle String
+  adminEmail   String
+  action       String   // e.g. "CREATE_PROJECT", "UPDATE_PROJECT", "TOGGLE_PUBLISH", "DELETE_PROJECT"
+  changes      String   // JSON diff string
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
 }
