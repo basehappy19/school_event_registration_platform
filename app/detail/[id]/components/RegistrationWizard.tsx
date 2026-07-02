@@ -148,17 +148,25 @@ export default function RegistrationWizard({ project, session, profile, errorPar
       formAnswers
     }
 
-    const res = await submitRegistration(payload)
-    if ('error' in res) {
-      setError(res.error || "An error occurred")
+    try {
+      const res = await submitRegistration(payload)
+      if (res && 'error' in res) {
+        setError(res.error || "An error occurred")
+        setLoading(false)
+      } else if (res && res.success) {
+        setAnswers({})
+        try {
+          const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
+          localStorage.removeItem(draftKey);
+        } catch {}
+        window.location.href = `/detail/${project.id}/success?status=${res.status}`
+      } else {
+        setError("ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง")
+        setLoading(false)
+      }
+    } catch (err) {
+      setError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง")
       setLoading(false)
-    } else {
-      setAnswers({})
-      try {
-        const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
-        localStorage.removeItem(draftKey);
-      } catch {}
-      router.push(`/detail/${project.id}/success?status=${res.status}`)
     }
   }
 
