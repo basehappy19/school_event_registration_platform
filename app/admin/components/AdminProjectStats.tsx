@@ -85,11 +85,20 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
       }
     })
 
-    // Prepare Time Series Array
+    // Prepare Cumulative Time Series Array
+    const allSeriesGrades = new Set<string>()
+    Object.values(timeSeriesMap).forEach(gradeMap => {
+      Object.keys(gradeMap).forEach(g => allSeriesGrades.add(g))
+    })
+
+    const runningTotals: Record<string, number> = {}
     const timeSeriesData = Object.keys(timeSeriesMap).sort().map(date => {
       const obj: Record<string, string | number> = { date }
       Object.keys(timeSeriesMap[date]).forEach(grade => {
-        obj[`ม.${grade}`] = timeSeriesMap[date][grade]
+        runningTotals[grade] = (runningTotals[grade] || 0) + timeSeriesMap[date][grade]
+      })
+      allSeriesGrades.forEach(grade => {
+        obj[`ม.${grade}`] = runningTotals[grade] || 0
       })
       return obj
     })
@@ -222,7 +231,7 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-indigo-500" />
-              <h3 className="font-bold text-slate-800">แนวโน้มการลงทะเบียนตามเวลา</h3>
+              <h3 className="font-bold text-slate-800">ยอดสะสมการลงทะเบียนตามเวลา</h3>
             </div>
             <select 
               value={timeFilter}
