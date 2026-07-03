@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, AlertCircle } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, AlertCircle, Instagram } from "lucide-react"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
@@ -224,10 +224,19 @@ export default async function SuccessPage({
           </div>
         </div>
 
-        <div className="mt-8 mb-6 text-center">
-          <p className="text-slate-600 mb-3">หากมีข้อสงสัย ปัญหาต่าง ๆ สามารถทัก <br/>IG: base_happy19 มาได้เลย</p>
-          <a href="https://www.instagram.com/base_happy19/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center text-pink-600 bg-pink-50 hover:bg-pink-100 font-medium px-4 py-2 rounded-lg transition-colors border border-pink-100">
-            กดตรงนี้ @base_happy19
+        {/* Support Contact Card */}
+        <div className="mt-8 mb-6 bg-gradient-to-br from-pink-50/80 via-purple-50/40 to-slate-50 border border-pink-200/60 rounded-2xl p-5 text-center shadow-xs">
+          <p className="text-xs sm:text-sm font-semibold text-slate-700 mb-3.5">
+            💬 มีข้อสงสัยหรือพบปัญหาในการลงทะเบียน?
+          </p>
+          <a 
+            href="https://www.instagram.com/base_happy19/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-md shadow-pink-500/20 transition-all active:scale-[0.98]"
+          >
+            <Instagram className="w-4 h-4 shrink-0" />
+            <span>ติดต่อสอบถามทาง IG: @base_happy19</span>
           </a>
         </div>
 
