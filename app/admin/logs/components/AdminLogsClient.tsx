@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { History, FileText, Lock, User, Calendar, ShieldCheck, ShieldAlert, ArrowRight, RefreshCw, Search } from "lucide-react"
 
 interface RegistrationLog {
@@ -51,8 +51,50 @@ export default function AdminLogsClient({
   initialProjectEditLogs: ProjectEditLog[]
   initialAdminLoginLogs: AdminLoginLog[]
 }) {
-  const [activeTab, setActiveTab] = useState<"reg" | "project" | "login">("reg")
+  const [activeTab, setActiveTab] = useState<"reg" | "project" | "login">(() => {
+    if (typeof window !== "undefined") {
+      const urlTab = new URLSearchParams(window.location.search).get("tab") as "reg" | "project" | "login" | null
+      if (urlTab === "reg" || urlTab === "project" || urlTab === "login") return urlTab
+      const saved = localStorage.getItem("admin_logs_active_tab") as "reg" | "project" | "login" | null
+      if (saved === "reg" || saved === "project" || saved === "login") return saved
+    }
+    return "reg"
+  })
+
   const [searchTerm, setSearchTerm] = useState("")
+  const [registrationLogs, setRegistrationLogs] = useState<RegistrationLog[]>(initialRegistrationLogs)
+  const [projectEditLogs, setProjectEditLogs] = useState<ProjectEditLog[]>(initialProjectEditLogs)
+  const [adminLoginLogs, setAdminLoginLogs] = useState<AdminLoginLog[]>(initialAdminLoginLogs)
+
+  const handleTabChange = (tab: "reg" | "project" | "login") => {
+    setActiveTab(tab)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin_logs_active_tab", tab)
+      const url = new URL(window.location.href)
+      url.searchParams.set("tab", tab)
+      window.history.replaceState({}, "", url)
+    }
+  }
+
+  // Real-time polling without page refresh
+  useEffect(() => {
+    const fetchRealtimeLogs = async () => {
+      try {
+        const res = await fetch('/api/admin/logs', { cache: 'no-store' })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.registrationLogs) setRegistrationLogs(data.registrationLogs)
+          if (data.projectEditLogs) setProjectEditLogs(data.projectEditLogs)
+          if (data.adminLoginLogs) setAdminLoginLogs(data.adminLoginLogs)
+        }
+      } catch (e) {
+        // Ignore errors during silent background polling
+      }
+    }
+
+    const interval = setInterval(fetchRealtimeLogs, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   const getActionBadge = (action: string) => {
     switch (action) {
@@ -110,7 +152,7 @@ export default function AdminLogsClient({
     })
   }
 
-  const filteredRegLogs = initialRegistrationLogs.filter(log => {
+  const filteredRegLogs = registrationLogs.filter(log => {
     const s = searchTerm.toLowerCase()
     return (
       (log.studentId && log.studentId.toLowerCase().includes(s)) ||
@@ -120,7 +162,7 @@ export default function AdminLogsClient({
     )
   })
 
-  const filteredProjectLogs = initialProjectEditLogs.filter(log => {
+  const filteredProjectLogs = projectEditLogs.filter(log => {
     const s = searchTerm.toLowerCase()
     return (
       (log.projectTitle && log.projectTitle.toLowerCase().includes(s)) ||
@@ -129,7 +171,7 @@ export default function AdminLogsClient({
     )
   })
 
-  const filteredLoginLogs = initialAdminLoginLogs.filter(log => {
+  const filteredLoginLogs = adminLoginLogs.filter(log => {
     const s = searchTerm.toLowerCase()
     return (
       log.emailAttempt.toLowerCase().includes(s) ||
@@ -142,12 +184,18 @@ export default function AdminLogsClient({
       {/* Title & Search Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-            <History className="w-7 h-7 text-indigo-600" />
-            บันทึกประวัติการทำงานระบบ
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+              <History className="w-7 h-7 text-indigo-600" />
+              บันทึกประวัติการทำงานระบบ
+            </h1>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/60">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Real-time
+            </span>
+          </div>
           <p className="text-slate-500 text-sm mt-1">
-            ตรวจสอบการลงทะเบียน สละสิทธิ์ การแก้ไขโครงการ และประวัติการเข้าสู่ระบบอย่างละเอียด
+            ตรวจสอบการลงทะเบียน สละสิทธิ์ การแก้ไขโครงการ และประวัติการเข้าสู่ระบบอย่างละเอียด (อัปเดตอัตโนมัติ)
           </p>
         </div>
 
@@ -166,7 +214,7 @@ export default function AdminLogsClient({
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 p-1.5 bg-slate-200/60 rounded-2xl w-fit">
         <button
-          onClick={() => setActiveTab("reg")}
+          onClick={() => handleTabChange("reg")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeTab === "reg"
               ? "bg-white text-indigo-600 shadow-sm"
@@ -178,7 +226,7 @@ export default function AdminLogsClient({
         </button>
 
         <button
-          onClick={() => setActiveTab("project")}
+          onClick={() => handleTabChange("project")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeTab === "project"
               ? "bg-white text-indigo-600 shadow-sm"
@@ -190,7 +238,7 @@ export default function AdminLogsClient({
         </button>
 
         <button
-          onClick={() => setActiveTab("login")}
+          onClick={() => handleTabChange("login")}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeTab === "login"
               ? "bg-white text-indigo-600 shadow-sm"
