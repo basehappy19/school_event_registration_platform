@@ -184,16 +184,10 @@ export default function AdminLogsClient({
       {/* Title & Search Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-              <History className="w-7 h-7 text-indigo-600" />
-              บันทึกประวัติการทำงานระบบ
-            </h1>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/60">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Real-time
-            </span>
-          </div>
+          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+            <History className="w-7 h-7 text-indigo-600" />
+            บันทึกประวัติการทำงานระบบ
+          </h1>
           <p className="text-slate-500 text-sm mt-1">
             ตรวจสอบการลงทะเบียน สละสิทธิ์ การแก้ไขโครงการ และประวัติการเข้าสู่ระบบอย่างละเอียด
           </p>
