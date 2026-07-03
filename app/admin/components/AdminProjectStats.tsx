@@ -10,7 +10,7 @@ import { ProjectWithRelations } from "@/app/types"
 
 export default function AdminProjectStats({ project }: { project: ProjectWithRelations }) {
   const { quotas = [], registrations = [] } = project
-  const [timeFilter, setTimeFilter] = useState<'minute' | 'hour' | 'day'>('hour')
+  const [timeFilter, setTimeFilter] = useState<'second' | 'minute' | 'hour' | 'day'>('minute')
 
   const stats = useMemo(() => {
     let totalQuota = 0
@@ -65,9 +65,12 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
         const D = pad(dateObj.getDate())
         const h = pad(dateObj.getHours())
         const m = pad(dateObj.getMinutes())
+        const s = pad(dateObj.getSeconds())
 
         let dateStr = ''
-        if (timeFilter === 'minute') {
+        if (timeFilter === 'second') {
+          dateStr = `${Y}-${M}-${D} ${h}:${m}:${s}`
+        } else if (timeFilter === 'minute') {
           dateStr = `${Y}-${M}-${D} ${h}:${m}`
         } else if (timeFilter === 'hour') {
           dateStr = `${Y}-${M}-${D} ${h}:00`
@@ -223,9 +226,10 @@ export default function AdminProjectStats({ project }: { project: ProjectWithRel
             </div>
             <select 
               value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value as 'minute' | 'hour' | 'day')}
+              onChange={(e) => setTimeFilter(e.target.value as 'second' | 'minute' | 'hour' | 'day')}
               className="text-sm border border-slate-200 rounded-lg text-slate-600 bg-white focus:ring-indigo-500 focus:border-indigo-500 py-1.5 pl-3 pr-8 shadow-sm"
             >
+              <option value="second">รายวินาที</option>
               <option value="minute">รายนาที</option>
               <option value="hour">รายชั่วโมง</option>
               <option value="day">รายวัน</option>

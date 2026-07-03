@@ -29,13 +29,7 @@ export async function GET(request: NextRequest) {
         include: {
           studentProfile: true,
           answers: true
-        },
-        orderBy: [
-          { status: 'asc' }, // APPROVED first
-          { studentProfile: { grade: 'asc' } },
-          { studentProfile: { room: 'asc' } },
-          { studentProfile: { number: 'asc' } }
-        ]
+        }
       }
     }
   })
@@ -46,8 +40,8 @@ export async function GET(request: NextRequest) {
 
   project.registrations.sort((a, b) => {
     if (a.status !== b.status) return a.status === 'APPROVED' ? -1 : 1;
-    const sA = a.studentProfile;
-    const sB = b.studentProfile;
+    const sA = a.studentProfile || {};
+    const sB = b.studentProfile || {};
     const gA = parseInt(sA.grade) || 0;
     const gB = parseInt(sB.grade) || 0;
     if (gA !== gB) return gA - gB;

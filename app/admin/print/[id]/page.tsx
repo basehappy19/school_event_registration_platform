@@ -55,17 +55,12 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
     },
     include: {
       studentProfile: true
-    },
-    orderBy: [
-      { studentProfile: { grade: 'asc' } },
-      { studentProfile: { room: 'asc' } },
-      { studentProfile: { number: 'asc' } }
-    ]
+    }
   })
 
   registrations.sort((a, b) => {
-    const sA = a.studentProfile;
-    const sB = b.studentProfile;
+    const sA = a.studentProfile || {};
+    const sB = b.studentProfile || {};
     const gA = parseInt(sA.grade) || 0;
     const gB = parseInt(sB.grade) || 0;
     if (gA !== gB) return gA - gB;
@@ -123,16 +118,19 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
           </thead>
           <tbody>
             {registrations.length > 0 ? (
-              registrations.map((reg, index) => (
-                <tr key={reg.id}>
-                  <td className="text-center">{index + 1}</td>
-                  <td className="text-center">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
-                  <td className="text-center">{reg.studentProfile.number}</td>
-                  <td>
-                    {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
-                  </td>
-                </tr>
-              ))
+              registrations.map((reg, index) => {
+                const profile = reg.studentProfile || {};
+                return (
+                  <tr key={reg.id}>
+                    <td className="text-center">{index + 1}</td>
+                    <td className="text-center">ม.{profile.grade || '-'}/{profile.room || '-'}</td>
+                    <td className="text-center">{profile.number || '-'}</td>
+                    <td>
+                      {profile.prefix || ''}{profile.firstName || ''} {profile.lastName || ''}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={4} className="text-center py-4">ไม่พบรายชื่อ</td>
