@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminRejectRegistration, adminWaitlistRegistration, adminAcceptAllWaitlist, adminSearchStudents } from "@/app/actions/admin"
 
 import { useRouter } from "next/navigation"
@@ -179,6 +179,19 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
       router.refresh()
     }
   }
+
+  const originalSeqMap = useMemo(() => {
+    const map = new Map<string, number>()
+    const sorted = [...project.registrations].sort((a, b) => {
+      const timeA = new Date(a.createdAt || 0).getTime()
+      const timeB = new Date(b.createdAt || 0).getTime()
+      return timeA - timeB
+    })
+    sorted.forEach((r, idx) => {
+      map.set(r.id, idx + 1)
+    })
+    return map
+  }, [project.registrations])
 
   const uniqueRooms = Array.from(
     new Set([
@@ -510,7 +523,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               paginatedRegs.map((reg, index) => (
                 <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-3 sm:px-4 py-2.5 text-center text-slate-400 font-mono text-xs">
-                    {(currentPage - 1) * itemsPerPage + index + 1}
+                    {originalSeqMap.get(reg.id) || (currentPage - 1) * itemsPerPage + index + 1}
                   </td>
                   <td className="px-3 sm:px-4 py-2.5 text-center">
                     {reg.status === 'APPROVED' ? (
@@ -629,7 +642,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/80">
-                    #{(currentPage - 1) * itemsPerPage + index + 1}
+                    #{originalSeqMap.get(reg.id) || (currentPage - 1) * itemsPerPage + index + 1}
                   </span>
                   {reg.status === 'APPROVED' ? (
                     <div className="inline-flex items-center text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200">

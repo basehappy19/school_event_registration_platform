@@ -57,6 +57,15 @@ export default function AnnouncementInteractive({
     triggerAnimation()
   }
 
+  const originalSeqMap = useMemo(() => {
+    const map = new Map<string, number>()
+    const approvedAll = allRegistrations.filter(r => r.status === 'APPROVED')
+    approvedAll.forEach((r, idx) => {
+      map.set(r.id, idx + 1)
+    })
+    return map
+  }, [allRegistrations])
+
   const filteredRegistrations = useMemo(() => {
     return allRegistrations.filter(r => {
       if (grade && r.studentProfile.grade !== grade) return false
@@ -141,7 +150,7 @@ export default function AnnouncementInteractive({
                 {approvedList.length > 0 ? (
                   approvedList.map((reg, index) => (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-3 sm:px-6 py-3 text-center text-slate-500">{index + 1}</td>
+                      <td className="px-3 sm:px-6 py-3 text-center text-slate-500">{originalSeqMap.get(reg.id) || index + 1}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">ม.{reg.studentProfile.grade}/{reg.studentProfile.room}</td>
                       <td className="px-2 sm:px-6 py-3 text-center text-slate-600">{reg.studentProfile.number}</td>
                       <td className="px-3 sm:px-6 py-3 text-slate-800 font-medium wrap-break-word">
