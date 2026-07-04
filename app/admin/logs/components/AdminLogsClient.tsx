@@ -259,7 +259,7 @@ export default function AdminLogsClient({
 
       const formatVal = (key: string, val: any): string => {
         if (val === null || val === undefined) return "-";
-        if (typeof val === "boolean") return val ? "✅ เปิดใช้งาน" : "❌ ปิดใช้งาน";
+        if (typeof val === "boolean") return val ? "เปิดใช้งาน" : "ปิดใช้งาน";
         if (key === "activityDate" && val) {
           try {
             return new Date(val).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" });
@@ -280,14 +280,9 @@ export default function AdminLogsClient({
       if (log.action === "CREATE_PROJECT") {
         const data = parsed.after || parsed || {};
         return (
-          <div className="space-y-1.5">
-            <div className="font-bold text-emerald-700 flex items-center gap-1.5 text-sm">
-              <span>✨ สร้างโครงการใหม่: {data.title || log.projectTitle || "-"}</span>
-            </div>
-            <div className="text-xs text-slate-500 flex flex-wrap gap-2">
-              <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80">📅 {formatVal("activityDate", data.activityDate)}</span>
-              <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80">📍 {data.activityLocation || "-"}</span>
-              <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80">โควตา: {formatVal("quotas", data.quotas)}</span>
+          <div className="space-y-1">
+            <div className="font-bold text-emerald-700 text-xs">
+              สร้างโครงการใหม่: {data.title || log.projectTitle || "-"}
             </div>
           </div>
         );
@@ -296,8 +291,8 @@ export default function AdminLogsClient({
         const data = parsed.before || parsed || {};
         return (
           <div className="space-y-1">
-            <div className="font-bold text-rose-700 flex items-center gap-1.5 text-sm">
-              <span>🗑️ ลบโครงการ: {data.title || log.projectTitle || "-"}</span>
+            <div className="font-bold text-rose-700 text-xs">
+              ลบโครงการ: {data.title || log.projectTitle || "-"}
             </div>
           </div>
         );
@@ -305,7 +300,9 @@ export default function AdminLogsClient({
 
       const before = parsed.before || {};
       const after = parsed.after || {};
-      const changedKeys = Object.keys(fieldLabels).filter((key) => {
+      const allKeys = Array.from(new Set([...Object.keys(before), ...Object.keys(after)]));
+      const changedKeys = allKeys.filter((key) => {
+        if (["id", "createdAt", "updatedAt", "projectId", "adminId"].includes(key)) return false;
         return JSON.stringify(before[key]) !== JSON.stringify(after[key]);
       });
 
@@ -314,20 +311,20 @@ export default function AdminLogsClient({
       }
 
       return (
-        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-2 text-xs shadow-2xs">
+        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1.5 text-xs shadow-2xs">
           {changedKeys.map((key) => {
             const bVal = formatVal(key, before[key]);
             const aVal = formatVal(key, after[key]);
             return (
               <div key={key} className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-slate-700 font-bold bg-white px-2.5 py-1 rounded-lg border border-slate-200/80 shadow-2xs">
-                  {fieldLabels[key]}:
+                <span className="text-slate-700 font-bold bg-white px-2 py-0.5 rounded border border-slate-200/80 shadow-2xs">
+                  {fieldLabels[key] || key}:
                 </span>
-                <span className="line-through text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60 font-medium">
+                <span className="line-through text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60 font-medium">
                   {bVal}
                 </span>
-                <span className="text-slate-400 font-bold">➡️</span>
-                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                <span className="text-slate-400 font-bold">-&gt;</span>
+                <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 font-medium">
                   {aVal}
                 </span>
               </div>
@@ -372,7 +369,7 @@ export default function AdminLogsClient({
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-slate-500 font-semibold">ชื่อเดิม:</span>
                   <span className="line-through text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">{p.old?.name || "-"}</span>
-                  <span>➡️</span>
+                  <span className="text-slate-400 font-bold">-&gt;</span>
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">{p.new?.name || "-"}</span>
                 </div>
               ) : null}
@@ -382,7 +379,7 @@ export default function AdminLogsClient({
                   <span className="line-through text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60">
                     {p.old?.role === "SUPER_ADMIN" ? "Super Admin" : "Admin"}
                   </span>
-                  <span>➡️</span>
+                  <span className="text-slate-400 font-bold">-&gt;</span>
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
                     {p.new?.role === "SUPER_ADMIN" ? "Super Admin" : "Admin"}
                   </span>
@@ -635,7 +632,7 @@ export default function AdminLogsClient({
                     </div>
 
                     <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100 flex-wrap gap-1">
-                      <div>🕒 {formatDateTime(log.createdAt)}</div>
+                      <div>{formatDateTime(log.createdAt)}</div>
                       <div className="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">โดย: {log.performedBy}</div>
                     </div>
                   </div>
@@ -724,7 +721,7 @@ export default function AdminLogsClient({
                     </div>
 
                     <div className="text-xs text-indigo-600 font-semibold bg-indigo-50/60 px-2.5 py-1.5 rounded-xl border border-indigo-100 w-fit">
-                      👤 โดย: {log.adminEmail}
+                      โดย: {log.adminEmail}
                     </div>
 
                     <div className="space-y-1.5">
@@ -733,7 +730,7 @@ export default function AdminLogsClient({
                     </div>
 
                     <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
-                      <div>🕒 {formatDateTime(log.createdAt)}</div>
+                      <div>{formatDateTime(log.createdAt)}</div>
                       <div className="font-mono text-slate-500">IP: {log.ipAddress || "-"}</div>
                     </div>
                   </div>
@@ -848,7 +845,7 @@ export default function AdminLogsClient({
                       </div>
 
                       <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
-                        <div>🕒 {formatDateTime(log.createdAt)}</div>
+                        <div>{formatDateTime(log.createdAt)}</div>
                       </div>
                     </div>
                   );
@@ -933,7 +930,7 @@ export default function AdminLogsClient({
                       </div>
 
                       <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100 flex-wrap gap-1">
-                        <div>🕒 {formatDateTime(log.createdAt)}</div>
+                        <div>{formatDateTime(log.createdAt)}</div>
                         <div className="font-mono text-slate-500">IP: {log.ipAddress || "-"}</div>
                       </div>
                     </div>
