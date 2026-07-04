@@ -155,7 +155,7 @@ export default async function SuccessPage({
             {isApproved ? (
               <div className="space-y-1.5 mt-2">
                 <p>ระบบได้บันทึกข้อมูลการลงทะเบียนเรียบร้อยแล้ว</p>
-                <p className="font-bold text-emerald-600">✨ นักเรียนได้รับสิทธิ์ในการเข้าร่วมโครงการ</p>
+                <p>นักเรียนได้รับสิทธิ์ในการเข้าร่วมโครงการ</p>
               </div>
             ) : isRejected ? (
               <p className="mt-2">เนื่องจากโควตารับลงทะเบียนเต็มแล้ว จึงไม่สามารถมอบสิทธิ์เข้าร่วมโครงการให้ได้ในครั้งนี้</p>
