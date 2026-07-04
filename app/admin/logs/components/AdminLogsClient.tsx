@@ -238,6 +238,112 @@ export default function AdminLogsClient({
     }
   }
 
+  const getProjectLogDisplay = (log: ProjectEditLog) => {
+    if (!log.changes) return <span className="text-slate-400 italic">-</span>;
+    try {
+      const parsed = JSON.parse(log.changes);
+      const fieldLabels: Record<string, string> = {
+        title: "ชื่อโครงการ",
+        description: "รายละเอียด",
+        activityDate: "วันที่จัดกิจกรรม",
+        activityStartTime: "เวลาเริ่ม",
+        activityEndTime: "เวลาสิ้นสุด",
+        activityLocation: "สถานที่",
+        isPublished: "สถานะเผยแพร่",
+        isRegistrationOpen: "เปิดรับลงทะเบียน",
+        isAnnouncementOpen: "เปิดดูประกาศผล",
+        quotas: "โควตารับสมัคร",
+        formFields: "คำถามเพิ่มเติม",
+        viewerEmails: "ผู้ช่วยตรวจ"
+      };
+
+      const formatVal = (key: string, val: any): string => {
+        if (val === null || val === undefined) return "-";
+        if (typeof val === "boolean") return val ? "✅ เปิดใช้งาน" : "❌ ปิดใช้งาน";
+        if (key === "activityDate" && val) {
+          try {
+            return new Date(val).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" });
+          } catch (e) {
+            return String(val);
+          }
+        }
+        if (Array.isArray(val)) {
+          if (key === "quotas") return `${val.length} ห้องเรียน`;
+          if (key === "formFields") return `${val.length} คำถาม`;
+          if (key === "viewerEmails") return `${val.length} อีเมล`;
+          return `${val.length} รายการ`;
+        }
+        if (typeof val === "object") return "ข้อมูลปรับปรุง";
+        return String(val);
+      };
+
+      if (log.action === "CREATE_PROJECT") {
+        const data = parsed.after || parsed || {};
+        return (
+          <div className="space-y-1.5">
+            <div className="font-bold text-emerald-700 flex items-center gap-1.5 text-sm">
+              <span>✨ สร้างโครงการใหม่: {data.title || log.projectTitle || "-"}</span>
+            </div>
+            <div className="text-xs text-slate-500 flex flex-wrap gap-2">
+              <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80">📅 {formatVal("activityDate", data.activityDate)}</span>
+              <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80">📍 {data.activityLocation || "-"}</span>
+              <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80">โควตา: {formatVal("quotas", data.quotas)}</span>
+            </div>
+          </div>
+        );
+      }
+      if (log.action === "DELETE_PROJECT") {
+        const data = parsed.before || parsed || {};
+        return (
+          <div className="space-y-1">
+            <div className="font-bold text-rose-700 flex items-center gap-1.5 text-sm">
+              <span>🗑️ ลบโครงการ: {data.title || log.projectTitle || "-"}</span>
+            </div>
+          </div>
+        );
+      }
+
+      const before = parsed.before || {};
+      const after = parsed.after || {};
+      const changedKeys = Object.keys(fieldLabels).filter((key) => {
+        return JSON.stringify(before[key]) !== JSON.stringify(after[key]);
+      });
+
+      if (changedKeys.length === 0) {
+        return <div className="text-slate-400 italic text-xs">บันทึกข้อมูลโครงการ (ไม่มีการเปลี่ยนแปลงค่าหลัก)</div>;
+      }
+
+      return (
+        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-2 text-xs shadow-2xs">
+          {changedKeys.map((key) => {
+            const bVal = formatVal(key, before[key]);
+            const aVal = formatVal(key, after[key]);
+            return (
+              <div key={key} className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-slate-700 font-bold bg-white px-2.5 py-1 rounded-lg border border-slate-200/80 shadow-2xs">
+                  {fieldLabels[key]}:
+                </span>
+                <span className="line-through text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60 font-medium">
+                  {bVal}
+                </span>
+                <span className="text-slate-400 font-bold">➡️</span>
+                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                  {aVal}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } catch (e) {
+      return (
+        <pre className="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono text-xs overflow-x-auto max-h-48">
+          {log.changes}
+        </pre>
+      );
+    }
+  };
+
   const getAuditLogDisplay = (log: AuditLogEntry) => {
     let renderedDetails: React.ReactNode = <span>{log.payload || "-"}</span>;
     try {
@@ -558,45 +664,35 @@ export default function AdminLogsClient({
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredProjectLogs.length > 0 ? (
-                    filteredProjectLogs.map((log) => {
-                      let formattedChanges = log.changes
-                      try {
-                        const parsed = JSON.parse(log.changes || "{}")
-                        formattedChanges = JSON.stringify(parsed, null, 2)
-                      } catch (e) {}
-
-                      return (
-                        <tr key={log.id} className="hover:bg-slate-50/70 transition-colors align-top">
-                          <td className="px-5 py-4 text-slate-500 font-medium whitespace-nowrap">
-                            {formatDateTime(log.createdAt)}
-                          </td>
-                          <td className="px-5 py-4 align-top">
-                            {renderProjectCell(log.projectId, log.projectTitle)}
-                          </td>
-                          <td className="px-5 py-4">
-                            <span className="text-indigo-600 font-semibold">{log.adminEmail}</span>
-                          </td>
-                          <td className="px-5 py-4 text-center whitespace-nowrap">
-                            <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
-                              log.action === "CREATE_PROJECT" ? "bg-emerald-100 text-emerald-700" :
-                              log.action === "DELETE_PROJECT" ? "bg-rose-100 text-rose-700" :
-                              "bg-blue-100 text-blue-700"
-                            }`}>
-                              {log.action === "CREATE_PROJECT" ? "สร้างโครงการ" :
-                               log.action === "DELETE_PROJECT" ? "ลบโครงการ" : "แก้ไขโครงการ"}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4">
-                            <pre className="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono text-xs overflow-x-auto max-h-48">
-                              {formattedChanges}
-                            </pre>
-                          </td>
-                          <td className="px-5 py-4 text-slate-500 font-mono text-xs whitespace-nowrap">
-                            {log.ipAddress || "-"}
-                          </td>
-                        </tr>
-                      )
-                    })
+                    filteredProjectLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50/70 transition-colors align-top">
+                        <td className="px-5 py-4 text-slate-500 font-medium whitespace-nowrap">
+                          {formatDateTime(log.createdAt)}
+                        </td>
+                        <td className="px-5 py-4 align-top">
+                          {renderProjectCell(log.projectId, log.projectTitle)}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-indigo-600 font-semibold">{log.adminEmail}</span>
+                        </td>
+                        <td className="px-5 py-4 text-center whitespace-nowrap">
+                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                            log.action === "CREATE_PROJECT" ? "bg-emerald-100 text-emerald-700" :
+                            log.action === "DELETE_PROJECT" ? "bg-rose-100 text-rose-700" :
+                            "bg-blue-100 text-blue-700"
+                          }`}>
+                            {log.action === "CREATE_PROJECT" ? "สร้างโครงการ" :
+                             log.action === "DELETE_PROJECT" ? "ลบโครงการ" : "แก้ไขโครงการ"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          {getProjectLogDisplay(log)}
+                        </td>
+                        <td className="px-5 py-4 text-slate-500 font-mono text-xs whitespace-nowrap">
+                          {log.ipAddress || "-"}
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
                       <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
@@ -611,47 +707,37 @@ export default function AdminLogsClient({
             {/* Mobile Card List */}
             <div className="md:hidden divide-y divide-slate-100">
               {filteredProjectLogs.length > 0 ? (
-                filteredProjectLogs.map((log) => {
-                  let formattedChanges = log.changes
-                  try {
-                    const parsed = JSON.parse(log.changes || "{}")
-                    formattedChanges = JSON.stringify(parsed, null, 2)
-                  } catch (e) {}
-
-                  return (
-                    <div key={log.id} className="p-4 hover:bg-slate-50/70 transition-colors space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="font-bold text-slate-900 text-sm min-w-0 flex-1">{renderProjectCell(log.projectId, log.projectTitle)}</div>
-                        <div className="shrink-0">
-                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
-                            log.action === "CREATE_PROJECT" ? "bg-emerald-100 text-emerald-700" :
-                            log.action === "DELETE_PROJECT" ? "bg-rose-100 text-rose-700" :
-                            "bg-blue-100 text-blue-700"
-                          }`}>
-                            {log.action === "CREATE_PROJECT" ? "สร้างโครงการ" :
-                             log.action === "DELETE_PROJECT" ? "ลบโครงการ" : "แก้ไขโครงการ"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-xs text-indigo-600 font-semibold bg-indigo-50/60 px-2.5 py-1.5 rounded-xl border border-indigo-100 w-fit">
-                        👤 โดย: {log.adminEmail}
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">รายละเอียดการแก้ไข:</div>
-                        <pre className="bg-slate-900 text-emerald-400 p-3 rounded-2xl font-mono text-xs overflow-x-auto max-h-48 shadow-inner">
-                          {formattedChanges}
-                        </pre>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
-                        <div>🕒 {formatDateTime(log.createdAt)}</div>
-                        <div className="font-mono text-slate-500">IP: {log.ipAddress || "-"}</div>
+                filteredProjectLogs.map((log) => (
+                  <div key={log.id} className="p-4 hover:bg-slate-50/70 transition-colors space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-bold text-slate-900 text-sm min-w-0 flex-1">{renderProjectCell(log.projectId, log.projectTitle)}</div>
+                      <div className="shrink-0">
+                        <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                          log.action === "CREATE_PROJECT" ? "bg-emerald-100 text-emerald-700" :
+                          log.action === "DELETE_PROJECT" ? "bg-rose-100 text-rose-700" :
+                          "bg-blue-100 text-blue-700"
+                        }`}>
+                          {log.action === "CREATE_PROJECT" ? "สร้างโครงการ" :
+                           log.action === "DELETE_PROJECT" ? "ลบโครงการ" : "แก้ไขโครงการ"}
+                        </span>
                       </div>
                     </div>
-                  );
-                })
+
+                    <div className="text-xs text-indigo-600 font-semibold bg-indigo-50/60 px-2.5 py-1.5 rounded-xl border border-indigo-100 w-fit">
+                      👤 โดย: {log.adminEmail}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">รายละเอียดการแก้ไข:</div>
+                      {getProjectLogDisplay(log)}
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                      <div>🕒 {formatDateTime(log.createdAt)}</div>
+                      <div className="font-mono text-slate-500">IP: {log.ipAddress || "-"}</div>
+                    </div>
+                  </div>
+                ))
               ) : (
                 <div className="py-12 text-center text-slate-400 text-sm font-medium">ไม่พบข้อมูลประวัติการแก้ไขโครงการ</div>
               )}

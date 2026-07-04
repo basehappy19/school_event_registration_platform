@@ -234,7 +234,6 @@ export default function AdminUsersClient({ initialAdmins }: { initialAdmins: Adm
                       </div>
                       <div>
                         <div className="text-slate-900">{admin.name || "ไม่ระบุชื่อ"}</div>
-                        <div className="text-xs text-slate-400 font-normal">ID: #{admin.id}</div>
                       </div>
                     </div>
                   </td>

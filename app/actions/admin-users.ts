@@ -18,7 +18,7 @@ async function checkSuperAdmin() {
 export async function getAdminUsersWithStats() {
   await checkSuperAdmin()
   const admins = await prisma.adminUser.findMany({
-    orderBy: [{ role: 'desc' }, { createdAt: 'desc' }]
+    orderBy: { id: 'asc' }
   })
 
   const adminsWithStats = await Promise.all(
