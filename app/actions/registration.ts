@@ -151,6 +151,8 @@ export async function submitRegistration(data: {
     revalidateTag('announcements', 'default')
     revalidatePath('/')
     revalidatePath(`/detail/${validData.projectId}`)
+    revalidatePath(`/announcement/${validData.projectId}`)
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true, status: result.status, registrationId: result.id }
 
   } catch (error) {
@@ -252,6 +254,8 @@ export async function cancelRegistration(registrationId: string) {
     revalidatePath('/')
     if (result.projectId) {
       revalidatePath(`/detail/${result.projectId}`)
+      revalidatePath(`/announcement/${result.projectId}`)
+      revalidatePath('/announcement/[id]', 'page')
     }
     return result
 
@@ -295,6 +299,8 @@ export async function approveAllWaitlist(projectId: number) {
     })
 
     revalidateTag('announcements', 'default')
+    revalidatePath(`/announcement/${projectId}`)
+    revalidatePath('/announcement/[id]', 'page')
     return result
 
   } catch (error) {

@@ -7,6 +7,9 @@ export const authConfig = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60, // 1 hour
+    maxAge: 3153600000, // 100 years (no expiration until manual logout)
+  },
+  jwt: {
+    maxAge: 3153600000,
   },
 } satisfies NextAuthConfig

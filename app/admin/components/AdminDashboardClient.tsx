@@ -311,6 +311,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
           </div>
           
           <DndContext 
+            id="admin-projects-dnd-context"
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}

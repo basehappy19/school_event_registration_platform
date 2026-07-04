@@ -13,24 +13,42 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const [registrationLogs, projectEditLogs, adminLoginLogs] = await Promise.all([
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+
+  const [registrationLogs, projectEditLogs, adminLoginLogs, auditLogs, projects] = await Promise.all([
     prisma.registrationLog.findMany({
       take: 200,
       orderBy: { createdAt: 'desc' }
     }),
-    prisma.projectEditLog.findMany({
+    isSuperAdmin ? prisma.projectEditLog.findMany({
       take: 200,
       orderBy: { createdAt: 'desc' }
-    }),
-    prisma.adminLoginLog.findMany({
+    }) : Promise.resolve([]),
+    isSuperAdmin ? prisma.adminLoginLog.findMany({
       take: 200,
       orderBy: { createdAt: 'desc' }
+    }) : Promise.resolve([]),
+    isSuperAdmin ? prisma.auditLog.findMany({
+      where: { action: { in: ['CREATE_ADMIN', 'UPDATE_ADMIN', 'DELETE_ADMIN'] } },
+      take: 200,
+      orderBy: { createdAt: 'desc' }
+    }) : Promise.resolve([]),
+    prisma.project.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        activityDate: true,
+        activityLocation: true,
+      }
     })
   ]);
 
   return NextResponse.json({
     registrationLogs,
     projectEditLogs,
-    adminLoginLogs
+    adminLoginLogs,
+    auditLogs,
+    projects
   });
 }

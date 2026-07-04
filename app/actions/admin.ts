@@ -229,6 +229,8 @@ export async function adminAddRegistration(projectId: number, studentId: string)
 
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
+    revalidatePath(`/announcement/${projectId}`)
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true, registration }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -269,6 +271,7 @@ export async function adminDeleteRegistration(registrationId: string) {
     })
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -306,6 +309,7 @@ export async function adminAcceptRegistration(regId: string) {
     }
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -343,6 +347,7 @@ export async function adminRejectRegistration(regId: string) {
     }
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -380,6 +385,7 @@ export async function adminWaitlistRegistration(regId: string) {
     }
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -395,6 +401,8 @@ export async function adminAcceptAllWaitlist(projectId: number) {
     })
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
+    revalidatePath(`/announcement/${projectId}`)
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -563,6 +571,8 @@ export async function adminRolloverPromoteWaitlist(projectId: number) {
 
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
+    revalidatePath(`/announcement/${projectId}`)
+    revalidatePath('/announcement/[id]', 'page')
     return { success: true, totalPromoted: result.totalPromoted }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }

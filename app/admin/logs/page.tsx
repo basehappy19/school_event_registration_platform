@@ -5,10 +5,10 @@ import AdminLogsClient from "./components/AdminLogsClient"
 import { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import { Home, LogOut, User, ArrowLeft } from "lucide-react"
+import { Home, LogOut, User, ArrowLeft, Users } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "บันทึกประวัติการทำงานระบบ (Logs)",
+  title: "บันทึกประวัติการทำงานระบบ",
   description: "ประวัติการลงทะเบียน การแก้ไข และการเข้าสู่ระบบ",
 }
 
@@ -24,19 +24,37 @@ export default async function AdminLogsPage() {
     redirect("/admin/login?error=AccessDenied")
   }
 
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+
   const registrationLogs = await prisma.registrationLog.findMany({
     take: 200,
     orderBy: { createdAt: 'desc' }
   })
 
-  const projectEditLogs = await prisma.projectEditLog.findMany({
+  const projectEditLogs = isSuperAdmin ? await prisma.projectEditLog.findMany({
     take: 200,
     orderBy: { createdAt: 'desc' }
-  })
+  }) : []
 
-  const adminLoginLogs = await prisma.adminLoginLog.findMany({
+  const adminLoginLogs = isSuperAdmin ? await prisma.adminLoginLog.findMany({
     take: 200,
     orderBy: { createdAt: 'desc' }
+  }) : []
+
+  const auditLogs = isSuperAdmin ? await prisma.auditLog.findMany({
+    where: { action: { in: ['CREATE_ADMIN', 'UPDATE_ADMIN', 'DELETE_ADMIN'] } },
+    take: 200,
+    orderBy: { createdAt: 'desc' }
+  }) : []
+
+  const projects = await prisma.project.findMany({
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      activityDate: true,
+      activityLocation: true,
+    }
   })
 
   return (
@@ -49,6 +67,17 @@ export default async function AdminLogsPage() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {role === "SUPER_ADMIN" && (
+              <Link 
+                href="/admin/users" 
+                className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-all"
+                title="จัดการผู้ดูแลระบบ (Super Admin)"
+              >
+                <Users className="w-4 h-4 text-slate-500" />
+                <span className="hidden sm:inline">จัดการแอดมิน</span>
+              </Link>
+            )}
+
             <Link 
               href="/admin" 
               className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all"
@@ -69,9 +98,12 @@ export default async function AdminLogsPage() {
       
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
         <AdminLogsClient 
+          role={role}
           initialRegistrationLogs={registrationLogs}
           initialProjectEditLogs={projectEditLogs}
           initialAdminLoginLogs={adminLoginLogs}
+          initialAuditLogs={auditLogs}
+          initialProjects={projects}
         />
       </main>
     </>

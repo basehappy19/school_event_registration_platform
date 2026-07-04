@@ -14,6 +14,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   const [studentIdInput, setStudentIdInput] = useState("")
   const [search, setSearch] = useState("")
   const [filterGrade, setFilterGrade] = useState<string>("ALL")
+  const [filterRoom, setFilterRoom] = useState<string>("ALL")
   const [filterStatus, setFilterStatus] = useState<string>("ALL")
   const [sortOrder, setSortOrder] = useState<'oldest' | 'newest'>('oldest')
   const [currentPage, setCurrentPage] = useState(1)
@@ -46,7 +47,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [search, filterGrade, filterStatus, sortOrder, itemsPerPage, project.id])
+  }, [search, filterGrade, filterRoom, filterStatus, sortOrder, itemsPerPage, project.id])
 
   useEffect(() => {
     if (toast) {
@@ -179,9 +180,20 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     }
   }
 
+  const uniqueRooms = Array.from(
+    new Set([
+      "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15",
+      ...project.registrations
+        .filter((r) => filterGrade === "ALL" || String(r.studentProfile?.grade) === filterGrade)
+        .map((r) => String(r.studentProfile?.room || ""))
+        .filter(Boolean)
+    ])
+  ).sort((a, b) => parseInt(a) - parseInt(b) || a.localeCompare(b, "th"))
+
   const regs = project.registrations
     .filter((r) => {
       if (filterGrade !== "ALL" && String(r.studentProfile?.grade) !== filterGrade) return false
+      if (filterRoom !== "ALL" && String(r.studentProfile?.room) !== filterRoom) return false
       if (filterStatus !== "ALL" && r.status !== filterStatus) return false
       if (!search) return true
       const term = search.toLowerCase()
@@ -344,14 +356,14 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
           </form>
 
           {/* Group 2: จัดสรรที่นั่งและรับสำรอง */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto items-stretch">
             <button 
               type="button"
               title="ผู้ช่วยจัดสรรที่นั่งว่างส่งต่อ"
               onClick={() => setShowSeatAssistantModal(true)}
-              className="flex-1 sm:flex-initial bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center shadow-2xs shrink-0"
+              className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white px-2 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shadow-2xs h-full shrink-0"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-1.5 shrink-0 text-amber-300" />
+              <Sparkles className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0 text-amber-300" />
               <span>จัดสรรที่นั่งว่างส่งต่อ</span>
             </button>
             <button 
@@ -359,59 +371,64 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               title="รับสำรองทั้งหมด"
               onClick={handleAcceptAllClick}
               disabled={loading || project.registrations.filter((r) => r.status === 'WAITLISTED').length === 0}
-              className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center shrink-0 shadow-2xs"
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 px-2 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full"
             >
-              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" />
               <span>รับสำรองทั้งหมด</span>
             </button>
           </div>
 
           {/* Group 3: ดูประกาศและส่งออกข้อมูล */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <a title="ดูประกาศหน้าเว็บ" href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="flex-1 sm:flex-initial bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center shrink-0 shadow-2xs">
-              <Eye className="w-3.5 h-3.5 mr-1.5 shrink-0" /> ดูประกาศ
+          <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto items-stretch">
+            <a title="ดูประกาศหน้าเว็บ" href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap">
+              <Eye className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" /> ดูประกาศ
             </a>
             <button 
               type="button" 
               title="พิมพ์ประกาศ (PDF)"
               onClick={handlePrint} 
               disabled={isPrinting}
-              className="flex-1 sm:flex-initial bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 disabled:opacity-50 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center shrink-0 shadow-2xs"
+              className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 disabled:opacity-50 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap"
             >
-              {isPrinting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin shrink-0" /> : <Printer className="w-3.5 h-3.5 mr-1.5 shrink-0" />} 
-              <span>{isPrinting ? 'กำลังพิมพ์...' : 'พิมพ์ PDF'}</span>
+              {isPrinting ? <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin shrink-0" /> : <Printer className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" />} 
+              <span>{isPrinting ? 'พิมพ์...' : 'พิมพ์ PDF'}</span>
             </button>
             <button 
               type="button"
               title="ส่งออก Excel"
               onClick={handleExportExcel}
-              className="flex-1 sm:flex-initial bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center shrink-0 shadow-2xs"
+              className="w-full sm:w-auto bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap"
             >
-              <Download className="w-3.5 h-3.5 mr-1.5 shrink-0" /> Excel
+              <Download className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" /> Excel
             </button>
           </div>
         </div>
       </div>
 
       <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col gap-3">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="ค้นหารายชื่อจากรหัส หรือชื่อ..." 
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-            />
-          </div>
+        {/* Full-width Search Bar */}
+        <div className="relative w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="ค้นหารายชื่อจากรหัส หรือชื่อ..." 
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 font-medium placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-2xs"
+          />
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-600">
+        {/* Filter Dropdowns below Search Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs sm:text-sm text-slate-600">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             {/* Grade Filter */}
             <select
               value={filterGrade}
-              onChange={e => setFilterGrade(e.target.value)}
-              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+              onChange={e => {
+                setFilterGrade(e.target.value)
+                setFilterRoom("ALL")
+              }}
+              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm flex-1 sm:flex-none"
             >
               <option value="ALL">ทุกระดับชั้น</option>
               <option value="4">ม.4</option>
@@ -419,11 +436,23 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               <option value="6">ม.6</option>
             </select>
 
+            {/* Room Filter */}
+            <select
+              value={filterRoom}
+              onChange={e => setFilterRoom(e.target.value)}
+              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm flex-1 sm:flex-none"
+            >
+              <option value="ALL">ทุกห้อง</option>
+              {uniqueRooms.map(room => (
+                <option key={room} value={room}>ห้อง {room}</option>
+              ))}
+            </select>
+
             {/* Status Filter */}
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value)}
-              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm flex-1 sm:flex-none"
             >
               <option value="ALL">ทุกสถานะ</option>
               <option value="APPROVED">ตัวจริง</option>
@@ -435,12 +464,14 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             <select
               value={sortOrder}
               onChange={e => setSortOrder(e.target.value as 'oldest' | 'newest')}
-              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm w-full sm:w-auto mt-1 sm:mt-0"
             >
               <option value="oldest">ลงทะเบียนก่อนไปหลัง</option>
               <option value="newest">ลงทะเบียนหลังไปก่อน</option>
             </select>
+          </div>
 
+          <div className="flex items-center justify-end gap-2 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-0 border-slate-200">
             <div className="h-4 w-px bg-slate-300 hidden sm:block mx-1"></div>
 
             {/* Items per page */}
@@ -462,7 +493,8 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
             <tr>
@@ -587,6 +619,116 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="md:hidden divide-y divide-slate-100">
+        {paginatedRegs.length > 0 ? (
+          paginatedRegs.map((reg, index) => (
+            <div key={reg.id} className="p-4 hover:bg-slate-50/70 transition-colors space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/80">
+                    #{(currentPage - 1) * itemsPerPage + index + 1}
+                  </span>
+                  {reg.status === 'APPROVED' ? (
+                    <div className="inline-flex items-center text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      <CheckCircle2 className="w-3 h-3 mr-1" /> ตัวจริง
+                    </div>
+                  ) : reg.status === 'WAITLISTED' ? (
+                    <div className="inline-flex items-center text-[11px] font-bold bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full border border-amber-200">
+                      <Clock className="w-3 h-3 mr-1" /> สำรอง
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center text-[11px] font-bold bg-rose-50 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
+                      <AlertCircle className="w-3 h-3 mr-1" /> ไม่ได้รับสิทธิ์
+                    </div>
+                  )}
+                </div>
+                <button 
+                  onClick={() => handleDelete(reg.id)}
+                  disabled={loading}
+                  className="bg-rose-50 text-rose-500 hover:text-rose-700 hover:bg-rose-100 border border-rose-200 p-1.5 rounded-lg transition-colors flex items-center justify-center shrink-0 shadow-2xs"
+                  title="ลบรายชื่อ"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div>
+                <a 
+                  href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm font-bold text-slate-900 hover:text-indigo-600 hover:underline inline-flex items-center gap-1"
+                  title="คลิกเพื่อดูหน้าข้อมูลการลงทะเบียน"
+                >
+                  {reg.studentProfile.prefix}{reg.studentProfile.firstName} {reg.studentProfile.lastName}
+                </a>
+                <div className="text-xs font-semibold text-indigo-600 mt-0.5">
+                  ม.{reg.studentProfile.grade}/{reg.studentProfile.room} เลขที่ {reg.studentProfile.number} • รหัส {reg.studentProfile.studentId}
+                </div>
+                {reg.answers && reg.answers.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-slate-100 text-xs text-slate-600 font-normal space-y-1 bg-slate-50/80 p-2.5 rounded-xl border">
+                    {reg.answers.map((ans) => {
+                      const field = project.formFields?.find((f) => f.id === ans.fieldId)
+                      return field ? <div key={ans.id}><span className="font-semibold text-slate-700">{field.label}:</span> {ans.value}</div> : null
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] text-slate-400 font-mono">
+                  {reg.createdAt ? new Date(reg.createdAt).toLocaleString("th-TH", {
+                    timeZone: "Asia/Bangkok",
+                    day: "numeric",
+                    month: "short",
+                    year: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }) + " น." : "-"}
+                </span>
+                <div className="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+                  <select
+                    value={reg.status}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === 'APPROVED' && reg.status !== 'APPROVED') handleAccept(reg.id);
+                      else if (val === 'WAITLISTED' && reg.status !== 'WAITLISTED') handleWaitlist(reg.id);
+                      else if (val === 'REJECTED' && reg.status !== 'REJECTED') handleReject(reg.id);
+                    }}
+                    disabled={loading}
+                    className={`flex-1 sm:flex-none text-xs font-bold px-3 py-1.5 rounded-lg border shadow-2xs focus:outline-none focus:ring-2 cursor-pointer transition-colors ${
+                      reg.status === 'APPROVED' 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300 focus:ring-emerald-500' 
+                        : reg.status === 'WAITLISTED' 
+                        ? 'bg-amber-50 text-amber-700 border-amber-300 focus:ring-amber-500' 
+                        : 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-rose-500'
+                    }`}
+                  >
+                    <option value="APPROVED">ตัวจริง</option>
+                    <option value="WAITLISTED">สำรอง</option>
+                    <option value="REJECTED">ไม่ได้รับสิทธิ์</option>
+                  </select>
+                  <a
+                    href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="bg-indigo-50 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1 text-xs font-medium shrink-0 shadow-2xs"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>ดูข้อมูล</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="px-6 py-12 text-center text-slate-500 text-sm">
+            ไม่พบรายชื่อในระบบ
+          </div>
+        )}
       </div>
 
       {/* Pagination Footer */}

@@ -8,18 +8,9 @@ import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { Metadata } from "next"
 import { auth } from "@/auth"
 import { signInWithGoogleCustomRedirect } from "@/app/actions/auth"
-import { unstable_cache } from "next/cache"
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-const getCachedAnnouncementRegs = unstable_cache(
-  async (projectId: number) => {
-    return prisma.registration.findMany({
-      where: { projectId, status: { in: ['APPROVED', 'WAITLISTED'] } },
-      include: { studentProfile: true }
-    })
-  },
-  ['announcement-regs-list'],
-  { tags: ['announcements'], revalidate: 60 }
-)
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -105,8 +96,11 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     )
   }
 
-  // Fetch all approved and waitlisted registrations from cache
-  const allRegs = await getCachedAnnouncementRegs(numericId)
+  // Fetch all approved and waitlisted registrations directly in real-time
+  const allRegs = await prisma.registration.findMany({
+    where: { projectId: numericId, status: { in: ['APPROVED', 'WAITLISTED'] } },
+    include: { studentProfile: true }
+  })
 
   allRegs.sort((a, b) => {
     if (a.status !== b.status) return a.status === 'APPROVED' ? -1 : 1;

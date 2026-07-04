@@ -20,28 +20,51 @@ export default async function AdminLogin() {
   const isStudent = session && role !== "ADMIN" && role !== "SUPER_ADMIN"
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 max-w-sm w-full text-center">
-        <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 selection:bg-rose-500 selection:text-white">
+      <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-8 max-w-md w-full text-center relative overflow-hidden">
+        {/* Top Warning Stripe */}
+        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-600 via-amber-500 to-rose-600 animate-pulse"></div>
+
+        <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mt-2 mb-4 border border-rose-100 shadow-sm">
           <ShieldAlert className="w-8 h-8" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-8">ผู้ดูแลระบบ</h1>
+        <h1 className="text-2xl font-black text-slate-900 mb-2">ระบบจัดการหลังบ้าน</h1>
+        <p className="text-xs text-slate-500 font-medium mb-6">พื้นที่เฉพาะเจ้าหน้าที่และผู้ดูแลระบบโรงเรียนภูเขียวเท่านั้น</p>
         
+        {/* Important Warning Box for Students */}
+        <div className="mb-6 bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 text-left shadow-xs">
+          <div className="flex items-center gap-2 font-bold text-amber-900 mb-1.5 text-xs sm:text-sm">
+            <span className="text-base">⚠️</span>
+            <span>คำเตือนสำคัญสำหรับนักเรียน</span>
+          </div>
+          <ul className="text-xs text-amber-800 space-y-1 pl-5 list-disc font-medium leading-relaxed">
+            <li><strong className="text-rose-700">นักเรียนห้ามเข้าสู่ระบบผ่านหน้านี้</strong></li>
+            <li>การเข้าสู่ระบบในหน้านี้จะไม่สามารถลงทะเบียนกิจกรรมได้</li>
+            <li>หากต้องการลงทะเบียนหรือตรวจสอบผล ให้ออกจากหน้านี้และกลับไปเข้าสู่ระบบที่ <strong className="underline">หน้าหลัก/หน้าโครงการ</strong></li>
+          </ul>
+        </div>
+
         {isStudent ? (
           <div className="mb-6">
-            <p className="text-amber-600 font-medium mb-4 text-sm bg-amber-50 p-3 rounded-lg border border-amber-100">
-              บัญชีปัจจุบันของคุณไม่มีสิทธิ์เข้าถึงระบบผู้ดูแล โปรดออกจากระบบเพื่อเข้าสู่ระบบใหม่ด้วยบัญชีที่มีสิทธิ์
+            <p className="text-rose-600 font-bold mb-4 text-xs sm:text-sm bg-rose-50 p-3.5 rounded-xl border border-rose-200">
+              ❌ บัญชีของคุณคือนักเรียน ไม่มีสิทธิ์เข้าถึงระบบผู้ดูแล กรุณากลับสู่หน้าหลักหรือออกจากระบบ
             </p>
-            <form
-              action={async () => {
-                "use server"
-                await signOut({ redirectTo: "/admin/login" })
-              }}
-            >
-              <button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3.5 px-4 rounded-xl transition-all shadow-md cursor-pointer">
-                ออกจากระบบปัจจุบัน
-              </button>
-            </form>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/" className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-xl transition-all text-sm flex items-center justify-center">
+                ⬅️ กลับหน้าหลัก
+              </Link>
+              <form
+                action={async () => {
+                  "use server"
+                  await signOut({ redirectTo: "/admin/login" })
+                }}
+                className="flex-1"
+              >
+                <button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md cursor-pointer text-sm">
+                  ออกจากระบบ
+                </button>
+              </form>
+            </div>
           </div>
         ) : (
           <form
@@ -50,14 +73,18 @@ export default async function AdminLogin() {
               await signIn("google", { redirectTo: "/admin" })
             }}
           >
-            <button type="submit" className="w-full bg-slate-900 hover:bg-black text-white font-semibold py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 bg-white rounded-full p-0.5"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
-              ดำเนินการต่อด้วย Google
+            <button type="submit" className="w-full bg-slate-900 hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2.5 cursor-pointer text-sm">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 bg-white rounded-full p-0.5 shrink-0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+              <span>เข้าสู่ระบบเฉพาะผู้ดูแลระบบ (Google)</span>
             </button>
           </form>
         )}
 
-        <p className="mt-8 text-xs text-slate-400">หากคุณไม่ใช่ผู้ดูแลระบบ โปรดกลับไปยัง<Link href="/" className="text-indigo-600 hover:underline">หน้าหลัก</Link></p>
+        <div className="mt-6 pt-6 border-t border-slate-100">
+          <Link href="/" className="inline-flex items-center justify-center gap-2 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl transition-all text-sm">
+            ⬅️ สำหรับนักเรียน: กลับสู่หน้าหลักเพื่อลงทะเบียน
+          </Link>
+        </div>
       </div>
     </div>
   )
