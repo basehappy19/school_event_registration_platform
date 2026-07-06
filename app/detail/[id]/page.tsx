@@ -5,6 +5,7 @@ import ViewerTracker from "./components/ViewerTracker"
 import AppNavbar from "@/app/components/AppNavbar"
 import { auth } from "@/auth"
 import { unstable_cache } from "next/cache"
+import { decodeProjectId } from "@/lib/id-codec"
 
 import { Metadata } from "next"
 
@@ -37,8 +38,8 @@ const getCachedProject = unstable_cache(
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) return {}
+  const numericId = decodeProjectId(id)
+  if (!numericId) return {}
   
   const project = await getCachedProjectMeta(numericId)
 
@@ -66,8 +67,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ProjectDetail({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ error?: string }> }) {
   const { id } = await params
   const { error } = await searchParams
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) return notFound()
+  const numericId = decodeProjectId(id)
+  if (!numericId) return notFound()
   
   const project = await getCachedProject(numericId)
 

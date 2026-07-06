@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
+import { decodeProjectId } from "@/lib/id-codec"
 
 // In-memory store for active viewers
 // Structure: { projectId: { sessionId: lastSeenTimestamp } }
@@ -17,8 +18,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const projectId = parseInt(id, 10)
-  if (isNaN(projectId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
+  const projectId = decodeProjectId(id)
+  if (!projectId) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
 
   const url = new URL(req.url)
   const sessionId = url.searchParams.get('sessionId')
@@ -82,8 +83,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const projectId = parseInt(id, 10)
-  if (isNaN(projectId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
+  const projectId = decodeProjectId(id)
+  if (!projectId) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
 
   const url = new URL(req.url)
   const sessionId = url.searchParams.get('sessionId')

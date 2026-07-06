@@ -8,6 +8,7 @@ import AdminRegistrationList from "./AdminRegistrationList"
 import AdminProjectStats from "./AdminProjectStats"
 import { createProject, updateProjectsOrder } from "@/app/actions/admin"
 import { ProjectWithRelations } from "@/app/types"
+import { encodeProjectId } from "@/lib/id-codec"
 import {
   DndContext,
   closestCenter,
@@ -374,12 +375,12 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
               {activeProject && (
                 <a
-                  href={`/detail/${activeProject.id}`}
+                  href={`/detail/${encodeProjectId(activeProject.id)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors flex items-center gap-1.5"
                 >
-                  <Eye className="w-3.5 h-3.5" />
+                  <Eye className="w-3.5 h-3.5 text-slate-500" />
                   <span>ดูหน้าลงทะเบียน</span>
                 </a>
               )}

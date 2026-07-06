@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import prisma from "@/lib/prisma"
+import { encodeProjectId } from "@/lib/id-codec"
 
 export const revalidate = 60 // Revalidate every minute
 
@@ -21,7 +22,7 @@ export default async function Home() {
   }
 
   if (project) {
-    redirect(`/detail/${project.id}`)
+    redirect(`/detail/${encodeProjectId(project.id)}`)
   }
 
   redirect('/admin/login')

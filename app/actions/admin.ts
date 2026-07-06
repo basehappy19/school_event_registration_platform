@@ -7,6 +7,7 @@ import { headers } from "next/headers"
 import { getClientIp } from "@/lib/ip"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { UpdateProjectPayload } from "@/app/types"
+import { encodeProjectId } from "@/lib/id-codec"
 import fs from "fs"
 import path from "path"
 
@@ -153,7 +154,7 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
 
     revalidatePath('/admin')
     revalidatePath('/')
-    revalidatePath(`/detail/${projectId}`)
+    revalidatePath(`/detail/${encodeProjectId(projectId)}`)
     return { success: true, project }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -229,7 +230,7 @@ export async function adminAddRegistration(projectId: number, studentId: string)
 
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
-    revalidatePath(`/announcement/${projectId}`)
+    revalidatePath(`/announcement/${encodeProjectId(projectId)}`)
     revalidatePath('/announcement/[id]', 'page')
     return { success: true, registration }
   } catch (error) {
@@ -401,7 +402,7 @@ export async function adminAcceptAllWaitlist(projectId: number) {
     })
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
-    revalidatePath(`/announcement/${projectId}`)
+    revalidatePath(`/announcement/${encodeProjectId(projectId)}`)
     revalidatePath('/announcement/[id]', 'page')
     return { success: true }
   } catch (error) {
@@ -571,7 +572,7 @@ export async function adminRolloverPromoteWaitlist(projectId: number) {
 
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
-    revalidatePath(`/announcement/${projectId}`)
+    revalidatePath(`/announcement/${encodeProjectId(projectId)}`)
     revalidatePath('/announcement/[id]', 'page')
     return { success: true, totalPromoted: result.totalPromoted }
   } catch (error) {

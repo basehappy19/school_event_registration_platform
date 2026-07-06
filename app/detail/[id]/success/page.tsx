@@ -6,11 +6,12 @@ import { redirect } from "next/navigation"
 import CancelRegistrationButton from "../components/CancelRegistrationButton"
 import AppNavbar from "@/app/components/AppNavbar"
 import { Metadata } from "next"
+import { decodeProjectId } from "@/lib/id-codec"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) return {}
+  const numericId = decodeProjectId(id)
+  if (!numericId) return {}
   
   const project = await prisma.project.findUnique({
     where: { id: numericId },
@@ -36,8 +37,8 @@ export default async function SuccessPage({
   const resolvedSearchParams = searchParams ? await searchParams : {}
   const targetStudentId = resolvedSearchParams.studentId
 
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) redirect("/")
+  const numericId = decodeProjectId(id)
+  if (!numericId) redirect("/")
 
   const session = await auth()
   const role = (session?.user as { role?: string })?.role
@@ -58,7 +59,7 @@ export default async function SuccessPage({
       } else if (userProfile && userProfile.studentId === targetStudentId) {
         profile = userProfile
       } else {
-        redirect(`/detail/${numericId}`)
+        redirect(`/detail/${id}`)
       }
     } else {
       profile = userProfile
@@ -70,7 +71,7 @@ export default async function SuccessPage({
   }
 
   if (!profile) {
-    redirect(`/detail/${numericId}`)
+    redirect(`/detail/${id}`)
   }
 
   const registration = await prisma.registration.findFirst({
@@ -89,7 +90,7 @@ export default async function SuccessPage({
   })
 
   if (!registration) {
-    redirect(`/detail/${numericId}`)
+    redirect(`/detail/${id}`)
   }
 
   const isApproved = registration.status === "APPROVED"
@@ -259,7 +260,7 @@ export default async function SuccessPage({
         {isAnnouncementOpen && (
           <div className="mb-4">
             <Link 
-              href={`/announcement/${numericId}`}
+              href={`/announcement/${id}`}
               className="flex items-center justify-center w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-emerald-600/20"
             >
               <Megaphone className="w-5 h-5 mr-3" /> ดูประกาศรายชื่อ

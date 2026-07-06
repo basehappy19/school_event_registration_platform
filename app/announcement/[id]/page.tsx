@@ -9,14 +9,15 @@ import { Metadata } from "next"
 import { auth } from "@/auth"
 import { signInWithGoogleCustomRedirect } from "@/app/actions/auth"
 import AppNavbar from "@/app/components/AppNavbar"
+import { decodeProjectId } from "@/lib/id-codec"
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) return {}
+  const numericId = decodeProjectId(id)
+  if (!numericId) return {}
   
   const project = await prisma.project.findUnique({
     where: { id: numericId },
@@ -35,8 +36,8 @@ export default async function AnnouncementPage({ params, searchParams }: { param
   const { id } = await params
   const { q, grade, room, from_login } = await searchParams
   
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) return notFound()
+  const numericId = decodeProjectId(id)
+  if (!numericId) return notFound()
 
   const project = await prisma.project.findUnique({
     where: { id: numericId },
@@ -80,7 +81,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
   }
 
   if (from_login === "1" && userRegistration) {
-    redirect(`/detail/${numericId}/success`)
+    redirect(`/detail/${id}/success`)
   }
 
   if (!isAnnouncementOpen && !isAdmin) {
@@ -167,7 +168,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               <h3 className="font-bold text-base sm:text-lg md:text-xl mb-1 break-keep">ต้องการดูข้อมูลการลงทะเบียน หรือแจ้งสละสิทธิ์?</h3>
               <p className="text-indigo-100 text-xs sm:text-sm break-keep leading-relaxed">เข้าสู่ระบบด้วยบัญชี Google ของโรงเรียนเพื่อตรวจสอบสถานะ</p>
             </div>
-            <form action={signInWithGoogleCustomRedirect.bind(null, `/announcement/${numericId}?from_login=1`)} className="shrink-0 w-full md:w-auto">
+            <form action={signInWithGoogleCustomRedirect.bind(null, `/announcement/${id}?from_login=1`)} className="shrink-0 w-full md:w-auto">
               <button type="submit" className="w-full md:w-auto bg-white text-slate-800 hover:bg-slate-50 font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2 border border-slate-100">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
                 <span>เข้าสู่ระบบด้วย Google</span>
@@ -183,7 +184,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               </div>
               <p className="text-emerald-700 text-xs sm:text-sm break-keep leading-relaxed">ตรวจสอบรายละเอียดข้อมูลที่ลงทะเบียนไว้ หรือดำเนินการแจ้งสละสิทธิ์ได้ที่นี้</p>
             </div>
-            <Link href={`/detail/${numericId}/success`} className="w-full md:w-auto text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
+            <Link href={`/detail/${id}/success`} className="w-full md:w-auto text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
               ดูข้อมูลการลงทะเบียน / สละสิทธิ์
             </Link>
           </div>
@@ -196,7 +197,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               </div>
               <p className="text-slate-600 text-xs sm:text-sm break-keep leading-relaxed">คุณไม่ได้ลงทะเบียนเข้าร่วมโครงการนี้ในช่วงเวลาที่เปิดรับลงทะเบียน จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
             </div>
-            <Link href={`/detail/${numericId}`} className="w-full md:w-auto text-center bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-2xs shrink-0">
+            <Link href={`/detail/${id}`} className="w-full md:w-auto text-center bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-2xs shrink-0">
               ดูรายละเอียดโครงการ
             </Link>
           </div>
@@ -206,7 +207,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
               <h3 className="font-bold text-amber-950 text-base sm:text-lg mb-1 break-keep">คุณยังไม่ได้ลงทะเบียนในโครงการนี้</h3>
               <p className="text-amber-700 text-xs sm:text-sm break-keep leading-relaxed">หากต้องการเข้าร่วมกิจกรรม สามารถเข้าไปอ่านรายละเอียดและลงทะเบียนได้ที่หน้าฟอร์มลงทะเบียน</p>
             </div>
-            <Link href={`/detail/${numericId}`} className="w-full md:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
+            <Link href={`/detail/${id}`} className="w-full md:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
               ไปที่หน้าฟอร์มลงทะเบียน
             </Link>
           </div>

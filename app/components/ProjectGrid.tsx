@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Calendar, ArrowRight, UserPlus, Megaphone, MapPin, Clock, Search, Users, X, ZoomIn } from "lucide-react"
 import { ProjectGridItem } from "@/app/types"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
+import { encodeProjectId } from "@/lib/id-codec"
 
 export default function ProjectGrid({ projects: initialProjects }: { projects: ProjectGridItem[] }) {
   const [projects, setProjects] = useState<ProjectGridItem[]>(initialProjects)
@@ -299,7 +300,7 @@ export default function ProjectGrid({ projects: initialProjects }: { projects: P
                 <div className="mt-auto flex flex-col gap-3">
                   {isRegistrationAvailable && (
                     <Link 
-                      href={`/detail/${project.id}`}
+                      href={`/detail/${encodeProjectId(project.id)}`}
                       className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold py-3.5 px-4 rounded-xl text-center transition-all duration-300 shadow-md hover:shadow-indigo-500/25 flex items-center justify-center group/btn"
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
@@ -310,7 +311,7 @@ export default function ProjectGrid({ projects: initialProjects }: { projects: P
 
                   {isAnnouncementAvailable && (
                     <Link
-                      href={`/announcement/${project.id}`}
+                      href={`/announcement/${encodeProjectId(project.id)}`}
                       className="flex-1 bg-white hover:bg-emerald-50 text-emerald-600 border border-emerald-200 hover:border-emerald-300 font-semibold py-2.5 px-4 rounded-xl text-center text-sm transition-all duration-300 shadow-xs flex items-center justify-center group/ann"
                     >
                       <Megaphone className="w-4 h-4 mr-2 text-emerald-500" />

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 import { ProjectWithRelations } from "@/app/types"
 import AdminSeatAssistantModal from "./AdminSeatAssistantModal"
+import { encodeProjectId } from "@/lib/id-codec"
 
 export default function AdminRegistrationList({ project }: { project: ProjectWithRelations }) {
   const router = useRouter()
@@ -93,14 +94,14 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
 
   const handlePrint = () => {
     setIsPrinting(true)
-    window.open(`/admin/print/${project.id}?print=true`, '_blank')
+    window.open(`/admin/print/${encodeProjectId(project.id)}?print=true`, '_blank')
     setTimeout(() => setIsPrinting(false), 1500)
   }
 
   const handleExportExcel = async () => {
     setIsExportingExcel(true)
     try {
-      const res = await fetch(`/api/export/excel?projectId=${project.id}`)
+      const res = await fetch(`/api/export/excel?projectId=${encodeProjectId(project.id)}`)
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -393,7 +394,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
 
           {/* Group 3: ดูประกาศและส่งออกข้อมูล */}
           <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto items-stretch">
-            <a title="ดูประกาศหน้าเว็บ" href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap">
+            <a title="ดูประกาศหน้าเว็บ" href={`/announcement/${encodeProjectId(project.id)}`} target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap">
               <Eye className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" /> ดูประกาศ
             </a>
             <button 
@@ -543,7 +544,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                   <td className="px-3 sm:px-4 py-2.5 text-slate-800 font-medium">
                     <div>
                       <a 
-                        href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                        href={`/detail/${encodeProjectId(project.id)}/success?studentId=${reg.studentProfile.studentId}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-xs sm:text-sm font-bold text-slate-800 hover:text-indigo-600 hover:underline inline-flex items-center gap-1"
@@ -578,7 +579,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                   <td className="px-3 sm:px-4 py-2.5 text-center">
                     <div className="flex items-center justify-center gap-1.5">
                       <a
-                        href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                        href={`/detail/${encodeProjectId(project.id)}/success?studentId=${reg.studentProfile.studentId}`}
                         target="_blank"
                         rel="noreferrer"
                         className="bg-indigo-50 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-100 border border-indigo-200 p-1.5 sm:px-2 sm:py-1 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium shrink-0 shadow-2xs"
@@ -670,7 +671,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
 
               <div>
                 <a 
-                  href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                  href={`/detail/${encodeProjectId(project.id)}/success?studentId=${reg.studentProfile.studentId}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-sm font-bold text-slate-900 hover:text-indigo-600 hover:underline inline-flex items-center gap-1"
@@ -725,7 +726,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                     <option value="REJECTED">ไม่ได้รับสิทธิ์</option>
                   </select>
                   <a
-                    href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
+                    href={`/detail/${encodeProjectId(project.id)}/success?studentId=${reg.studentProfile.studentId}`}
                     target="_blank"
                     rel="noreferrer"
                     className="bg-indigo-50 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1 text-xs font-medium shrink-0 shadow-2xs"

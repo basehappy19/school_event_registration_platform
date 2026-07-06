@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
 import AutoPrint from "@/app/announcement/[id]/components/AutoPrint"
 import { Metadata } from "next"
+import { decodeProjectId } from "@/lib/id-codec"
 import { Sarabun } from "next/font/google"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
@@ -14,8 +15,8 @@ const sarabun = Sarabun({
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) return {}
+  const numericId = decodeProjectId(id)
+  if (!numericId) return {}
   
   const project = await prisma.project.findUnique({
     where: { id: numericId },
@@ -39,8 +40,8 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
   }
 
   const { id } = await params
-  const numericId = parseInt(id, 10)
-  if (isNaN(numericId)) return notFound()
+  const numericId = decodeProjectId(id)
+  if (!numericId) return notFound()
 
   const project = await prisma.project.findUnique({
     where: { id: numericId }

@@ -12,6 +12,7 @@ import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { ProjectForWizard } from "@/app/types"
 import { StudentProfile } from "@prisma/client"
 import { Session } from "next-auth"
+import { encodeProjectId } from "@/lib/id-codec"
 
 export default function RegistrationWizard({ project, session, profile, errorParam }: { project: ProjectForWizard, session: Session | null, profile: StudentProfile | null, errorParam?: string }) {
   const router = useRouter()
@@ -29,7 +30,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
   const closeAccessDeniedModal = () => {
     setShowAccessDeniedModal(false)
-    router.replace(`/detail/${project.id}`)
+    router.replace(`/detail/${encodeProjectId(project.id)}`)
   }
 
   // Real-time Stats State
@@ -163,7 +164,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
           const draftKey = `phukhieo_reg_draft_${project.id}_${profile?.studentId || 'anon'}`;
           localStorage.removeItem(draftKey);
         } catch {}
-        router.push(`/detail/${project.id}/success?status=${res.status}`)
+        router.push(`/detail/${encodeProjectId(project.id)}/success?status=${res.status}`)
         router.refresh()
       } else {
         setError("ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง")
@@ -349,7 +350,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                   <p className="text-slate-600 text-sm">อีเมล {session.user?.email} ไม่สามารถใช้งานได้ กรุณาเปลี่ยนไปใช้อีเมลของโรงเรียนในการลงทะเบียน</p>
                 </div>
                 <button
-                  onClick={() => signOutAndRedirect(`/detail/${project.id}`)}
+                  onClick={() => signOutAndRedirect(`/detail/${encodeProjectId(project.id)}`)}
                   className="bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-medium py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer shrink-0"
                 >
                   เปลี่ยนบัญชี

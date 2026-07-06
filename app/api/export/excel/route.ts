@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
 import ExcelJS from "exceljs"
+import { decodeProjectId } from "@/lib/id-codec"
 
 export async function GET(request: NextRequest) {
   const session = await auth()
@@ -16,8 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing projectId" }, { status: 400 })
   }
 
+  const numericId = decodeProjectId(projectId) || parseInt(projectId, 10)
   const project = await prisma.project.findUnique({
-    where: { id: parseInt(projectId, 10) },
+    where: { id: numericId },
     include: {
       formFields: {
         orderBy: { id: 'asc' }
