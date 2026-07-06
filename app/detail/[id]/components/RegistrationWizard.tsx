@@ -41,7 +41,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     const fetchStats = async () => {
       if (document.hidden) return;
       try {
-        const res = await fetch(`/api/projects/${project.id}/stats?sessionId=${sessionId}`)
+        const res = await fetch(`/api/projects/${encodeProjectId(project.id)}/stats?sessionId=${sessionId}`)
         if (res.ok) {
           const data = await res.json()
           setStats(data)
@@ -55,14 +55,14 @@ export default function RegistrationWizard({ project, session, profile, errorPar
     const interval = setInterval(fetchStats, 2000)
 
     const handleBeforeUnload = () => {
-      navigator.sendBeacon(`/api/projects/${project.id}/stats?sessionId=${sessionId}&action=leave`)
+      navigator.sendBeacon(`/api/projects/${encodeProjectId(project.id)}/stats?sessionId=${sessionId}&action=leave`)
     }
     window.addEventListener("beforeunload", handleBeforeUnload)
 
     return () => {
       clearInterval(interval)
       window.removeEventListener("beforeunload", handleBeforeUnload)
-      navigator.sendBeacon(`/api/projects/${project.id}/stats?sessionId=${sessionId}&action=leave`)
+      navigator.sendBeacon(`/api/projects/${encodeProjectId(project.id)}/stats?sessionId=${sessionId}&action=leave`)
     }
   }, [project.id, sessionId])
 

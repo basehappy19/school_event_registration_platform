@@ -12,7 +12,7 @@ import { Metadata } from "next"
 const getCachedProjectMeta = unstable_cache(
   async (id: number) => {
     return await prisma.project.findUnique({
-      where: { id, isPublished: true },
+      where: { id },
       select: { title: true, description: true, posterUrl: true }
     })
   },
@@ -23,7 +23,7 @@ const getCachedProjectMeta = unstable_cache(
 const getCachedProject = unstable_cache(
   async (id: number) => {
     return await prisma.project.findUnique({
-      where: { id, isPublished: true },
+      where: { id },
       include: {
         formFields: true,
         quotas: {
