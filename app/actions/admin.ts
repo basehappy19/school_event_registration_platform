@@ -7,7 +7,6 @@ import { headers } from "next/headers"
 import { getClientIp } from "@/lib/ip"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { UpdateProjectPayload } from "@/app/types"
-import { encodeProjectId } from "@/lib/id-codec"
 import fs from "fs"
 import path from "path"
 
@@ -54,7 +53,7 @@ export async function createProject(data: { title: string, description?: string,
   }
 }
 
-export async function updateProjectSettings(projectId: number, payload: UpdateProjectPayload) {
+export async function updateProjectSettings(projectId: string, payload: UpdateProjectPayload) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = getClientIp(hdrs)
@@ -154,7 +153,7 @@ export async function updateProjectSettings(projectId: number, payload: UpdatePr
 
     revalidatePath('/admin')
     revalidatePath('/')
-    revalidatePath(`/detail/${encodeProjectId(projectId)}`)
+    revalidatePath(`/detail/${projectId}`)
     return { success: true, project }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
@@ -190,7 +189,7 @@ export async function adminSearchStudents(query: string) {
   }
 }
 
-export async function adminAddRegistration(projectId: number, studentId: string) {
+export async function adminAddRegistration(projectId: string, studentId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = getClientIp(hdrs)
@@ -230,7 +229,7 @@ export async function adminAddRegistration(projectId: number, studentId: string)
 
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
-    revalidatePath(`/announcement/${encodeProjectId(projectId)}`)
+    revalidatePath(`/announcement/${projectId}`)
     revalidatePath('/announcement/[id]', 'page')
     return { success: true, registration }
   } catch (error) {
@@ -393,7 +392,7 @@ export async function adminWaitlistRegistration(regId: string) {
   }
 }
 
-export async function adminAcceptAllWaitlist(projectId: number) {
+export async function adminAcceptAllWaitlist(projectId: string) {
   await checkAdmin()
   try {
     await prisma.registration.updateMany({
@@ -402,7 +401,7 @@ export async function adminAcceptAllWaitlist(projectId: number) {
     })
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
-    revalidatePath(`/announcement/${encodeProjectId(projectId)}`)
+    revalidatePath(`/announcement/${projectId}`)
     revalidatePath('/announcement/[id]', 'page')
     return { success: true }
   } catch (error) {
@@ -410,7 +409,7 @@ export async function adminAcceptAllWaitlist(projectId: number) {
   }
 }
 
-export async function deleteProject(projectId: number) {
+export async function deleteProject(projectId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = getClientIp(hdrs)
@@ -452,7 +451,7 @@ export async function deleteProject(projectId: number) {
   }
 }
 
-export async function updateProjectsOrder(orderedIds: number[]) {
+export async function updateProjectsOrder(orderedIds: string[]) {
   await checkAdmin()
   try {
     for (let i = 0; i < orderedIds.length; i++) {
@@ -490,7 +489,7 @@ export async function getSystemLogs(limit = 100) {
   }
 }
 
-export async function adminRolloverPromoteWaitlist(projectId: number) {
+export async function adminRolloverPromoteWaitlist(projectId: string) {
   const adminEmail = await checkAdmin()
   const hdrs = await headers()
   const ip = getClientIp(hdrs)
@@ -572,7 +571,7 @@ export async function adminRolloverPromoteWaitlist(projectId: number) {
 
     revalidatePath('/admin')
     revalidateTag('announcements', 'default')
-    revalidatePath(`/announcement/${encodeProjectId(projectId)}`)
+    revalidatePath(`/announcement/${projectId}`)
     revalidatePath('/announcement/[id]', 'page')
     return { success: true, totalPromoted: result.totalPromoted }
   } catch (error) {
@@ -580,7 +579,7 @@ export async function adminRolloverPromoteWaitlist(projectId: number) {
   }
 }
 
-export async function adminAnalyzeAllocation(projectId: number) {
+export async function adminAnalyzeAllocation(projectId: string) {
   await checkAdmin()
   try {
     const project = await prisma.project.findUnique({

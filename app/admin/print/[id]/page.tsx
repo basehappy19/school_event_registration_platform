@@ -3,7 +3,6 @@ import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
 import AutoPrint from "@/app/announcement/[id]/components/AutoPrint"
 import { Metadata } from "next"
-import { decodeProjectId } from "@/lib/id-codec"
 import { Sarabun } from "next/font/google"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 
@@ -15,11 +14,9 @@ const sarabun = Sarabun({
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = decodeProjectId(id)
-  if (!numericId) return {}
   
   const project = await prisma.project.findUnique({
-    where: { id: numericId },
+    where: { id },
     select: { title: true }
   })
 
@@ -30,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 }
 
-export default async function AdminPrintPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AdminPrintPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ grade?: string, room?: string }> }) {
   const session = await auth()
   const role = (session?.user as { role?: string })?.role
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN"
@@ -40,19 +37,20 @@ export default async function AdminPrintPage({ params }: { params: Promise<{ id:
   }
 
   const { id } = await params
-  const numericId = decodeProjectId(id)
-  if (!numericId) return notFound()
+  const { grade, room } = await searchParams
+  
+  if (!id) return notFound()
 
   const project = await prisma.project.findUnique({
-    where: { id: numericId }
+    where: { id }
   })
 
   if (!project) return notFound()
 
   const registrations = await prisma.registration.findMany({
     where: {
-      projectId: numericId,
-      status: 'APPROVED'
+      projectId: id,
+      status: { in: ['APPROVED', 'WAITLISTED'] }
     },
     include: {
       studentProfile: true

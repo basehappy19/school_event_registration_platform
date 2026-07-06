@@ -43,11 +43,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                             cookieStore.get("__Secure-authjs.callback-url")?.value ||
                             hdrs.get('referer') || ""
           
-          const match = returnUrl.match(/\/(detail|announcement)\/(\d+)/)
+          const match = returnUrl.match(/\/(detail|announcement)\/([^\/?#]+)/)
           if (match) {
             const pageType = match[1] === 'detail' ? 'หน้าฟอร์ม' : 'หน้าประกาศผล'
-            const projId = parseInt(match[2], 10)
-            if (!isNaN(projId)) {
+            const projId = match[2]
+            if (projId) {
               const proj = await prisma.project.findUnique({
                 where: { id: projId },
                 select: { title: true, description: true }

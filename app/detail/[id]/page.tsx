@@ -5,12 +5,11 @@ import ViewerTracker from "./components/ViewerTracker"
 import AppNavbar from "@/app/components/AppNavbar"
 import { auth } from "@/auth"
 import { unstable_cache } from "next/cache"
-import { decodeProjectId } from "@/lib/id-codec"
 
 import { Metadata } from "next"
 
 const getCachedProjectMeta = unstable_cache(
-  async (id: number) => {
+  async (id: string) => {
     return await prisma.project.findUnique({
       where: { id },
       select: { title: true, description: true, posterUrl: true }
@@ -21,7 +20,7 @@ const getCachedProjectMeta = unstable_cache(
 )
 
 const getCachedProject = unstable_cache(
-  async (id: number) => {
+  async (id: string) => {
     return await prisma.project.findUnique({
       where: { id },
       include: {
@@ -38,10 +37,8 @@ const getCachedProject = unstable_cache(
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = decodeProjectId(id)
-  if (!numericId) return {}
   
-  const project = await getCachedProjectMeta(numericId)
+  const project = await getCachedProjectMeta(id)
 
   if (!project) return {}
 
@@ -67,10 +64,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ProjectDetail({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ error?: string }> }) {
   const { id } = await params
   const { error } = await searchParams
-  const numericId = decodeProjectId(id)
-  if (!numericId) return notFound()
   
-  const project = await getCachedProject(numericId)
+  const project = await getCachedProject(id)
 
   if (!project) return notFound()
 
@@ -84,7 +79,7 @@ export default async function ProjectDetail({ params, searchParams }: { params: 
     if (profile) {
       const existingReg = await prisma.registration.findFirst({
         where: {
-          projectId: numericId,
+          projectId: id,
           studentId: profile.studentId
         }
       })
@@ -92,7 +87,7 @@ export default async function ProjectDetail({ params, searchParams }: { params: 
       if (existingReg && existingReg.status !== 'CANCELLED') {
         // Redirect to success page if already registered and not cancelled
         const { redirect } = await import("next/navigation")
-        redirect(`/detail/${numericId}/success`)
+        redirect(`/detail/${id}/success`)
       }
     }
   }

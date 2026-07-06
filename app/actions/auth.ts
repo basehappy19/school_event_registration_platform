@@ -2,14 +2,13 @@
 
 import { signIn, signOut } from "@/auth"
 import { cookies } from "next/headers"
-import { encodeProjectId } from "@/lib/id-codec"
 
-export async function signInWithGoogle(projectId?: number) {
+export async function signInWithGoogle(projectId?: string) {
   if (projectId) {
     const cookieStore = await cookies()
-    cookieStore.set("auth_return_url", `/detail/${encodeProjectId(projectId)}`, { maxAge: 3600 })
+    cookieStore.set("auth_return_url", `/detail/${projectId}`, { maxAge: 3600 })
   }
-  await signIn("google", { redirectTo: projectId ? `/detail/${encodeProjectId(projectId)}` : "/" })
+  await signIn("google", { redirectTo: projectId ? `/detail/${projectId}` : "/" })
 }
 
 export async function signInWithGoogleCustomRedirect(customUrl: string) {

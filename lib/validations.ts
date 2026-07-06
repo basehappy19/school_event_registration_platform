@@ -8,7 +8,7 @@ export const sanitizeString = (str: string) => {
 }
 
 export const submitRegistrationSchema = z.object({
-  projectId: z.number().int().positive(),
+  projectId: z.union([z.string(), z.number()]).transform(String),
   formAnswers: z.array(
     z.object({
       fieldId: z.number().int().positive(),

@@ -9,7 +9,7 @@ export default function AdminSeatAssistantModal({
   onClose,
   onSuccess
 }: {
-  projectId: number
+  projectId: string
   onClose: () => void
   onSuccess: (msg: string) => void
 }) {

@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client"
 
-export async function promoteEligibleWaitlist(tx: Prisma.TransactionClient, projectId: number) {
+export async function promoteEligibleWaitlist(tx: Prisma.TransactionClient, projectId: string) {
   // Lock all Project Quotas for the project to prevent race conditions
   const allQuotas: any[] = await tx.$queryRaw`
     SELECT * FROM "ProjectQuota" 

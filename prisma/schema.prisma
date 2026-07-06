@@ -51,7 +51,7 @@ model StudentProfile {
 }
 
 model Project {
-  id                    Int      @id @default(autoincrement())
+  id                    String   @id @default(uuid())
   title                 String
   description           String?
   posterUrl             String?
@@ -87,7 +87,7 @@ model Project {
 
 model ProjectQuota {
   id               Int    @id @default(autoincrement())
-  projectId        Int
+  projectId        String
   grade            String
   capacity         Int
 
@@ -104,7 +104,7 @@ enum FieldType {
 
 model FormField {
   id         Int       @id @default(autoincrement())
-  projectId  Int
+  projectId  String
   label      String
   type       FieldType
   options    String?   // JSON string or comma-separated
@@ -133,7 +133,7 @@ enum RegistrationStatus {
 
 model Registration {
   id              String             @id @default(cuid())
-  projectId       Int
+  projectId       String
   studentId       String
   status          RegistrationStatus @default(WAITLISTED)
 
@@ -151,7 +151,7 @@ model AuditLog {
   action     String
   adminEmail String?
   studentId  String?
-  projectId  Int?
+  projectId  String?
   ipAddress  String?
   userAgent  String?
   payload    String?
@@ -161,7 +161,7 @@ model AuditLog {
 model RegistrationLog {
   id             String   @id @default(cuid())
   action         String   // e.g. "REGISTER", "CANCEL", "ADMIN_DELETE", "ADMIN_APPROVE", "ADMIN_REJECT", "ADMIN_WAITLIST", "AUTO_PROMOTE"
-  projectId      Int
+  projectId      String
   projectTitle   String?
   studentId      String
   studentName    String?
@@ -177,7 +177,7 @@ model RegistrationLog {
 
 model ProjectEditLog {
   id           Int      @id @default(autoincrement())
-  projectId    Int
+  projectId    String
   projectTitle String
   adminEmail   String
   action       String   // e.g. "CREATE_PROJECT", "UPDATE_PROJECT", "TOGGLE_PUBLISH", "DELETE_PROJECT"

@@ -6,15 +6,12 @@ import { redirect } from "next/navigation"
 import CancelRegistrationButton from "../components/CancelRegistrationButton"
 import AppNavbar from "@/app/components/AppNavbar"
 import { Metadata } from "next"
-import { decodeProjectId } from "@/lib/id-codec"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = decodeProjectId(id)
-  if (!numericId) return {}
   
   const project = await prisma.project.findUnique({
-    where: { id: numericId },
+    where: { id },
     select: { title: true }
   })
 
@@ -36,9 +33,8 @@ export default async function SuccessPage({
   const { id } = await params
   const resolvedSearchParams = searchParams ? await searchParams : {}
   const targetStudentId = resolvedSearchParams.studentId
-
-  const numericId = decodeProjectId(id)
-  if (!numericId) redirect("/")
+  
+  if (!id) redirect("/")
 
   const session = await auth()
   const role = (session?.user as { role?: string })?.role
@@ -76,7 +72,7 @@ export default async function SuccessPage({
 
   const registration = await prisma.registration.findFirst({
     where: {
-      projectId: numericId,
+      projectId: id,
       studentId: profile.studentId
     },
     include: {
@@ -104,7 +100,7 @@ export default async function SuccessPage({
   // Query queue numbers
   const totalQueueNumber = await prisma.registration.count({
     where: {
-      projectId: numericId,
+      projectId: id,
       status: { in: ['APPROVED', 'WAITLISTED'] },
       createdAt: { lte: registration.createdAt }
     }
@@ -112,7 +108,7 @@ export default async function SuccessPage({
 
   const gradeQueueNumber = await prisma.registration.count({
     where: {
-      projectId: numericId,
+      projectId: id,
       studentProfile: { grade: profile.grade },
       status: { in: ['APPROVED', 'WAITLISTED'] },
       createdAt: { lte: registration.createdAt }

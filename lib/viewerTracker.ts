@@ -3,15 +3,15 @@
 type ViewerMap = Map<string, number>;
 
 const globalForViewers = globalThis as unknown as {
-  viewerCounts?: Map<number, ViewerMap>;
+  viewerCounts?: Map<string, ViewerMap>;
 };
 
-const viewerCounts = globalForViewers.viewerCounts || new Map<number, ViewerMap>();
+const viewerCounts = globalForViewers.viewerCounts || new Map<string, ViewerMap>();
 if (process.env.NODE_ENV !== 'production') globalForViewers.viewerCounts = viewerCounts;
 
 const EXPIRATION_MS = 15000; // 15 seconds timeout
 
-export function updateHeartbeat(projectId: number, visitorId: string, leave = false) {
+export function updateHeartbeat(projectId: string, visitorId: string, leave = false) {
   if (!viewerCounts.has(projectId)) {
     viewerCounts.set(projectId, new Map());
   }
@@ -26,9 +26,9 @@ export function updateHeartbeat(projectId: number, visitorId: string, leave = fa
   cleanup();
 }
 
-export function getViewerCounts(): Record<number, number> {
+export function getViewerCounts(): Record<string, number> {
   cleanup();
-  const counts: Record<number, number> = {};
+  const counts: Record<string, number> = {};
   viewerCounts.forEach((map, projectId) => {
     counts[projectId] = map.size;
   });

@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { decodeProjectId } from "@/lib/id-codec"
 
 // In-memory store for active viewers
 // Structure: { projectId: { sessionId: lastSeenTimestamp } }
 const globalForViewers = global as unknown as { 
-  activeViewers: Record<number, Record<string, number>>,
-  cachedStats: Record<number, { data: any, timestamp: number }>
+  activeViewers: Record<string, Record<string, number>>,
+  cachedStats: Record<string, { data: any, timestamp: number }>
 }
 const activeViewers = globalForViewers.activeViewers || {}
 const cachedStats = globalForViewers.cachedStats || {}
@@ -18,7 +17,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const projectId = decodeProjectId(id)
+  const projectId = id
   if (!projectId) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
 
   const url = new URL(req.url)
@@ -61,13 +60,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-    const totalCapacity = project.quotas.reduce((acc, q) => acc + q.capacity, 0)
+    const totalCapacity = project.quotas.reduce((acc: number, q: { capacity: number }) => acc + q.capacity, 0)
     const totalRegistered = project.registrations.length
-    const gradeStats = project.quotas.map(q => ({
+    const gradeStats = project.quotas.map((q: { grade: string; capacity: number }) => ({
       grade: q.grade,
       capacity: q.capacity,
-      registered: project.registrations.filter(r => r.studentProfile?.grade === q.grade).length
-    })).sort((a, b) => Number(a.grade) - Number(b.grade))
+      registered: project.registrations.filter((r: { studentProfile: { grade: string } | null }) => r.studentProfile?.grade === q.grade).length
+    })).sort((a: { grade: string }, b: { grade: string }) => Number(a.grade) - Number(b.grade))
 
     statsData = { totalCapacity, totalRegistered, gradeStats }
     cachedStats[projectId] = { data: statsData, timestamp: now }
@@ -83,7 +82,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const projectId = decodeProjectId(id)
+  const projectId = id
   if (!projectId) return NextResponse.json({ error: "Invalid ID" }, { status: 400 })
 
   const url = new URL(req.url)

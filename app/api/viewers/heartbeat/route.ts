@@ -6,8 +6,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { projectId, visitorId, leave } = body;
 
-    if (typeof projectId === 'number' && typeof visitorId === 'string') {
-      updateHeartbeat(projectId, visitorId, Boolean(leave));
+    if ((typeof projectId === 'string' || typeof projectId === 'number') && typeof visitorId === 'string') {
+      updateHeartbeat(String(projectId), visitorId, Boolean(leave));
     }
 
     return NextResponse.json({ success: true });

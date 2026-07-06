@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function ViewerTracker({ projectId }: { projectId: number }) {
+export default function ViewerTracker({ projectId }: { projectId: string }) {
   useEffect(() => {
     // Get or generate unique visitor ID for this browser tab/session
     let visitorId = sessionStorage.getItem(`viewer_id_${projectId}`);

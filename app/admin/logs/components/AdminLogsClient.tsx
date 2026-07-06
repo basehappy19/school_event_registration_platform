@@ -6,7 +6,7 @@ import { History, FileText, Lock, User, Calendar, ShieldCheck, ShieldAlert, Arro
 interface RegistrationLog {
   id: string
   action: string
-  projectId: number
+  projectId: string
   projectTitle: string | null
   studentId: string
   studentName: string | null
@@ -22,7 +22,7 @@ interface RegistrationLog {
 
 interface ProjectEditLog {
   id: number | string
-  projectId: number
+  projectId: string
   projectTitle: string | null
   adminEmail: string | null
   action: string
@@ -53,7 +53,7 @@ interface AuditLogEntry {
 }
 
 interface ProjectInfo {
-  id: number
+  id: string
   title: string
   description: string | null
   activityDate: string | Date | null
@@ -185,7 +185,7 @@ export default function AdminLogsClient({
     })
   }
 
-  const renderProjectCell = (projectId: number, fallbackTitle: string | null) => {
+  const renderProjectCell = (projectId: string, fallbackTitle: string | null) => {
     const proj = projects.find(p => p.id === projectId)
     const displayTitle = proj?.title || fallbackTitle || `Project #${projectId}`
 

@@ -9,18 +9,15 @@ import { Metadata } from "next"
 import { auth } from "@/auth"
 import { signInWithGoogleCustomRedirect } from "@/app/actions/auth"
 import AppNavbar from "@/app/components/AppNavbar"
-import { decodeProjectId } from "@/lib/id-codec"
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const numericId = decodeProjectId(id)
-  if (!numericId) return {}
   
   const project = await prisma.project.findUnique({
-    where: { id: numericId },
+    where: { id },
     select: { title: true }
   })
 
@@ -36,11 +33,10 @@ export default async function AnnouncementPage({ params, searchParams }: { param
   const { id } = await params
   const { q, grade, room, from_login } = await searchParams
   
-  const numericId = decodeProjectId(id)
-  if (!numericId) return notFound()
+  if (!id) return notFound()
 
   const project = await prisma.project.findUnique({
-    where: { id: numericId },
+    where: { id },
     include: {
       quotas: true
     }
@@ -72,7 +68,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
     if (userProfile) {
       userRegistration = await prisma.registration.findFirst({
         where: {
-          projectId: numericId,
+          projectId: id,
           studentId: userProfile.studentId,
           status: { not: 'CANCELLED' }
         }
@@ -100,7 +96,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
 
   // Fetch all approved and waitlisted registrations directly in real-time
   const allRegs = await prisma.registration.findMany({
-    where: { projectId: numericId, status: { in: ['APPROVED', 'WAITLISTED'] } },
+    where: { projectId: id, status: { in: ['APPROVED', 'WAITLISTED'] } },
     include: { studentProfile: true }
   })
 

@@ -6,11 +6,10 @@ import { headers } from "next/headers"
 import { revalidateTag, revalidatePath } from "next/cache"
 import { getClientIp } from "@/lib/ip"
 import { submitRegistrationSchema } from "@/lib/validations"
-import { encodeProjectId } from "@/lib/id-codec"
 import { auth } from "@/auth"
 
 export async function submitRegistration(data: {
-  projectId: number,
+  projectId: string,
   formAnswers: { fieldId: number, value: string }[]
 }) {
   const headersList = await headers()
@@ -150,8 +149,8 @@ export async function submitRegistration(data: {
 
     revalidateTag('announcements', 'default')
     revalidatePath('/')
-    revalidatePath(`/detail/${encodeProjectId(validData.projectId)}`)
-    revalidatePath(`/announcement/${encodeProjectId(validData.projectId)}`)
+    revalidatePath(`/detail/${validData.projectId}`)
+    revalidatePath(`/announcement/${validData.projectId}`)
     revalidatePath('/announcement/[id]', 'page')
     return { success: true, status: result.status, registrationId: result.id }
 
@@ -253,8 +252,8 @@ export async function cancelRegistration(registrationId: string) {
     revalidateTag('announcements', 'default')
     revalidatePath('/')
     if (result.projectId) {
-      revalidatePath(`/detail/${encodeProjectId(result.projectId)}`)
-      revalidatePath(`/announcement/${encodeProjectId(result.projectId)}`)
+      revalidatePath(`/detail/${result.projectId}`)
+      revalidatePath(`/announcement/${result.projectId}`)
       revalidatePath('/announcement/[id]', 'page')
     }
     return result
@@ -264,7 +263,7 @@ export async function cancelRegistration(registrationId: string) {
   }
 }
 
-export async function approveAllWaitlist(projectId: number) {
+export async function approveAllWaitlist(projectId: string) {
   const headersList = await headers()
   const ip = getClientIp(headersList)
   const userAgent = headersList.get('user-agent') || 'Unknown'
@@ -299,7 +298,7 @@ export async function approveAllWaitlist(projectId: number) {
     })
 
     revalidateTag('announcements', 'default')
-    revalidatePath(`/announcement/${encodeProjectId(projectId)}`)
+    revalidatePath(`/announcement/${projectId}`)
     revalidatePath('/announcement/[id]', 'page')
     return result
 

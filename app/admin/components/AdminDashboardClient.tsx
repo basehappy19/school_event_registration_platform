@@ -8,7 +8,6 @@ import AdminRegistrationList from "./AdminRegistrationList"
 import AdminProjectStats from "./AdminProjectStats"
 import { createProject, updateProjectsOrder } from "@/app/actions/admin"
 import { ProjectWithRelations } from "@/app/types"
-import { encodeProjectId } from "@/lib/id-codec"
 import {
   DndContext,
   closestCenter,
@@ -134,9 +133,9 @@ function SortableProjectItem({
 export default function AdminDashboardClient({ initialProjects }: { initialProjects: ProjectWithRelations[] }) {
   const router = useRouter()
   const [projects, setProjects] = useState(initialProjects)
-  const [activeProjectId, setActiveProjectId] = useState<number | null>(projects[0]?.id || null)
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(projects[0]?.id || null)
   const [isCreating, setIsCreating] = useState(false)
-  const [viewerCounts, setViewerCounts] = useState<Record<number, number>>({})
+  const [viewerCounts, setViewerCounts] = useState<Record<string, number>>({})
   const [activeTab, setActiveTab] = useState<'registrations' | 'settings'>('registrations')
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const isDraggingRef = useRef(false)
@@ -145,9 +144,8 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
   useEffect(() => {
     const saved = sessionStorage.getItem('admin_active_project_id')
     if (saved) {
-      const id = Number(saved)
-      if (initialProjects.some(p => p.id === id)) {
-        setActiveProjectId(id)
+      if (initialProjects.some(p => p.id === saved)) {
+        setActiveProjectId(saved)
       }
     }
   }, [])
@@ -161,8 +159,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
   useEffect(() => {
     setProjects(initialProjects)
     if (!initialProjects.find(p => p.id === activeProjectId)) {
-      const saved = sessionStorage.getItem('admin_active_project_id')
-      const savedId = saved ? Number(saved) : null
+      const savedId = sessionStorage.getItem('admin_active_project_id')
       if (savedId && initialProjects.some(p => p.id === savedId)) {
         setActiveProjectId(savedId)
       } else {
@@ -375,7 +372,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
               {activeProject && (
                 <a
-                  href={`/detail/${encodeProjectId(activeProject.id)}`}
+                  href={`/detail/${activeProject.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors flex items-center gap-1.5"
