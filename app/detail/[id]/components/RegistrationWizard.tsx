@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { submitRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2, X, ZoomIn, AlertCircle, Info } from "lucide-react"
+import { UserCheck, ShieldCheck, Loader2, MapPin, Calendar, Clock, Users, Link as LinkIcon, CheckCircle2, X, ZoomIn, AlertCircle, Info, Megaphone } from "lucide-react"
 import { signInWithGoogle, signOutAction, signOutAndRedirect } from "@/app/actions/auth"
 import Link from "next/link"
 import Image from "next/image"
@@ -124,6 +124,10 @@ export default function RegistrationWizard({ project, session, profile, errorPar
 
   const isRegistrationOpen = project.isRegistrationOpen && isTimeOpen
 
+  const isAnnouncementAvailable = project.isAnnouncementOpen && 
+    (!project.announcementStartDate || currentTime >= new Date(project.announcementStartDate)) &&
+    (!project.announcementEndDate || currentTime <= new Date(project.announcementEndDate))
+
   const isAllRequiredFieldsFilled = project.formFields
     .filter(field => field.isRequired)
     .every(field => {
@@ -229,10 +233,7 @@ export default function RegistrationWizard({ project, session, profile, errorPar
             </div>
           )}
           <div className="flex-1">
-            <div className="flex gap-3 mb-6">
-              <Link href="/" className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center text-sm font-medium transition-all w-fit shadow-sm">
-                <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
-              </Link>
+            <div className="flex flex-wrap items-center gap-3 mb-6">
               <button 
                 onClick={handleCopyLink}
                 className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center text-sm font-medium transition-all w-fit shadow-sm"
@@ -240,6 +241,14 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                 {isCopied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <LinkIcon className="w-4 h-4 mr-2" />} 
                 {isCopied ? 'คัดลอกลิงก์แล้ว' : 'คัดลอกลิงก์'}
               </button>
+              {isAnnouncementAvailable && (
+                <Link
+                  href={`/announcement/${project.id}`}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold px-4 py-2.5 rounded-xl flex items-center text-sm transition-all w-fit shadow-md hover:shadow-lg"
+                >
+                  <Megaphone className="w-4 h-4 mr-2" /> ดูประกาศรายชื่อ
+                </Link>
+              )}
             </div>
             <h1 className="text-3xl font-bold mb-2 text-slate-900">{project.title}</h1>
             <p className="text-slate-600 mb-6">{project.description}</p>
@@ -382,9 +391,11 @@ export default function RegistrationWizard({ project, session, profile, errorPar
                 <h3 className="font-bold text-slate-800 text-base sm:text-lg break-keep">โครงการนี้ปิดรับลงทะเบียนแล้ว</h3>
                 <p className="text-slate-600 text-xs sm:text-sm mt-1 break-keep leading-relaxed">หมดเวลาหรือปิดรับลงทะเบียนสำหรับโครงการนี้แล้ว คุณไม่ได้ทำการลงทะเบียนไว้จึงไม่สามารถเข้าร่วมกิจกรรมได้</p>
               </div>
-              <Link href={`/announcement/${project.id}`} className="w-full sm:w-auto text-center bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-black transition-colors shrink-0 shadow-sm">
-                ดูประกาศรายชื่อ
-              </Link>
+              {isAnnouncementAvailable && (
+                <Link href={`/announcement/${project.id}`} className="w-full sm:w-auto text-center bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-black transition-colors shrink-0 shadow-sm flex items-center justify-center">
+                  <Megaphone className="w-4 h-4 mr-2 text-emerald-400" /> ดูประกาศรายชื่อ
+                </Link>
+              )}
             </div>
           )}
 

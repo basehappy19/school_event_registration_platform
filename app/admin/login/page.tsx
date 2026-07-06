@@ -40,25 +40,22 @@ export default async function AdminLogin() {
           <ul className="text-xs text-amber-800 space-y-1 pl-5 list-disc font-medium leading-relaxed">
             <li><strong className="text-rose-700">นักเรียนห้ามเข้าสู่ระบบผ่านหน้านี้</strong></li>
             <li>การเข้าสู่ระบบในหน้านี้จะไม่สามารถลงทะเบียนกิจกรรมได้</li>
-            <li>หากต้องการลงทะเบียนหรือตรวจสอบผล ให้ออกจากหน้านี้และกลับไปเข้าสู่ระบบที่ <strong className="underline">หน้าหลัก/หน้าโครงการ</strong></li>
+            <li>หากต้องการลงทะเบียนหรือตรวจสอบผล ให้ออกจากหน้านี้และเข้าใช้งานผ่าน <strong className="underline">ลิงก์หน้าลงทะเบียนโครงการ</strong></li>
           </ul>
         </div>
 
         {isStudent ? (
           <div className="mb-6">
             <p className="text-rose-600 font-bold mb-4 text-xs sm:text-sm bg-rose-50 p-3.5 rounded-xl border border-rose-200">
-              ❌ บัญชีของคุณคือนักเรียน ไม่มีสิทธิ์เข้าถึงระบบผู้ดูแล กรุณากลับสู่หน้าหลักหรือออกจากระบบ
+              ❌ บัญชีของคุณคือนักเรียน ไม่มีสิทธิ์เข้าถึงระบบผู้ดูแล กรุณาออกจากระบบ
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/" className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-xl transition-all text-sm flex items-center justify-center">
-                ⬅️ กลับหน้าหลัก
-              </Link>
               <form
                 action={async () => {
                   "use server"
                   await signOut({ redirectTo: "/admin/login" })
                 }}
-                className="flex-1"
+                className="w-full"
               >
                 <button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md cursor-pointer text-sm">
                   ออกจากระบบ
@@ -80,11 +77,7 @@ export default async function AdminLogin() {
           </form>
         )}
 
-        <div className="mt-6 pt-6 border-t border-slate-100">
-          <Link href="/" className="inline-flex items-center justify-center gap-2 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl transition-all text-sm">
-            ⬅️ สำหรับนักเรียน: กลับสู่หน้าหลักเพื่อลงทะเบียน
-          </Link>
-        </div>
+
       </div>
     </div>
   )

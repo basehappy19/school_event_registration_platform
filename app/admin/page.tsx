@@ -5,7 +5,7 @@ import AdminDashboardClient from "./components/AdminDashboardClient"
 import { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import { Home, LogOut, User, History, Users } from "lucide-react"
+import { LogOut, User, History, Users } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "ระบบจัดการผู้ดูแลระบบ",
@@ -46,11 +46,14 @@ export default async function AdminDashboard() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Left brand */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Image src="/logo.png" alt="Logo" width={36} height={36} className="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-sm shrink-0" />
-            <span className="font-bold text-slate-900 text-base sm:text-lg tracking-tight truncate">ระบบจัดการผู้ดูแลระบบ</span>
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 min-w-0 leading-tight">
+              <span className="font-bold text-slate-900 text-sm sm:text-lg tracking-tight truncate">โรงเรียนภูเขียว</span>
+              <span className="text-[11px] sm:text-sm font-medium text-slate-500 truncate">ระบบจัดการหลังบ้าน</span>
+            </div>
           </div>
 
           {/* Right actions */}
@@ -73,15 +76,6 @@ export default async function AdminDashboard() {
             >
               <History className="w-4 h-4 text-slate-500" />
               <span className="hidden sm:inline">ประวัติระบบ</span>
-            </Link>
-
-            <Link 
-              href="/" 
-              className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-all"
-              title="กลับหน้าหลัก"
-            >
-              <Home className="w-4 h-4 text-slate-500" />
-              <span className="hidden sm:inline">กลับหน้าหลัก</span>
             </Link>
 
             <div className="h-5 w-px bg-slate-200 hidden sm:block"></div>

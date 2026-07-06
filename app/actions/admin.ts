@@ -653,18 +653,18 @@ export async function adminAnalyzeAllocation(projectId: number) {
 
         if (totalRemaining <= 0) {
           adviceType = "FULL_TOTAL"
-          adviceText = `⚠️ โควตารวมโครงการเต็มแล้ว (${approvedTotalCount}/${totalCapacity}) หากกดรับสิทธิ์ ยอดรวมจะเกินกำหนด`
+          adviceText = `โควตารวมโครงการเต็มแล้ว (${approvedTotalCount}/${totalCapacity}) หากกดรับสิทธิ์ ยอดรวมจะเกินกำหนด`
         } else if (ga && ga.vacant > 0) {
           adviceType = "VACANT_OWN"
-          adviceText = `✅ โควตา ม.${grade} ยังว่างอยู่ (${ga.approved}/${ga.capacity}) สามารถรับเข้าโควตาชั้นตัวเองได้ทันที`
+          adviceText = `โควตา ม.${grade} ยังว่างอยู่ (${ga.approved}/${ga.capacity}) สามารถรับเข้าโควตาชั้นตัวเองได้ทันที`
         } else if (ga && ga.receivedRollover > 0) {
           const gaIdx = gradeAnalysis.findIndex(g => g.grade === grade)
           const donorGrade = gaIdx > 0 ? gradeAnalysis[gaIdx - 1].grade : 'ก่อนหน้า'
           adviceType = "ROLLOVER_DONOR"
-          adviceText = `💡 โควตา ม.${grade} เต็มแล้ว แต่สามารถใช้โควตาว่างที่ส่งต่อจาก ม.${donorGrade} (จำนวน ${ga.receivedRollover} ที่นั่ง)`
+          adviceText = `โควตา ม.${grade} เต็มแล้ว แต่สามารถใช้โควตาว่างที่ส่งต่อจาก ม.${donorGrade} (จำนวน ${ga.receivedRollover} ที่นั่ง)`
         } else {
           adviceType = "NO_QUOTA"
-          adviceText = `🔸 โควตาชั้นตัวเองเต็มแล้ว (แต่โควตารวมโครงการยังเหลืออีก ${totalRemaining} ที่นั่ง สามารถรับพิเศษได้)`
+          adviceText = `โควตาชั้นตัวเองเต็มแล้ว (แต่โควตารวมโครงการยังเหลืออีก ${totalRemaining} ที่นั่ง สามารถรับพิเศษได้)`
         }
 
         return {

@@ -1,9 +1,10 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, AlertCircle } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, AlertCircle, Megaphone } from "lucide-react"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import CancelRegistrationButton from "../components/CancelRegistrationButton"
+import AppNavbar from "@/app/components/AppNavbar"
 import { Metadata } from "next"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -94,6 +95,11 @@ export default async function SuccessPage({
   const isApproved = registration.status === "APPROVED"
   const isRejected = registration.status === "REJECTED"
 
+  const now = new Date()
+  const isAnnouncementOpen = registration.project.isAnnouncementOpen &&
+    (!registration.project.announcementStartDate || now >= registration.project.announcementStartDate) &&
+    (!registration.project.announcementEndDate || now <= registration.project.announcementEndDate)
+
   // Query queue numbers
   const totalQueueNumber = await prisma.registration.count({
     where: {
@@ -130,8 +136,10 @@ export default async function SuccessPage({
   const formattedTime = regDate.toLocaleTimeString('th-TH', thaiTimeOptions) + ' น.'
 
   return (
-    <div className="min-h-screen bg-transparent font-sans flex flex-col items-center justify-center py-0 sm:py-12 px-0 sm:px-6 lg:px-8">
-      <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 px-5 py-8 sm:p-10 md:p-12 max-w-4xl w-full min-h-screen sm:min-h-0">
+    <>
+      <AppNavbar />
+      <div className="min-h-screen bg-transparent font-sans flex flex-col items-center justify-center py-0 sm:py-12 px-0 sm:px-6 lg:px-8">
+        <div className="bg-white sm:rounded-3xl sm:shadow-xl sm:border border-slate-100 px-5 py-8 sm:p-10 md:p-12 max-w-4xl w-full min-h-screen sm:min-h-0">
         <div className="text-center mb-8">
           {isApproved ? (
             <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white">
@@ -248,19 +256,22 @@ export default async function SuccessPage({
           </a>
         </div>
 
-        <div className="mb-4">
-          <Link 
-            href="/"
-            className="flex items-center justify-center w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-slate-900/20"
-          >
-            <ArrowLeft className="w-5 h-5 mr-3" /> กลับสู่หน้าหลัก
-          </Link>
-        </div>
+        {isAnnouncementOpen && (
+          <div className="mb-4">
+            <Link 
+              href={`/announcement/${numericId}`}
+              className="flex items-center justify-center w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-emerald-600/20"
+            >
+              <Megaphone className="w-5 h-5 mr-3" /> ดูประกาศรายชื่อ
+            </Link>
+          </div>
+        )}
 
         {!isRejected && (
           <CancelRegistrationButton registrationId={registration.id} />
         )}
       </div>
     </div>
+    </>
   )
 }

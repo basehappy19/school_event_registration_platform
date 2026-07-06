@@ -116,12 +116,12 @@ export async function getAdminDetailedLogs(email: string) {
           const changes: string[] = [];
           
           if (p.old?.name !== p.new?.name && (p.old?.name || p.new?.name)) {
-            changes.push(`ชื่อ: "${p.old?.name || '-'}" ➡️ "${p.new?.name || '-'}"`);
+            changes.push(`ชื่อ: "${p.old?.name || '-'}" -> "${p.new?.name || '-'}"`);
           }
           if (p.old?.role !== p.new?.role && (p.old?.role || p.new?.role)) {
             const oldRole = p.old?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin';
             const newRole = p.new?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin';
-            changes.push(`สิทธิ์: [${oldRole}] ➡️ [${newRole}]`);
+            changes.push(`สิทธิ์: [${oldRole}] -> [${newRole}]`);
           }
           
           const changeStr = changes.length > 0 ? changes.join(', ') : 'บันทึกข้อมูล (ไม่มีการเปลี่ยนแปลง)';

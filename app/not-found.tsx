@@ -30,16 +30,7 @@ export default function NotFound() {
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div>
-          <Link 
-            href="/" 
-            className="inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-white font-semibold px-8 py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            กลับสู่หน้าหลัก
-          </Link>
-        </div>
+
       </div>
     </div>
   )

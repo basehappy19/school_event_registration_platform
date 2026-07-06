@@ -8,6 +8,7 @@ import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { Metadata } from "next"
 import { auth } from "@/auth"
 import { signInWithGoogleCustomRedirect } from "@/app/actions/auth"
+import AppNavbar from "@/app/components/AppNavbar"
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -84,15 +85,15 @@ export default async function AnnouncementPage({ params, searchParams }: { param
 
   if (!isAnnouncementOpen && !isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-transparent text-slate-800 p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-lg text-center max-w-md w-full">
-          <h1 className="text-2xl font-bold mb-4 text-rose-600">ยังไม่ถึงเวลาประกาศผล</h1>
-          <p className="text-slate-600 mb-8">โครงการนี้ยังไม่เปิดให้ดูประกาศรายชื่อ หรือหมดระยะเวลาการประกาศผลแล้ว</p>
-          <Link href="/" className="bg-slate-900 text-white px-6 py-3 rounded-xl font-medium inline-flex items-center hover:bg-black transition-colors shadow-md">
-            <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
-          </Link>
+      <>
+        <AppNavbar />
+        <div className="min-h-screen flex flex-col items-center justify-center bg-transparent text-slate-800 p-4">
+          <div className="bg-white p-8 rounded-3xl shadow-lg text-center max-w-md w-full">
+            <h1 className="text-2xl font-bold mb-4 text-rose-600">ยังไม่ถึงเวลาประกาศผล</h1>
+            <p className="text-slate-600">โครงการนี้ยังไม่เปิดให้ดูประกาศรายชื่อ หรือหมดระยะเวลาการประกาศผลแล้ว</p>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
@@ -121,44 +122,42 @@ export default async function AnnouncementPage({ params, searchParams }: { param
   const uniqueRooms = Array.from(new Set(allRegs.map(r => r.studentProfile.room))).sort((a, b) => parseInt(a) - parseInt(b))
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
-      <div className="bg-white border-b border-slate-200 pt-8 pb-12 px-4 sm:px-6 lg:px-8 shadow-xs">
-        <div className="max-w-5xl mx-auto">
-          <Link href="/" className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl flex items-center mb-6 text-sm font-medium transition-all w-fit print:hidden shadow-2xs">
-            <ArrowLeft className="w-4 h-4 mr-2" /> กลับหน้าหลัก
-          </Link>
-          
-          <div className="text-center">
-            <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600 mb-3 border border-indigo-100">
-              ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ
-            </span>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-900 mb-3 max-w-4xl mx-auto leading-relaxed">
-              {project.title}
-            </h1>
-            {project.description && (
-              <p className="text-base md:text-lg font-medium text-slate-600 mb-6 max-w-2xl mx-auto whitespace-pre-wrap leading-relaxed">
-                {project.description}
-              </p>
-            )}
-            <div className="inline-flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 bg-slate-100/90 px-5 py-4 rounded-2xl text-xs sm:text-sm md:text-base text-slate-700 font-medium border border-slate-200/80 print:border-none print:bg-transparent print:p-0 w-full sm:w-auto max-w-full">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
-                <span>{formatThaiDateWithDay(project.activityDate)}</span>
-              </div>
-              <span className="hidden sm:inline text-slate-300">•</span>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
-                <span>เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)}</span>
-              </div>
-              <span className="hidden sm:inline text-slate-300">•</span>
-              <div className="flex items-center gap-2 text-center">
-                <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
-                <span>ณ {project.activityLocation || "__________"}</span>
+    <>
+      <AppNavbar />
+      <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 pb-12">
+        <div className="bg-white border-b border-slate-200 pt-8 pb-12 px-4 sm:px-6 lg:px-8 shadow-xs">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center">
+              <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600 mb-3 border border-indigo-100">
+                ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ
+              </span>
+              <h1 className="text-xl md:text-2xl font-bold text-slate-900 mb-3 max-w-4xl mx-auto leading-relaxed">
+                {project.title}
+              </h1>
+              {project.description && (
+                <p className="text-base md:text-lg font-medium text-slate-600 mb-6 max-w-2xl mx-auto whitespace-pre-wrap leading-relaxed">
+                  {project.description}
+                </p>
+              )}
+              <div className="inline-flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 bg-slate-100/90 px-5 py-4 rounded-2xl text-xs sm:text-sm md:text-base text-slate-700 font-medium border border-slate-200/80 print:border-none print:bg-transparent print:p-0 w-full sm:w-auto max-w-full">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span>{formatThaiDateWithDay(project.activityDate)}</span>
+                </div>
+                <span className="hidden sm:inline text-slate-300">•</span>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span>เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)}</span>
+                </div>
+                <span className="hidden sm:inline text-slate-300">•</span>
+                <div className="flex items-center gap-2 text-center">
+                  <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span>ณ {project.activityLocation || "__________"}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-10 print:mt-0 print:pt-4">
         {/* User CTA Banner */}
@@ -225,5 +224,6 @@ export default async function AnnouncementPage({ params, searchParams }: { param
       
       <AutoPrint />
     </div>
+    </>
   )
 }
