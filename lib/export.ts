@@ -77,6 +77,8 @@ export async function exportProjectToPDF(project: any) {
   const location = project.activityLocation || "โรงเรียนภูเขียว"
 
   const container = document.createElement('div')
+  const uniqueId = 'pdf-export-container-' + Date.now()
+  container.id = uniqueId
   container.style.position = 'absolute'
   container.style.left = '-9999px'
   container.style.top = '0'
@@ -137,7 +139,22 @@ export async function exportProjectToPDF(project: any) {
       margin: 15,
       filename: formatExportFilename(project.title, project.description, 'pdf'),
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        letterRendering: true,
+        scrollY: 0,
+        scrollX: 0,
+        onclone: (clonedDoc: Document) => {
+          const el = clonedDoc.getElementById(uniqueId)
+          if (el) {
+            el.style.position = 'relative'
+            el.style.left = '0px'
+            el.style.top = '0px'
+            el.style.margin = '0'
+          }
+        }
+      },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     }
@@ -151,6 +168,8 @@ export async function exportProjectToPDF(project: any) {
 
 export async function exportToPDF(registrations: any[], projectName: string) {
   const container = document.createElement('div')
+  const uniqueId = 'pdf-export-container-' + Date.now()
+  container.id = uniqueId
   container.style.position = 'absolute'
   container.style.left = '-9999px'
   container.style.top = '0'
@@ -211,7 +230,22 @@ export async function exportToPDF(registrations: any[], projectName: string) {
       margin: 15,
       filename: formatExportFilename(projectName, null, 'pdf'),
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        letterRendering: true,
+        scrollY: 0,
+        scrollX: 0,
+        onclone: (clonedDoc: Document) => {
+          const el = clonedDoc.getElementById(uniqueId)
+          if (el) {
+            el.style.position = 'relative'
+            el.style.left = '0px'
+            el.style.top = '0px'
+            el.style.margin = '0'
+          }
+        }
+      },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     }
