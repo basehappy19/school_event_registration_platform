@@ -1,6 +1,14 @@
 import ExcelJS from 'exceljs'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
+
+export function formatExportFilename(title: string, description?: string | null, ext: string = 'pdf'): string {
+  let name = title || 'project'
+  if (description && description.trim()) {
+    name += ` ${description.trim()}`
+  }
+  name = name.replace(/[\/\\]/g, '_').replace(/[:*?"<>|\r\n]+/g, ' ').replace(/\s+/g, ' ').trim()
+  return `ประกาศรายชื่อ_${name}.${ext}`
+}
 
 export async function exportToExcel(registrations: any[], projectName: string) {
   const workbook = new ExcelJS.Workbook()
@@ -40,39 +48,228 @@ export async function exportToExcel(registrations: any[], projectName: string) {
   
   const a = document.createElement('a')
   a.href = url
-  a.download = `${projectName}_Registrations.xlsx`
+  a.download = formatExportFilename(projectName, null, 'xlsx')
   a.click()
   URL.revokeObjectURL(url)
 }
 
-export function exportToPDF(registrations: any[], projectName: string) {
-  const doc = new jsPDF()
+export async function exportProjectToPDF(project: any) {
+  const jsPDFModule = await import('jspdf')
+  const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule
+  const autoTableModule = await import('jspdf-autotable')
+  const autoTable = autoTableModule.default || autoTableModule
+
+  const doc = new (jsPDF as any)({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  })
+
+  try {
+    const [regRes, boldRes] = await Promise.all([
+      fetch('/Prompt/Prompt-Regular.ttf'),
+      fetch('/Prompt/Prompt-Bold.ttf')
+    ])
+    if (regRes.ok && boldRes.ok) {
+      const [regBuf, boldBuf] = await Promise.all([
+        regRes.arrayBuffer(),
+        boldRes.arrayBuffer()
+      ])
+      
+      const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+        let binary = ''
+        const bytes = new Uint8Array(buffer)
+        const len = bytes.byteLength
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i])
+        }
+        return window.btoa(binary)
+      }
+
+      doc.addFileToVFS('Prompt-Regular.ttf', arrayBufferToBase64(regBuf))
+      doc.addFont('Prompt-Regular.ttf', 'Prompt', 'normal')
+
+      doc.addFileToVFS('Prompt-Bold.ttf', arrayBufferToBase64(boldBuf))
+      doc.addFont('Prompt-Bold.ttf', 'Prompt', 'bold')
+
+      doc.setFont('Prompt')
+    }
+  } catch (e) {
+    console.warn("Failed to load Thai font for PDF:", e)
+  }
+
+  const approvedRegs = [...(project.registrations || [])].filter(
+    (r: any) => r.status === 'APPROVED' || r.status === 'WAITLISTED'
+  )
   
-  doc.text(`Registrations for ${projectName}`, 14, 15)
-
-  const tableColumn = ["Student ID", "Name", "Grade", "Room", "No.", "Status"]
-  const tableRows: any[] = []
-
-  registrations.forEach(reg => {
-    const rowData = [
-      reg.studentIdInput,
-      `${reg.prefix}${reg.firstName} ${reg.lastName}`,
-      reg.grade,
-      reg.room,
-      reg.number,
-      reg.status
-    ]
-    tableRows.push(rowData)
+  approvedRegs.sort((a: any, b: any) => {
+    const sA = a.studentProfile || {}
+    const sB = b.studentProfile || {}
+    const gA = parseInt(sA.grade) || 0
+    const gB = parseInt(sB.grade) || 0
+    if (gA !== gB) return gA - gB
+    const rA = parseInt(sA.room) || 0
+    const rB = parseInt(sB.room) || 0
+    if (rA !== rB) return rA - rB
+    const nA = parseInt(sA.number) || 0
+    const nB = parseInt(sB.number) || 0
+    return nA - nB
   })
 
-  // Note: For full Thai font support, a custom font needs to be added to jsPDF via addFileToVFS and addFont.
-  // Using default helvetica here.
+  const formattedDate = formatThaiDateWithDay(project.activityDate)
+  const timeRange = formatTimeRange(project.activityStartTime, project.activityEndTime)
+  const location = project.activityLocation || "โรงเรียนภูเขียว"
+
+  doc.setFontSize(16)
+  doc.setFont('Prompt', 'bold')
+  doc.text('ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม', 105, 20, { align: 'center' })
+  doc.text(project.title || '', 105, 28, { align: 'center' })
+
+  let currentY = 36
+  if (project.description) {
+    doc.setFontSize(12)
+    doc.setFont('Prompt', 'normal')
+    const splitDesc = doc.splitTextToSize(project.description, 170)
+    doc.text(splitDesc, 105, currentY, { align: 'center' })
+    currentY += splitDesc.length * 6 + 2
+  }
+
+  doc.setFontSize(11)
+  doc.setFont('Prompt', 'normal')
+  doc.text(`${formattedDate} เวลา ${timeRange} ณ ${location}`, 105, currentY, { align: 'center' })
+  currentY += 10
+
+  const tableData = approvedRegs.length > 0
+    ? approvedRegs.map((reg: any, index: number) => {
+        const profile = reg.studentProfile || {}
+        return [
+          index + 1,
+          `ม.${profile.grade || '-'}/${profile.room || '-'}`,
+          profile.number || '-',
+          `${profile.prefix || ''}${profile.firstName || ''} ${profile.lastName || ''}`
+        ]
+      })
+    : [['', '', 'ไม่พบรายชื่อ', '']]
+
   autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 20,
-    styles: { font: 'helvetica' },
+    startY: currentY,
+    head: [['ลำดับ', 'ชั้น/ห้อง', 'เลขที่', 'ชื่อ-นามสกุล']],
+    body: tableData,
+    styles: {
+      font: 'Prompt',
+      fontSize: 11,
+      cellPadding: 3,
+      textColor: [0, 0, 0],
+      lineColor: [203, 213, 225],
+      lineWidth: 0.1
+    },
+    headStyles: {
+      fillColor: [248, 250, 252],
+      textColor: [15, 23, 42],
+      fontStyle: 'bold',
+      halign: 'center',
+      lineColor: [100, 116, 139],
+      lineWidth: 0.2
+    },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 20 },
+      1: { halign: 'center', cellWidth: 30 },
+      2: { halign: 'center', cellWidth: 25 },
+      3: { halign: 'left' }
+    },
+    margin: { left: 15, right: 15 },
+    theme: 'grid'
   })
 
-  doc.save(`${projectName}_Registrations.pdf`)
+  doc.save(formatExportFilename(project.title, project.description, 'pdf'))
+}
+
+export async function exportToPDF(registrations: any[], projectName: string) {
+  const jsPDFModule = await import('jspdf')
+  const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule
+  const autoTableModule = await import('jspdf-autotable')
+  const autoTable = autoTableModule.default || autoTableModule
+
+  const doc = new (jsPDF as any)({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  })
+
+  try {
+    const [regRes, boldRes] = await Promise.all([
+      fetch('/Prompt/Prompt-Regular.ttf'),
+      fetch('/Prompt/Prompt-Bold.ttf')
+    ])
+    if (regRes.ok && boldRes.ok) {
+      const [regBuf, boldBuf] = await Promise.all([
+        regRes.arrayBuffer(),
+        boldRes.arrayBuffer()
+      ])
+      
+      const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+        let binary = ''
+        const bytes = new Uint8Array(buffer)
+        const len = bytes.byteLength
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i])
+        }
+        return window.btoa(binary)
+      }
+
+      doc.addFileToVFS('Prompt-Regular.ttf', arrayBufferToBase64(regBuf))
+      doc.addFont('Prompt-Regular.ttf', 'Prompt', 'normal')
+
+      doc.addFileToVFS('Prompt-Bold.ttf', arrayBufferToBase64(boldBuf))
+      doc.addFont('Prompt-Bold.ttf', 'Prompt', 'bold')
+
+      doc.setFont('Prompt')
+    }
+  } catch (e) {
+    console.warn("Failed to load Thai font for PDF:", e)
+  }
+
+  doc.setFontSize(16)
+  doc.setFont('Prompt', 'bold')
+  doc.text(`Registrations for ${projectName}`, 105, 20, { align: 'center' })
+
+  const tableData = registrations.map((reg: any, index: number) => [
+    index + 1,
+    reg.studentIdInput || '-',
+    `${reg.prefix || ''}${reg.firstName || ''} ${reg.lastName || ''}`,
+    `ม.${reg.grade || '-'}/${reg.room || '-'}`,
+    reg.number || '-',
+    reg.status || '-'
+  ])
+
+  autoTable(doc, {
+    startY: 30,
+    head: [['No.', 'Student ID', 'Name', 'Grade/Room', 'Number', 'Status']],
+    body: tableData,
+    styles: {
+      font: 'Prompt',
+      fontSize: 10,
+      cellPadding: 3,
+      textColor: [0, 0, 0],
+      lineColor: [203, 213, 225],
+      lineWidth: 0.1
+    },
+    headStyles: {
+      fillColor: [248, 250, 252],
+      textColor: [15, 23, 42],
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 15 },
+      1: { halign: 'center', cellWidth: 30 },
+      3: { halign: 'center', cellWidth: 25 },
+      4: { halign: 'center', cellWidth: 20 },
+      5: { halign: 'center', cellWidth: 25 }
+    },
+    margin: { left: 15, right: 15 },
+    theme: 'grid'
+  })
+
+  doc.save(formatExportFilename(projectName, null, 'pdf'))
 }

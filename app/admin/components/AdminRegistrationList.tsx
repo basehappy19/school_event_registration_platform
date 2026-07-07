@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration, adminRejectRegistration, adminWaitlistRegistration, adminAcceptAllWaitlist, adminSearchStudents } from "@/app/actions/admin"
+import { exportProjectToPDF, formatExportFilename } from "@/lib/export"
 
 import { useRouter } from "next/navigation"
 import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
@@ -24,6 +25,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   const [showAcceptAllModal, setShowAcceptAllModal] = useState(false)
   const [isPrinting, setIsPrinting] = useState(false)
   const [isExportingExcel, setIsExportingExcel] = useState(false)
+  const [isExportingPDF, setIsExportingPDF] = useState(false)
   const [studentSuggestions, setStudentSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isSearchingStudent, setIsSearchingStudent] = useState(false)
@@ -97,6 +99,19 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     setTimeout(() => setIsPrinting(false), 1500)
   }
 
+  const handleExportPDF = async () => {
+    setIsExportingPDF(true)
+    try {
+      await exportProjectToPDF(project)
+      showToast("ดาวน์โหลด PDF สำเร็จ", "success")
+    } catch (err) {
+      console.error(err)
+      showToast("เกิดข้อผิดพลาดในการสร้าง PDF", "error")
+    } finally {
+      setIsExportingPDF(false)
+    }
+  }
+
   const handleExportExcel = async () => {
     setIsExportingExcel(true)
     try {
@@ -106,7 +121,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
       const a = document.createElement('a')
       a.href = url
       
-      let filename = `Registrations_${project.title}.xlsx`
+      let filename = formatExportFilename(project.title, project.description, 'xlsx')
       const disposition = res.headers.get('content-disposition')
       if (disposition && disposition.indexOf('filename=') !== -1) {
         const utf8Matches = /filename\*=UTF-8''([^;\n]*)/.exec(disposition)
@@ -392,19 +407,29 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
           </div>
 
           {/* Group 3: ดูประกาศและส่งออกข้อมูล */}
-          <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto items-stretch">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full sm:flex sm:w-auto items-stretch">
             <a title="ดูประกาศหน้าเว็บ" href={`/announcement/${project.id}`} target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap">
               <Eye className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" /> ดูประกาศ
             </a>
             <button 
               type="button" 
-              title="พิมพ์ประกาศ (PDF)"
+              title="พิมพ์ประกาศ (ผ่านหน้าเว็บ)"
               onClick={handlePrint} 
               disabled={isPrinting}
               className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 disabled:opacity-50 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap"
             >
               {isPrinting ? <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin shrink-0" /> : <Printer className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" />} 
-              <span>{isPrinting ? 'พิมพ์...' : 'พิมพ์ PDF'}</span>
+              <span>{isPrinting ? 'พิมพ์...' : 'พิมพ์ประกาศ'}</span>
+            </button>
+            <button 
+              type="button" 
+              title="ดาวน์โหลดไฟล์ PDF โดยตรง (ไม่ต้องผ่านเซิร์ฟเวอร์)"
+              onClick={handleExportPDF} 
+              disabled={isExportingPDF}
+              className="w-full sm:w-auto bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 px-1.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center text-center shrink-0 shadow-2xs h-full whitespace-nowrap"
+            >
+              {isExportingPDF ? <Loader2 className="w-3.5 h-3.5 mr-1 sm:mr-1.5 animate-spin shrink-0" /> : <Download className="w-3.5 h-3.5 mr-1 sm:mr-1.5 shrink-0" />} 
+              <span>{isExportingPDF ? 'สร้าง PDF...' : 'โหลด PDF'}</span>
             </button>
             <button 
               type="button"

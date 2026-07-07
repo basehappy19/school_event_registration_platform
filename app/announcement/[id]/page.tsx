@@ -6,6 +6,7 @@ import AutoPrint from "./components/AutoPrint"
 import AnnouncementInteractive from "./components/AnnouncementInteractive"
 import { formatThaiDateWithDay, formatTimeRange } from "@/lib/dateUtils"
 import { Metadata } from "next"
+import { formatExportFilename } from "@/lib/export"
 import { auth } from "@/auth"
 import { signInWithGoogleCustomRedirect } from "@/app/actions/auth"
 import AppNavbar from "@/app/components/AppNavbar"
@@ -18,13 +19,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   
   const project = await prisma.project.findUnique({
     where: { id },
-    select: { title: true }
+    select: { title: true, description: true }
   })
 
   if (!project) return {}
 
+  const printTitle = formatExportFilename(project.title, project.description, 'pdf').replace('.pdf', '')
+
   return {
-    title: `ประกาศรายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ${project.title}`,
+    title: printTitle,
     description: `ตรวจสอบรายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ${project.title} โรงเรียนภูเขียว`
   }
 }

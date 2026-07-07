@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
 import ExcelJS from "exceljs"
+import { formatExportFilename } from "@/lib/export"
 
 export async function GET(request: NextRequest) {
   const session = await auth()
@@ -65,8 +66,11 @@ export async function GET(request: NextRequest) {
   const ws1 = workbook.addWorksheet("รายชื่อตัวจริง")
   
   // Add Project Title
+  const titleText = project.description && project.description.trim()
+    ? `${project.title} (${project.description.trim()})`
+    : project.title
   ws1.mergeCells(1, 1, 1, totalColumns)
-  ws1.getCell(1, 1).value = `รายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ: ${project.title}`
+  ws1.getCell(1, 1).value = `รายชื่อผู้มีสิทธิ์เข้าร่วมโครงการ: ${titleText}`
   ws1.getCell(1, 1).font = { size: 16, bold: true }
   ws1.getCell(1, 1).alignment = { vertical: 'middle', horizontal: 'center' }
 
@@ -110,7 +114,7 @@ export async function GET(request: NextRequest) {
     
     // Add Project Title
     ws2.mergeCells(1, 1, 1, totalColumns)
-    ws2.getCell(1, 1).value = `รายชื่อสำรองโครงการ: ${project.title}`
+    ws2.getCell(1, 1).value = `รายชื่อสำรองโครงการ: ${titleText}`
     ws2.getCell(1, 1).font = { size: 16, bold: true }
     ws2.getCell(1, 1).alignment = { vertical: 'middle', horizontal: 'center' }
 
@@ -148,14 +152,13 @@ export async function GET(request: NextRequest) {
 
   const buffer = await workbook.xlsx.writeBuffer()
 
-  // Clean title for filename
-  const cleanTitle = project.title.replace(/[^a-z0-9ก-๙]/gi, '_').substring(0, 30)
+  const filename = formatExportFilename(project.title, project.description, 'xlsx')
 
   return new NextResponse(buffer, {
     status: 200,
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="Registrations.xlsx"; filename*=UTF-8''Registrations_${encodeURIComponent(cleanTitle)}.xlsx`,
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
     }
   })
 }

@@ -137,7 +137,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
   const [isCreating, setIsCreating] = useState(false)
   const [viewerCounts, setViewerCounts] = useState<Record<string, number>>({})
   const [activeTab, setActiveTab] = useState<'registrations' | 'settings'>('registrations')
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const isDraggingRef = useRef(false)
   const isInitialMount = useRef(true)
 
@@ -401,43 +401,43 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
             <AdminProjectStats key={`stats-${activeProject.id}`} project={activeProject} />
             
             {/* Tab Navigation & Live Viewer Count */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+              <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
                 <button
                   onClick={() => setActiveTab('registrations')}
-                  className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
+                  className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all whitespace-nowrap ${
                     activeTab === 'registrations'
                       ? 'bg-indigo-600 text-white shadow-sm'
                       : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
-                  <Users className="w-4 h-4" />
-                  รายชื่อผู้ลงทะเบียน ({activeProject.registrations?.length || 0})
+                  <Users className="w-4 h-4 shrink-0" />
+                  <span>รายชื่อผู้ลงทะเบียน ({activeProject.registrations?.length || 0})</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('settings')}
-                  className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
+                  className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all whitespace-nowrap ${
                     activeTab === 'settings'
                       ? 'bg-indigo-600 text-white shadow-sm'
                       : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
-                  <Settings className="w-4 h-4" />
-                  ตั้งค่าโครงการ
+                  <Settings className="w-4 h-4 shrink-0" />
+                  <span>ตั้งค่าโครงการ</span>
                 </button>
                 <a
                   href={`/detail/${activeProject.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-all shadow-2xs"
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-all shadow-2xs whitespace-nowrap"
                 >
-                  <Eye className="w-4 h-4" />
+                  <Eye className="w-4 h-4 shrink-0" />
                   <span>ดูหน้าลงทะเบียน</span>
                 </a>
               </div>
 
-              <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-sm font-medium">
-                <Eye className="w-4 h-4 text-slate-500" />
+              <div className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-sm font-medium w-full xl:w-auto shrink-0">
+                <Eye className="w-4 h-4 text-slate-500 shrink-0" />
                 <span>กำลังดูหน้านี้: <strong className="text-slate-900 font-bold">{viewerCounts[activeProject.id] || 0}</strong> คน</span>
               </div>
             </div>
