@@ -14,30 +14,38 @@ export default function AdminPrintContent({ project, registrations }: { project:
           @media print {
             @page { margin: 15mm; size: A4 portrait; }
             thead { display: table-header-group; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid black; padding: 8px 10px; font-size: 14px; line-height: 1.6; font-weight: normal; vertical-align: middle; }
-            th { font-weight: bold; }
+            * { font-family: 'THSarabunNew', sans-serif !important; }
+            table { width: 100%; border-collapse: collapse; overflow: visible !important; }
+            tr, th, td { overflow: visible !important; }
+            th, td { border: 1px solid black !important; padding: 6px 8px 4px 8px !important; font-size: 16pt !important; line-height: 1.4 !important; font-weight: normal; vertical-align: middle; }
+            th { font-weight: bold !important; }
             tr { page-break-inside: avoid; }
-            h1, h2, h3, p, span, div, th, td { line-height: 1.6 !important; }
+            h1 { font-size: 22pt !important; font-weight: bold !important; line-height: 1.4 !important; }
+            h2 { font-size: 18pt !important; font-weight: bold !important; line-height: 1.4 !important; }
+            p, span, div { font-size: 16pt !important; line-height: 1.4 !important; overflow: visible !important; }
           }
           /* Screen styles */
-          table.screen-table { width: 100%; border-collapse: collapse; }
-          table.screen-table th, table.screen-table td { border: 1px solid black; padding: 8px 10px; font-size: 14px; line-height: 1.6; font-weight: normal; vertical-align: middle; }
-          table.screen-table th { font-weight: bold; }
-          h1, h2, h3, p, span, div, th, td { line-height: 1.6; }
+          #print-content { font-family: 'THSarabunNew', sans-serif !important; }
+          table.screen-table { width: 100%; border-collapse: collapse; overflow: visible !important; font-family: 'THSarabunNew', sans-serif !important; }
+          table.screen-table tr, table.screen-table th, table.screen-table td { overflow: visible !important; }
+          table.screen-table th, table.screen-table td { border: 1px solid black; padding: 6px 8px 4px 8px !important; font-size: 16pt !important; line-height: 1.4 !important; font-weight: normal; vertical-align: middle; }
+          table.screen-table th { font-weight: bold !important; }
+          #print-content h1 { font-size: 22pt !important; font-weight: bold !important; line-height: 1.4 !important; }
+          #print-content h2 { font-size: 18pt !important; font-weight: bold !important; line-height: 1.4 !important; }
+          #print-content p, #print-content span, #print-content div { line-height: 1.4 !important; overflow: visible !important; }
         `}} />
         
         <div className="p-8 print:p-0 max-w-4xl mx-auto print:max-w-none">
           <div className="text-center mb-6 mt-8 print:mt-0">
-            <h1 className="text-lg font-bold mb-3 leading-relaxed pt-2">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
-            <h2 className="text-lg font-bold mb-2 leading-relaxed pt-1">{project.title}</h2>
+            <h1 className="font-bold mb-2">ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม</h1>
+            <h2 className="font-bold mb-2">{project.title}</h2>
             {project.description && (
-              <p className="text-lg font-bold text-black mb-3 max-w-4xl mx-auto whitespace-pre-wrap leading-relaxed pt-1">
+              <p className="font-bold text-black mb-2 max-w-4xl mx-auto whitespace-pre-wrap">
                 {project.description}
               </p>
             )}
             
-            <p className="text-base leading-relaxed pt-1">
+            <p className="text-base">
               {formattedDate} เวลา {formatTimeRange(project.activityStartTime, project.activityEndTime)} ณ {project.activityLocation || "โรงเรียนภูเขียว"}
             </p>
           </div>

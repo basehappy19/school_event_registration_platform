@@ -67,8 +67,8 @@ export async function exportProjectToPDF(project: any) {
 
   try {
     const [regRes, boldRes] = await Promise.all([
-      fetch('/Prompt/Prompt-Regular.ttf'),
-      fetch('/Prompt/Prompt-Bold.ttf')
+      fetch('/THSarabun/THSarabunNew.ttf'),
+      fetch('/THSarabun/THSarabunNew-Bold.ttf')
     ])
     if (regRes.ok && boldRes.ok) {
       const [regBuf, boldBuf] = await Promise.all([
@@ -86,13 +86,13 @@ export async function exportProjectToPDF(project: any) {
         return window.btoa(binary)
       }
 
-      doc.addFileToVFS('Prompt-Regular.ttf', arrayBufferToBase64(regBuf))
-      doc.addFont('Prompt-Regular.ttf', 'Prompt', 'normal')
+      doc.addFileToVFS('THSarabunNew.ttf', arrayBufferToBase64(regBuf))
+      doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal')
 
-      doc.addFileToVFS('Prompt-Bold.ttf', arrayBufferToBase64(boldBuf))
-      doc.addFont('Prompt-Bold.ttf', 'Prompt', 'bold')
+      doc.addFileToVFS('THSarabunNew-Bold.ttf', arrayBufferToBase64(boldBuf))
+      doc.addFont('THSarabunNew-Bold.ttf', 'THSarabunNew', 'bold')
 
-      doc.setFont('Prompt')
+      doc.setFont('THSarabunNew')
     }
   } catch (e) {
     console.warn("Failed to load Thai font for PDF:", e)
@@ -120,24 +120,25 @@ export async function exportProjectToPDF(project: any) {
   const timeRange = formatTimeRange(project.activityStartTime, project.activityEndTime)
   const location = project.activityLocation || "โรงเรียนภูเขียว"
 
-  doc.setFontSize(16)
-  doc.setFont('Prompt', 'bold')
-  doc.text('ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม', 105, 20, { align: 'center' })
-  doc.text(project.title || '', 105, 28, { align: 'center' })
+  doc.setFontSize(22)
+  doc.setFont('THSarabunNew', 'bold')
+  doc.text('ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม', 105, 22, { align: 'center' })
+  doc.setFontSize(18)
+  doc.text(project.title || '', 105, 32, { align: 'center' })
 
-  let currentY = 36
+  let currentY = 42
   if (project.description) {
-    doc.setFontSize(12)
-    doc.setFont('Prompt', 'normal')
+    doc.setFontSize(16)
+    doc.setFont('THSarabunNew', 'normal')
     const splitDesc = doc.splitTextToSize(project.description, 170)
-    doc.text(splitDesc, 105, currentY, { align: 'center' })
-    currentY += splitDesc.length * 6 + 2
+    doc.text(splitDesc, 105, currentY, { align: 'center', lineHeightFactor: 1.4 })
+    currentY += splitDesc.length * 8 + 4
   }
 
-  doc.setFontSize(11)
-  doc.setFont('Prompt', 'normal')
+  doc.setFontSize(16)
+  doc.setFont('THSarabunNew', 'normal')
   doc.text(`${formattedDate} เวลา ${timeRange} ณ ${location}`, 105, currentY, { align: 'center' })
-  currentY += 10
+  currentY += 12
 
   const tableData = approvedRegs.length > 0
     ? approvedRegs.map((reg: any, index: number) => {
@@ -156,19 +157,20 @@ export async function exportProjectToPDF(project: any) {
     head: [['ลำดับ', 'ชั้น/ห้อง', 'เลขที่', 'ชื่อ-นามสกุล']],
     body: tableData,
     styles: {
-      font: 'Prompt',
-      fontSize: 11,
-      cellPadding: 3,
+      font: 'THSarabunNew',
+      fontSize: 16,
+      cellPadding: { top: 5, right: 3, bottom: 2, left: 3 },
       textColor: [0, 0, 0],
-      lineColor: [203, 213, 225],
-      lineWidth: 0.1
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2,
+      valign: 'middle'
     },
     headStyles: {
-      fillColor: [248, 250, 252],
-      textColor: [15, 23, 42],
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
       fontStyle: 'bold',
       halign: 'center',
-      lineColor: [100, 116, 139],
+      lineColor: [0, 0, 0],
       lineWidth: 0.2
     },
     columnStyles: {
@@ -198,8 +200,8 @@ export async function exportToPDF(registrations: any[], projectName: string) {
 
   try {
     const [regRes, boldRes] = await Promise.all([
-      fetch('/Prompt/Prompt-Regular.ttf'),
-      fetch('/Prompt/Prompt-Bold.ttf')
+      fetch('/THSarabun/THSarabunNew.ttf'),
+      fetch('/THSarabun/THSarabunNew-Bold.ttf')
     ])
     if (regRes.ok && boldRes.ok) {
       const [regBuf, boldBuf] = await Promise.all([
@@ -217,20 +219,20 @@ export async function exportToPDF(registrations: any[], projectName: string) {
         return window.btoa(binary)
       }
 
-      doc.addFileToVFS('Prompt-Regular.ttf', arrayBufferToBase64(regBuf))
-      doc.addFont('Prompt-Regular.ttf', 'Prompt', 'normal')
+      doc.addFileToVFS('THSarabunNew.ttf', arrayBufferToBase64(regBuf))
+      doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal')
 
-      doc.addFileToVFS('Prompt-Bold.ttf', arrayBufferToBase64(boldBuf))
-      doc.addFont('Prompt-Bold.ttf', 'Prompt', 'bold')
+      doc.addFileToVFS('THSarabunNew-Bold.ttf', arrayBufferToBase64(boldBuf))
+      doc.addFont('THSarabunNew-Bold.ttf', 'THSarabunNew', 'bold')
 
-      doc.setFont('Prompt')
+      doc.setFont('THSarabunNew')
     }
   } catch (e) {
     console.warn("Failed to load Thai font for PDF:", e)
   }
 
-  doc.setFontSize(16)
-  doc.setFont('Prompt', 'bold')
+  doc.setFontSize(20)
+  doc.setFont('THSarabunNew', 'bold')
   doc.text(`Registrations for ${projectName}`, 105, 20, { align: 'center' })
 
   const tableData = registrations.map((reg: any, index: number) => [
@@ -247,18 +249,21 @@ export async function exportToPDF(registrations: any[], projectName: string) {
     head: [['No.', 'Student ID', 'Name', 'Grade/Room', 'Number', 'Status']],
     body: tableData,
     styles: {
-      font: 'Prompt',
-      fontSize: 10,
-      cellPadding: 3,
+      font: 'THSarabunNew',
+      fontSize: 15,
+      cellPadding: { top: 5, right: 3, bottom: 2, left: 3 },
       textColor: [0, 0, 0],
-      lineColor: [203, 213, 225],
-      lineWidth: 0.1
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2,
+      valign: 'middle'
     },
     headStyles: {
-      fillColor: [248, 250, 252],
-      textColor: [15, 23, 42],
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
       fontStyle: 'bold',
-      halign: 'center'
+      halign: 'center',
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2
     },
     columnStyles: {
       0: { halign: 'center', cellWidth: 15 },

@@ -130,6 +130,19 @@ export default function AnnouncementInteractive({
       </div>
 
       {/* Content */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          * { font-family: 'THSarabunNew', sans-serif !important; }
+          table { width: 100%; border-collapse: collapse; overflow: visible !important; }
+          tr, th, td { overflow: visible !important; }
+          th, td { border: 1px solid black !important; padding: 6px 8px 4px 8px !important; font-size: 16pt !important; line-height: 1.4 !important; font-weight: normal; vertical-align: middle; }
+          th { font-weight: bold !important; }
+          tr { page-break-inside: avoid; }
+          h1 { font-size: 22pt !important; font-weight: bold !important; line-height: 1.4 !important; }
+          h2 { font-size: 18pt !important; font-weight: bold !important; line-height: 1.4 !important; }
+          p, span, div { line-height: 1.4 !important; overflow: visible !important; }
+        }
+      `}} />
       <div className={`transition-all duration-200 ${isAnimating ? 'opacity-50 scale-[0.998]' : 'opacity-100 scale-100'}`}>
         <div className="bg-white sm:rounded-3xl sm:shadow-sm border-y sm:border border-slate-200 overflow-hidden print:border-none print:shadow-none">
           <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center print:hidden">

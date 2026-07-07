@@ -130,10 +130,18 @@ function SortableProjectItem({
   );
 }
 
-export default function AdminDashboardClient({ initialProjects }: { initialProjects: ProjectWithRelations[] }) {
+export default function AdminDashboardClient({ 
+  initialProjects,
+  initialActiveProjectId = null
+}: { 
+  initialProjects: ProjectWithRelations[],
+  initialActiveProjectId?: string | null
+}) {
   const router = useRouter()
   const [projects, setProjects] = useState(initialProjects)
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(projects[0]?.id || null)
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(
+    initialActiveProjectId || projects[0]?.id || null
+  )
   const [isCreating, setIsCreating] = useState(false)
   const [viewerCounts, setViewerCounts] = useState<Record<string, number>>({})
   const [activeTab, setActiveTab] = useState<'registrations' | 'settings'>('registrations')
@@ -141,18 +149,28 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
   const isDraggingRef = useRef(false)
   const isInitialMount = useRef(true)
 
+  const handleSelectProject = (id: string) => {
+    if (id !== activeProjectId) {
+      setActiveProjectId(id)
+    }
+  }
+
   useEffect(() => {
     const saved = sessionStorage.getItem('admin_active_project_id')
-    if (saved) {
+    if (saved && !initialActiveProjectId) {
       if (initialProjects.some(p => p.id === saved)) {
         setActiveProjectId(saved)
+        document.cookie = `admin_active_project_id=${saved}; path=/; max-age=2592000; SameSite=Lax`
       }
+    } else if (activeProjectId) {
+      document.cookie = `admin_active_project_id=${activeProjectId}; path=/; max-age=2592000; SameSite=Lax`
     }
   }, [])
 
   useEffect(() => {
     if (activeProjectId !== null) {
       sessionStorage.setItem('admin_active_project_id', String(activeProjectId))
+      document.cookie = `admin_active_project_id=${activeProjectId}; path=/; max-age=2592000; SameSite=Lax`
     }
   }, [activeProjectId])
 
@@ -269,7 +287,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
     if (res.success) {
       router.refresh()
       if (res.project?.id) {
-        setActiveProjectId(res.project.id)
+        handleSelectProject(res.project.id)
       }
     } else {
       alert("Error: " + res.error)
@@ -329,7 +347,7 @@ export default function AdminDashboardClient({ initialProjects }: { initialProje
                       key={p.id}
                       project={p}
                       isActive={activeProjectId === p.id}
-                      onClick={() => setActiveProjectId(p.id)}
+                      onClick={() => handleSelectProject(p.id)}
                       onMoveUp={() => handleMoveUp(index)}
                       onMoveDown={() => handleMoveDown(index)}
                       isFirst={index === 0}

@@ -6,6 +6,7 @@ import { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { LogOut, User, History, Users } from "lucide-react"
+import { cookies } from "next/headers"
 
 export const metadata: Metadata = {
   title: "ระบบจัดการผู้ดูแลระบบ",
@@ -42,6 +43,17 @@ export default async function AdminDashboard() {
       }
     }
   })
+
+  // Read active project cookie on server to prevent flash/jump on refresh
+  const cookieStore = await cookies()
+  const savedProjectId = cookieStore.get("admin_active_project_id")?.value
+  
+  let initialActiveProjectId: string | null = null
+  if (savedProjectId && projects.some(p => p.id === savedProjectId)) {
+    initialActiveProjectId = savedProjectId
+  } else if (projects.length > 0) {
+    initialActiveProjectId = projects[0].id
+  }
 
   return (
     <>
@@ -104,7 +116,7 @@ export default async function AdminDashboard() {
       </header>
       
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        <AdminDashboardClient initialProjects={projects} />
+        <AdminDashboardClient initialProjects={projects} initialActiveProjectId={initialActiveProjectId} />
       </main>
     </>
   )
