@@ -135,12 +135,12 @@ export default function AnnouncementInteractive({
           * { font-family: 'THSarabunNew', sans-serif !important; }
           table { width: 100%; border-collapse: collapse; overflow: visible !important; }
           tr, th, td { overflow: visible !important; }
-          th, td { border: 1px solid black !important; padding: 6px 8px 4px 8px !important; font-size: 16pt !important; line-height: 1.4 !important; font-weight: normal; vertical-align: middle; }
+          th, td { border: 1px solid black !important; padding: 3px 6px 2px 6px !important; font-size: 13pt !important; line-height: 1.3 !important; font-weight: normal; vertical-align: middle; }
           th { font-weight: bold !important; }
           tr { page-break-inside: avoid; }
-          h1 { font-size: 22pt !important; font-weight: bold !important; line-height: 1.4 !important; }
-          h2 { font-size: 18pt !important; font-weight: bold !important; line-height: 1.4 !important; }
-          p, span, div { line-height: 1.4 !important; overflow: visible !important; }
+          h1 { font-size: 16pt !important; font-weight: bold !important; line-height: 1.3 !important; }
+          h2 { font-size: 14pt !important; font-weight: bold !important; line-height: 1.3 !important; }
+          p, span, div { font-size: 12pt !important; line-height: 1.3 !important; overflow: visible !important; }
         }
       `}} />
       <div className={`transition-all duration-200 ${isAnimating ? 'opacity-50 scale-[0.998]' : 'opacity-100 scale-100'}`}>

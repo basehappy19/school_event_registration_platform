@@ -120,25 +120,25 @@ export async function exportProjectToPDF(project: any) {
   const timeRange = formatTimeRange(project.activityStartTime, project.activityEndTime)
   const location = project.activityLocation || "โรงเรียนภูเขียว"
 
-  doc.setFontSize(22)
+  doc.setFontSize(16)
   doc.setFont('THSarabunNew', 'bold')
-  doc.text('ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม', 105, 22, { align: 'center' })
-  doc.setFontSize(18)
-  doc.text(project.title || '', 105, 32, { align: 'center' })
+  doc.text('ประกาศรายชื่อผู้มีสิทธิ์เข้าติวเสริม', 105, 20, { align: 'center' })
+  doc.setFontSize(14)
+  doc.text(project.title || '', 105, 28, { align: 'center' })
 
-  let currentY = 42
+  let currentY = 36
   if (project.description) {
-    doc.setFontSize(16)
+    doc.setFontSize(13)
     doc.setFont('THSarabunNew', 'normal')
     const splitDesc = doc.splitTextToSize(project.description, 170)
-    doc.text(splitDesc, 105, currentY, { align: 'center', lineHeightFactor: 1.4 })
-    currentY += splitDesc.length * 8 + 4
+    doc.text(splitDesc, 105, currentY, { align: 'center', lineHeightFactor: 1.3 })
+    currentY += splitDesc.length * 6 + 4
   }
 
-  doc.setFontSize(16)
+  doc.setFontSize(13)
   doc.setFont('THSarabunNew', 'normal')
   doc.text(`${formattedDate} เวลา ${timeRange} ณ ${location}`, 105, currentY, { align: 'center' })
-  currentY += 12
+  currentY += 10
 
   const tableData = approvedRegs.length > 0
     ? approvedRegs.map((reg: any, index: number) => {
@@ -158,8 +158,8 @@ export async function exportProjectToPDF(project: any) {
     body: tableData,
     styles: {
       font: 'THSarabunNew',
-      fontSize: 16,
-      cellPadding: { top: 5, right: 3, bottom: 2, left: 3 },
+      fontSize: 13,
+      cellPadding: { top: 2, right: 3, bottom: 1.5, left: 3 },
       textColor: [0, 0, 0],
       lineColor: [0, 0, 0],
       lineWidth: 0.2,
@@ -231,9 +231,9 @@ export async function exportToPDF(registrations: any[], projectName: string) {
     console.warn("Failed to load Thai font for PDF:", e)
   }
 
-  doc.setFontSize(20)
+  doc.setFontSize(16)
   doc.setFont('THSarabunNew', 'bold')
-  doc.text(`Registrations for ${projectName}`, 105, 20, { align: 'center' })
+  doc.text(`Registrations for ${projectName}`, 105, 18, { align: 'center' })
 
   const tableData = registrations.map((reg: any, index: number) => [
     index + 1,
@@ -245,13 +245,13 @@ export async function exportToPDF(registrations: any[], projectName: string) {
   ])
 
   autoTable(doc, {
-    startY: 30,
+    startY: 26,
     head: [['No.', 'Student ID', 'Name', 'Grade/Room', 'Number', 'Status']],
     body: tableData,
     styles: {
       font: 'THSarabunNew',
-      fontSize: 15,
-      cellPadding: { top: 5, right: 3, bottom: 2, left: 3 },
+      fontSize: 13,
+      cellPadding: { top: 2, right: 3, bottom: 1.5, left: 3 },
       textColor: [0, 0, 0],
       lineColor: [0, 0, 0],
       lineWidth: 0.2,

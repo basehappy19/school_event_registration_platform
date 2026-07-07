@@ -17,22 +17,22 @@ export default function AdminPrintContent({ project, registrations }: { project:
             * { font-family: 'THSarabunNew', sans-serif !important; }
             table { width: 100%; border-collapse: collapse; overflow: visible !important; }
             tr, th, td { overflow: visible !important; }
-            th, td { border: 1px solid black !important; padding: 6px 8px 4px 8px !important; font-size: 16pt !important; line-height: 1.4 !important; font-weight: normal; vertical-align: middle; }
+            th, td { border: 1px solid black !important; padding: 3px 6px 2px 6px !important; font-size: 13pt !important; line-height: 1.3 !important; font-weight: normal; vertical-align: middle; }
             th { font-weight: bold !important; }
             tr { page-break-inside: avoid; }
-            h1 { font-size: 22pt !important; font-weight: bold !important; line-height: 1.4 !important; }
-            h2 { font-size: 18pt !important; font-weight: bold !important; line-height: 1.4 !important; }
-            p, span, div { font-size: 16pt !important; line-height: 1.4 !important; overflow: visible !important; }
+            h1 { font-size: 16pt !important; font-weight: bold !important; line-height: 1.3 !important; }
+            h2 { font-size: 14pt !important; font-weight: bold !important; line-height: 1.3 !important; }
+            p, span, div { font-size: 12pt !important; line-height: 1.3 !important; overflow: visible !important; }
           }
           /* Screen styles */
           #print-content { font-family: 'THSarabunNew', sans-serif !important; }
           table.screen-table { width: 100%; border-collapse: collapse; overflow: visible !important; font-family: 'THSarabunNew', sans-serif !important; }
           table.screen-table tr, table.screen-table th, table.screen-table td { overflow: visible !important; }
-          table.screen-table th, table.screen-table td { border: 1px solid black; padding: 6px 8px 4px 8px !important; font-size: 16pt !important; line-height: 1.4 !important; font-weight: normal; vertical-align: middle; }
+          table.screen-table th, table.screen-table td { border: 1px solid black; padding: 3px 6px 2px 6px !important; font-size: 13pt !important; line-height: 1.3 !important; font-weight: normal; vertical-align: middle; }
           table.screen-table th { font-weight: bold !important; }
-          #print-content h1 { font-size: 22pt !important; font-weight: bold !important; line-height: 1.4 !important; }
-          #print-content h2 { font-size: 18pt !important; font-weight: bold !important; line-height: 1.4 !important; }
-          #print-content p, #print-content span, #print-content div { line-height: 1.4 !important; overflow: visible !important; }
+          #print-content h1 { font-size: 16pt !important; font-weight: bold !important; line-height: 1.3 !important; }
+          #print-content h2 { font-size: 14pt !important; font-weight: bold !important; line-height: 1.3 !important; }
+          #print-content p, #print-content span, #print-content div { line-height: 1.3 !important; overflow: visible !important; }
         `}} />
         
         <div className="p-8 print:p-0 max-w-4xl mx-auto print:max-w-none">
