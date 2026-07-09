@@ -164,7 +164,7 @@ export default async function AnnouncementPage({ params, searchParams }: { param
         {!session ? (
           <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 print:hidden">
             <div className="text-center md:text-left">
-              <h3 className="font-bold text-base sm:text-lg md:text-xl mb-1 break-keep">ต้องการดูข้อมูลการลงทะเบียน หรือแจ้งสละสิทธิ์?</h3>
+              <h3 className="font-bold text-base sm:text-lg md:text-xl mb-1 break-keep">{isRegistrationOpen ? "ต้องการดูข้อมูลการลงทะเบียน หรือแจ้งสละสิทธิ์?" : "ต้องการดูข้อมูลการลงทะเบียนของคุณ?"}</h3>
               <p className="text-indigo-100 text-xs sm:text-sm break-keep leading-relaxed">เข้าสู่ระบบด้วยบัญชี Google ของโรงเรียนเพื่อตรวจสอบสถานะ</p>
             </div>
             <form action={signInWithGoogleCustomRedirect.bind(null, `/announcement/${id}?from_login=1`)} className="shrink-0 w-full md:w-auto">
@@ -181,10 +181,10 @@ export default async function AnnouncementPage({ params, searchParams }: { param
                 <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                 <h3 className="font-bold text-emerald-950 text-base sm:text-lg break-keep">คุณได้ลงทะเบียนในโครงการนี้แล้ว</h3>
               </div>
-              <p className="text-emerald-700 text-xs sm:text-sm break-keep leading-relaxed">ตรวจสอบรายละเอียดข้อมูลที่ลงทะเบียนไว้ หรือดำเนินการแจ้งสละสิทธิ์ได้ที่นี้</p>
+              <p className="text-emerald-700 text-xs sm:text-sm break-keep leading-relaxed">{isRegistrationOpen ? "ตรวจสอบรายละเอียดข้อมูลที่ลงทะเบียนไว้ หรือดำเนินการแจ้งสละสิทธิ์ได้ที่นี้" : "ตรวจสอบรายละเอียดข้อมูลและสถานะการลงทะเบียนของคุณได้ที่นี้"}</p>
             </div>
             <Link href={`/detail/${id}/success`} className="w-full md:w-auto text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-sm shrink-0">
-              ดูข้อมูลการลงทะเบียน / สละสิทธิ์
+              {isRegistrationOpen ? "ดูข้อมูลการลงทะเบียน / สละสิทธิ์" : "ดูข้อมูลการลงทะเบียน"}
             </Link>
           </div>
         ) : !isRegistrationOpen ? (

@@ -97,6 +97,10 @@ export default async function SuccessPage({
     (!registration.project.announcementStartDate || now >= registration.project.announcementStartDate) &&
     (!registration.project.announcementEndDate || now <= registration.project.announcementEndDate)
 
+  const isRegistrationOpen = registration.project.isRegistrationOpen &&
+    (!registration.project.registrationStartDate || now >= registration.project.registrationStartDate) &&
+    (!registration.project.registrationEndDate || now <= registration.project.registrationEndDate)
+
   // Query queue numbers
   const totalQueueNumber = await prisma.registration.count({
     where: {
@@ -264,8 +268,8 @@ export default async function SuccessPage({
           </div>
         )}
 
-        {!isRejected && (
-          <CancelRegistrationButton registrationId={registration.id} />
+        {!isRejected && isRegistrationOpen && (
+          <CancelRegistrationButton registrationId={registration.id} isRegistrationOpen={isRegistrationOpen} />
         )}
       </div>
     </div>

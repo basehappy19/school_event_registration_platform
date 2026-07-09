@@ -5,11 +5,13 @@ import { cancelRegistration } from "@/app/actions/registration"
 import { useRouter } from "next/navigation"
 import { Loader2, XCircle, CheckCircle2, AlertCircle } from "lucide-react"
 
-export default function CancelRegistrationButton({ registrationId }: { registrationId: string }) {
+export default function CancelRegistrationButton({ registrationId, isRegistrationOpen = true }: { registrationId: string | number, isRegistrationOpen?: boolean }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [toast, setToast] = useState<{message: string, type: 'error' | 'success'} | null>(null)
+
+  if (!isRegistrationOpen) return null
 
   useEffect(() => {
     if (toast) {
@@ -28,7 +30,7 @@ export default function CancelRegistrationButton({ registrationId }: { registrat
     setLoading(true)
     setShowModal(false)
     
-    const res = await cancelRegistration(registrationId)
+    const res = await cancelRegistration(String(registrationId))
     if (res && 'error' in res) {
       showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
       setLoading(false)

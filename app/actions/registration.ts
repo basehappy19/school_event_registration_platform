@@ -41,7 +41,21 @@ export async function submitRegistration(data: {
 
     const result = await prisma.$transaction(async (tx) => {
       // Lock Project row to serialize capacity calculations safely across parallel transactions
-      await tx.$queryRaw`SELECT id FROM "Project" WHERE id = ${validData.projectId} FOR UPDATE`
+      const projectList: any[] = await tx.$queryRaw`SELECT * FROM "Project" WHERE id = ${validData.projectId} FOR UPDATE`
+      const project = projectList[0]
+
+      if (!project) {
+        throw new Error("ไม่พบข้อมูลโครงการ")
+      }
+
+      const now = new Date()
+      const isRegistrationOpen = project.isRegistrationOpen &&
+        (!project.registrationStartDate || now >= project.registrationStartDate) &&
+        (!project.registrationEndDate || now <= project.registrationEndDate)
+
+      if (!isRegistrationOpen) {
+        throw new Error("ไม่สามารถลงทะเบียนได้เนื่องจากปิดระบบลงทะเบียนแล้ว")
+      }
 
       // a. Check if already registered for this project
       const existing = await tx.registration.findFirst({
@@ -187,11 +201,20 @@ export async function cancelRegistration(registrationId: string) {
     const result = await prisma.$transaction(async (tx) => {
       const reg = await tx.registration.findUnique({
         where: { id: registrationId },
-        include: { studentProfile: true }
+        include: { studentProfile: true, project: true }
       })
 
       if (!reg || reg.status === 'CANCELLED') {
         throw new Error("Registration not found or already cancelled")
+      }
+
+      const now = new Date()
+      const isRegistrationOpen = reg.project.isRegistrationOpen &&
+        (!reg.project.registrationStartDate || now >= reg.project.registrationStartDate) &&
+        (!reg.project.registrationEndDate || now <= reg.project.registrationEndDate)
+
+      if (!isRegistrationOpen) {
+        throw new Error("ไม่สามารถสละสิทธิ์ได้เนื่องจากปิดระบบลงทะเบียนแล้ว")
       }
 
       // Lock the quota for this grade to prevent race conditions during waitlist promotion
