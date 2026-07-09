@@ -97,6 +97,25 @@ export default async function SuccessPage({
     (!registration.project.announcementStartDate || now >= registration.project.announcementStartDate) &&
     (!registration.project.announcementEndDate || now <= registration.project.announcementEndDate)
 
+  let isTimeOpen = true
+  if (registration.project.registrationStartDate && now < registration.project.registrationStartDate) {
+    isTimeOpen = false
+  }
+  if (registration.project.registrationEndDate && now > registration.project.registrationEndDate) {
+    isTimeOpen = false
+  }
+  const isRegOpen = registration.project.isRegistrationOpen && isTimeOpen
+
+  let isWithin48Hours = false
+  if (registration.project.registrationEndDate) {
+    const cutoff = new Date(registration.project.registrationEndDate.getTime() - 48 * 60 * 60 * 1000)
+    if (now >= cutoff) {
+      isWithin48Hours = true
+    }
+  }
+
+  const canStudentCancel = isRegOpen && !isWithin48Hours
+
   // Query queue numbers
   const totalQueueNumber = await prisma.registration.count({
     where: {
@@ -265,7 +284,11 @@ export default async function SuccessPage({
         )}
 
         {!isRejected && (
-          <CancelRegistrationButton registrationId={registration.id} />
+          <CancelRegistrationButton 
+            registrationId={registration.id} 
+            canStudentCancel={canStudentCancel} 
+            isAdmin={isAdmin} 
+          />
         )}
       </div>
     </div>

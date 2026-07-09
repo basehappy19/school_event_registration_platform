@@ -5,7 +5,7 @@ import { adminAddRegistration, adminDeleteRegistration, adminAcceptRegistration,
 import { exportProjectToPDF, formatExportFilename } from "@/lib/export"
 
 import { useRouter } from "next/navigation"
-import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
+import { Loader2, Plus, Search, Trash2, Printer, Download, CheckCircle2, Clock, Eye, AlertCircle, ChevronLeft, ChevronRight, Sparkles, XCircle, X, MessageSquare } from "lucide-react"
 import { ProjectWithRelations } from "@/app/types"
 import AdminSeatAssistantModal from "./AdminSeatAssistantModal"
 
@@ -30,6 +30,8 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isSearchingStudent, setIsSearchingStudent] = useState(false)
   const [showSeatAssistantModal, setShowSeatAssistantModal] = useState(false)
+  const [selectedCancelReason, setSelectedCancelReason] = useState<{ studentName: string; gradeRoom: string; reason: string; cancelledAt?: any } | null>(null)
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ regId: string; studentName: string; gradeRoom: string } | null>(null)
 
   useEffect(() => {
     if (!studentIdInput || studentIdInput.trim().length < 1) {
@@ -80,15 +82,24 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
     }
   }
 
-  const handleDelete = async (regId: string) => {
-    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบรายชื่อนี้?")) return
+  const handleDelete = (reg: any) => {
+    setDeleteConfirmModal({
+      regId: reg.id,
+      studentName: reg.studentProfile ? `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}` : "นักเรียน",
+      gradeRoom: reg.studentProfile ? `ม.${reg.studentProfile.grade}/${reg.studentProfile.room} เลขที่ ${reg.studentProfile.number}` : ""
+    })
+  }
+
+  const confirmDeleteRegistration = async () => {
+    if (!deleteConfirmModal) return
     setLoading(true)
-    const res = await adminDeleteRegistration(regId)
+    const res = await adminDeleteRegistration(deleteConfirmModal.regId)
     setLoading(false)
     if (res.error) {
       showToast(res.error, 'error')
     } else {
       showToast("ลบรายชื่อสำเร็จ", "success")
+      setDeleteConfirmModal(null)
       router.refresh()
     }
   }
@@ -227,7 +238,8 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
       const term = search.toLowerCase()
       return r.studentProfile.studentId.includes(term) || 
              r.studentProfile.firstName.toLowerCase().includes(term) || 
-             r.studentProfile.lastName.toLowerCase().includes(term)
+             r.studentProfile.lastName.toLowerCase().includes(term) ||
+             (r.cancelReason && r.cancelReason.toLowerCase().includes(term))
     })
     .sort((a, b) => {
       const timeA = new Date(a.createdAt || 0).getTime()
@@ -495,7 +507,8 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
               <option value="ALL">ทุกสถานะ</option>
               <option value="APPROVED">ตัวจริง</option>
               <option value="WAITLISTED">สำรอง</option>
-              <option value="REJECTED">ไม่ผ่าน/สละสิทธิ์</option>
+              <option value="CANCELLED">สละสิทธิ์</option>
+              <option value="REJECTED">ไม่ได้รับสิทธิ์</option>
             </select>
 
             {/* Sort Order */}
@@ -559,6 +572,10 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                       <div className="inline-flex items-center text-[11px] font-bold bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full border border-amber-200">
                         <Clock className="w-3 h-3 mr-1" /> สำรอง
                       </div>
+                    ) : reg.status === 'CANCELLED' ? (
+                      <div className="inline-flex items-center text-[11px] font-bold bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full border border-rose-300">
+                        <XCircle className="w-3 h-3 mr-1" /> สละสิทธิ์
+                      </div>
                     ) : (
                       <div className="inline-flex items-center text-[11px] font-bold bg-rose-50 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
                         <AlertCircle className="w-3 h-3 mr-1" /> ไม่ได้รับสิทธิ์
@@ -586,6 +603,25 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                           const field = project.formFields?.find((f) => f.id === ans.fieldId)
                           return field ? <div key={ans.id}><span className="font-medium text-slate-600">{field.label}:</span> {ans.value}</div> : null
                         })}
+                      </div>
+                    )}
+                    {reg.status === 'CANCELLED' && (
+                      <div className="mt-2 pt-2 border-t border-rose-200 flex items-center justify-between gap-2 bg-rose-50/90 px-2.5 py-1.5 rounded-xl border">
+                        <div className="text-xs text-rose-800 font-medium truncate max-w-[220px]">
+                          <span className="font-bold">💬 เหตุผลสละสิทธิ์: </span>
+                          <span>{reg.cancelReason || "ไม่ระบุเหตุผล"}</span>
+                        </div>
+                        <button
+                          onClick={() => setSelectedCancelReason({
+                            studentName: `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`,
+                            gradeRoom: `ม.${reg.studentProfile.grade}/${reg.studentProfile.room} เลขที่ ${reg.studentProfile.number}`,
+                            reason: reg.cancelReason || "ไม่ระบุเหตุผล",
+                            cancelledAt: reg.createdAt
+                          })}
+                          className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] rounded-lg transition-colors shadow-2xs shrink-0 cursor-pointer"
+                        >
+                          อ่านเหตุผล
+                        </button>
                       </div>
                     )}
                   </td>
@@ -627,6 +663,8 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-300 focus:ring-emerald-500' 
                             : reg.status === 'WAITLISTED' 
                             ? 'bg-amber-50 text-amber-700 border-amber-300 focus:ring-amber-500' 
+                            : reg.status === 'CANCELLED'
+                            ? 'bg-rose-100 text-rose-800 border-rose-300 focus:ring-rose-500'
                             : 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-rose-500'
                         }`}
                         title="เปลี่ยนสถานะผู้ลงทะเบียน"
@@ -634,12 +672,13 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                         <option value="APPROVED">ตัวจริง</option>
                         <option value="WAITLISTED">สำรอง</option>
                         <option value="REJECTED">ไม่ได้รับสิทธิ์</option>
+                        {reg.status === 'CANCELLED' && <option value="CANCELLED" disabled>สละสิทธิ์</option>}
                       </select>
 
                       <button 
-                        onClick={() => handleDelete(reg.id)}
+                        onClick={() => handleDelete(reg)}
                         disabled={loading}
-                        className="bg-rose-50 text-rose-500 hover:text-rose-700 hover:bg-rose-100 border border-rose-200 p-1.5 rounded-lg transition-colors flex items-center justify-center shrink-0 shadow-2xs"
+                        className="bg-rose-50 text-rose-500 hover:text-rose-700 hover:bg-rose-100 border border-rose-200 p-1.5 rounded-lg transition-colors flex items-center justify-center shrink-0 shadow-2xs cursor-pointer"
                         title="ลบรายชื่อ"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -677,6 +716,10 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                     <div className="inline-flex items-center text-[11px] font-bold bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full border border-amber-200">
                       <Clock className="w-3 h-3 mr-1" /> สำรอง
                     </div>
+                  ) : reg.status === 'CANCELLED' ? (
+                    <div className="inline-flex items-center text-[11px] font-bold bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full border border-rose-300">
+                      <XCircle className="w-3 h-3 mr-1" /> สละสิทธิ์
+                    </div>
                   ) : (
                     <div className="inline-flex items-center text-[11px] font-bold bg-rose-50 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
                       <AlertCircle className="w-3 h-3 mr-1" /> ไม่ได้รับสิทธิ์
@@ -684,9 +727,9 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                   )}
                 </div>
                 <button 
-                  onClick={() => handleDelete(reg.id)}
+                  onClick={() => handleDelete(reg)}
                   disabled={loading}
-                  className="bg-rose-50 text-rose-500 hover:text-rose-700 hover:bg-rose-100 border border-rose-200 p-1.5 rounded-lg transition-colors flex items-center justify-center shrink-0 shadow-2xs"
+                  className="bg-rose-50 text-rose-500 hover:text-rose-700 hover:bg-rose-100 border border-rose-200 p-1.5 rounded-lg transition-colors flex items-center justify-center shrink-0 shadow-2xs cursor-pointer"
                   title="ลบรายชื่อ"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -712,6 +755,25 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                       const field = project.formFields?.find((f) => f.id === ans.fieldId)
                       return field ? <div key={ans.id}><span className="font-semibold text-slate-700">{field.label}:</span> {ans.value}</div> : null
                     })}
+                  </div>
+                )}
+                {reg.status === 'CANCELLED' && (
+                  <div className="mt-2 pt-2 border-t border-rose-200 flex items-center justify-between gap-2 bg-rose-50/90 p-2.5 rounded-xl border">
+                    <div className="text-xs text-rose-800 font-medium truncate flex-1">
+                      <span className="font-bold">💬 เหตุผลสละสิทธิ์: </span>
+                      <span>{reg.cancelReason || "ไม่ระบุเหตุผล"}</span>
+                    </div>
+                    <button
+                      onClick={() => setSelectedCancelReason({
+                        studentName: `${reg.studentProfile.prefix}${reg.studentProfile.firstName} ${reg.studentProfile.lastName}`,
+                        gradeRoom: `ม.${reg.studentProfile.grade}/${reg.studentProfile.room} เลขที่ ${reg.studentProfile.number}`,
+                        reason: reg.cancelReason || "ไม่ระบุเหตุผล",
+                        cancelledAt: reg.createdAt
+                      })}
+                      className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] rounded-lg transition-colors shadow-2xs shrink-0 cursor-pointer"
+                    >
+                      อ่านเหตุผล
+                    </button>
                   </div>
                 )}
               </div>
@@ -742,12 +804,15 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-300 focus:ring-emerald-500' 
                         : reg.status === 'WAITLISTED' 
                         ? 'bg-amber-50 text-amber-700 border-amber-300 focus:ring-amber-500' 
+                        : reg.status === 'CANCELLED'
+                        ? 'bg-rose-100 text-rose-800 border-rose-300 focus:ring-rose-500'
                         : 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-rose-500'
                     }`}
                   >
                     <option value="APPROVED">ตัวจริง</option>
                     <option value="WAITLISTED">สำรอง</option>
                     <option value="REJECTED">ไม่ได้รับสิทธิ์</option>
+                    {reg.status === 'CANCELLED' && <option value="CANCELLED" disabled>สละสิทธิ์</option>}
                   </select>
                   <a
                     href={`/detail/${project.id}/success?studentId=${reg.studentProfile.studentId}`}
@@ -799,6 +864,112 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
           </div>
         )}
       </div>
+
+      {/* Cancel Reason Modal */}
+      {selectedCancelReason && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-left animate-in zoom-in-95 duration-200 border border-slate-100">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
+                  <XCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">เหตุผลการสละสิทธิ์</h3>
+                  <p className="text-xs font-semibold text-rose-700 mt-0.5">{selectedCancelReason.studentName}</p>
+                  <p className="text-[11px] text-slate-500">{selectedCancelReason.gradeRoom}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedCancelReason(null)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="text-xs font-bold text-slate-600 flex items-center justify-between">
+                <span>ข้อความ/เหตุผลที่นักเรียนระบุ:</span>
+                {selectedCancelReason.cancelledAt && (
+                  <span className="text-[11px] text-slate-400 font-normal">
+                    {new Date(selectedCancelReason.cancelledAt).toLocaleString("th-TH", {
+                      timeZone: "Asia/Bangkok",
+                      day: "numeric",
+                      month: "short",
+                      year: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })} น.
+                  </span>
+                )}
+              </div>
+              <div className="bg-rose-50/80 border border-rose-200 rounded-xl p-4 text-sm font-medium text-slate-800 whitespace-pre-wrap leading-relaxed min-h-[90px] shadow-2xs">
+                {selectedCancelReason.reason}
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setSelectedCancelReason(null)}
+                className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
+              >
+                รับทราบ และปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-left animate-in zoom-in-95 duration-200 border border-slate-100">
+            <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+              <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg">ยืนยันลบรายชื่อผู้ลงทะเบียน</h3>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">คุณต้องการลบรายชื่อนี้ใช่หรือไม่?</p>
+              </div>
+            </div>
+
+            <div className="my-5 p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <div className="text-sm font-bold text-slate-900">
+                {deleteConfirmModal.studentName}
+              </div>
+              {deleteConfirmModal.gradeRoom && (
+                <div className="text-xs font-semibold text-indigo-600">
+                  {deleteConfirmModal.gradeRoom}
+                </div>
+              )}
+              <div className="pt-2 mt-2 border-t border-slate-200/60 text-xs text-rose-700 font-medium flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>คำเตือน: ข้อมูลการลงทะเบียนและการตอบคำถามทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                onClick={() => setDeleteConfirmModal(null)}
+                disabled={loading}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={confirmDeleteRegistration}
+                disabled={loading}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all shadow-2xs flex items-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                <span>ยืนยันลบรายชื่อ</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

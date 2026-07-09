@@ -421,13 +421,32 @@ export default function AdminLogsClient({
     return { renderedDetails, actionBadge };
   }
 
+  const getCancelReason = (details: string | null) => {
+    if (!details) return null
+    try {
+      if (details.startsWith("{") || details.startsWith("[")) {
+        const parsed = JSON.parse(details)
+        if (parsed && typeof parsed.reason === "string" && parsed.reason.trim()) {
+          return parsed.reason.trim()
+        }
+      } else if (details.trim() && !details.includes("formAnswers")) {
+        return details.trim()
+      }
+    } catch (e) {
+      // Ignore parse error
+    }
+    return null
+  }
+
   const filteredRegLogs = registrationLogs.filter(log => {
     const s = searchTerm.toLowerCase()
+    const cancelReason = getCancelReason(log.details)
     return (
       (log.studentId && log.studentId.toLowerCase().includes(s)) ||
       (log.studentName && log.studentName.toLowerCase().includes(s)) ||
       (log.projectTitle && log.projectTitle.toLowerCase().includes(s)) ||
-      (log.performedBy && log.performedBy.toLowerCase().includes(s))
+      (log.performedBy && log.performedBy.toLowerCase().includes(s)) ||
+      (cancelReason && cancelReason.toLowerCase().includes(s))
     )
   })
 
@@ -563,38 +582,47 @@ export default function AdminLogsClient({
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredRegLogs.length > 0 ? (
-                    filteredRegLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/70 transition-colors align-top">
-                        <td className="px-5 py-4 text-slate-500 font-medium whitespace-nowrap">
-                          {formatDateTime(log.createdAt)}
-                        </td>
-                        <td className="px-5 py-4 align-top">
-                          {renderProjectCell(log.projectId, log.projectTitle)}
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="font-bold text-slate-900">{log.studentName || log.studentId}</div>
-                          <div className="text-xs text-slate-500">รหัส: {log.studentId} ({log.gradeRoom || "-"})</div>
-                        </td>
-                        <td className="px-5 py-4 text-center">
-                          {getActionBadge(log.action)}
-                        </td>
-                        <td className="px-5 py-4 text-center">
-                          <div className="inline-flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 text-xs">
-                            {getStatusBadge(log.previousStatus)}
-                            <ArrowRight className="w-3 h-3 text-slate-400" />
-                            {getStatusBadge(log.newStatus)}
-                          </div>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className="font-mono text-xs px-2 py-1 bg-slate-100 rounded-md text-slate-700">
-                            {log.performedBy}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-slate-500 font-mono text-xs">
-                          {log.ipAddress || "-"}
-                        </td>
-                      </tr>
-                    ))
+                    filteredRegLogs.map((log) => {
+                      const cancelReason = getCancelReason(log.details)
+                      return (
+                        <tr key={log.id} className="hover:bg-slate-50/70 transition-colors align-top">
+                          <td className="px-5 py-4 text-slate-500 font-medium whitespace-nowrap">
+                            {formatDateTime(log.createdAt)}
+                          </td>
+                          <td className="px-5 py-4 align-top">
+                            {renderProjectCell(log.projectId, log.projectTitle)}
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="font-bold text-slate-900">{log.studentName || log.studentId}</div>
+                            <div className="text-xs text-slate-500">รหัส: {log.studentId} ({log.gradeRoom || "-"})</div>
+                            {cancelReason && (
+                              <div className="mt-1.5 p-2 bg-rose-50 border border-rose-200/80 rounded-xl text-xs text-rose-800 font-medium max-w-[280px] whitespace-normal">
+                                <span className="font-bold">เหตุผลสละสิทธิ์: </span>
+                                <span>{cancelReason}</span>
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-5 py-4 text-center">
+                            {getActionBadge(log.action)}
+                          </td>
+                          <td className="px-5 py-4 text-center">
+                            <div className="inline-flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 text-xs">
+                              {getStatusBadge(log.previousStatus)}
+                              <ArrowRight className="w-3 h-3 text-slate-400" />
+                              {getStatusBadge(log.newStatus)}
+                            </div>
+                          </td>
+                          <td className="px-5 py-4">
+                            <span className="font-mono text-xs px-2 py-1 bg-slate-100 rounded-md text-slate-700">
+                              {log.performedBy}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-slate-500 font-mono text-xs">
+                            {log.ipAddress || "-"}
+                          </td>
+                        </tr>
+                      )
+                    })
                   ) : (
                     <tr>
                       <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
@@ -609,34 +637,43 @@ export default function AdminLogsClient({
             {/* Mobile Card List */}
             <div className="md:hidden divide-y divide-slate-100">
               {filteredRegLogs.length > 0 ? (
-                filteredRegLogs.map((log) => (
-                  <div key={log.id} className="p-4 hover:bg-slate-50/70 transition-colors space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="font-bold text-slate-900 text-sm truncate">{log.studentName || log.studentId}</div>
-                        <div className="text-xs text-slate-500 font-medium">รหัส: {log.studentId} ({log.gradeRoom || "-"})</div>
-                      </div>
-                      <div className="shrink-0">{getActionBadge(log.action)}</div>
-                    </div>
-
-                    <div className="text-xs text-slate-700 bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-2">
-                      <div className="font-semibold text-indigo-900">{renderProjectCell(log.projectId, log.projectTitle)}</div>
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/80 flex-wrap">
-                        <span className="text-slate-400 text-[11px] font-medium">การเปลี่ยนสถานะ:</span>
-                        <div className="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
-                          {getStatusBadge(log.previousStatus)}
-                          <ArrowRight className="w-3 h-3 text-slate-400" />
-                          {getStatusBadge(log.newStatus)}
+                filteredRegLogs.map((log) => {
+                  const cancelReason = getCancelReason(log.details)
+                  return (
+                    <div key={log.id} className="p-4 hover:bg-slate-50/70 transition-colors space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-bold text-slate-900 text-sm truncate">{log.studentName || log.studentId}</div>
+                          <div className="text-xs text-slate-500 font-medium">รหัส: {log.studentId} ({log.gradeRoom || "-"})</div>
                         </div>
+                        <div className="shrink-0">{getActionBadge(log.action)}</div>
+                      </div>
+
+                      <div className="text-xs text-slate-700 bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-2">
+                        <div className="font-semibold text-indigo-900">{renderProjectCell(log.projectId, log.projectTitle)}</div>
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/80 flex-wrap">
+                          <span className="text-slate-400 text-[11px] font-medium">การเปลี่ยนสถานะ:</span>
+                          <div className="inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                            {getStatusBadge(log.previousStatus)}
+                            <ArrowRight className="w-3 h-3 text-slate-400" />
+                            {getStatusBadge(log.newStatus)}
+                          </div>
+                        </div>
+                        {cancelReason && (
+                          <div className="mt-2 p-2 bg-rose-50 border border-rose-200/80 rounded-xl text-xs text-rose-800 font-medium">
+                            <span className="font-bold">เหตุผลสละสิทธิ์: </span>
+                            <span>{cancelReason}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100 flex-wrap gap-1">
+                        <div>{formatDateTime(log.createdAt)}</div>
+                        <div className="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">โดย: {log.performedBy}</div>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100 flex-wrap gap-1">
-                      <div>{formatDateTime(log.createdAt)}</div>
-                      <div className="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-semibold">โดย: {log.performedBy}</div>
-                    </div>
-                  </div>
-                ))
+                  )
+                })
               ) : (
                 <div className="py-12 text-center text-slate-400 text-sm font-medium">ไม่พบข้อมูลประวัติการลงทะเบียน/สละสิทธิ์</div>
               )}

@@ -136,6 +136,7 @@ model Registration {
   projectId       String
   studentId       String
   status          RegistrationStatus @default(WAITLISTED)
+  cancelReason    String?
 
   createdAt DateTime @default(now())
 

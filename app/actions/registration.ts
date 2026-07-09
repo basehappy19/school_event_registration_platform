@@ -90,6 +90,7 @@ export async function submitRegistration(data: {
           where: { id: existing.id },
           data: {
             status: status,
+            cancelReason: null,
             createdAt: new Date(), // Reset timestamp for new queue position
             answers: {
               create: validData.formAnswers.map(ans => ({
@@ -159,7 +160,11 @@ export async function submitRegistration(data: {
   }
 }
 
-export async function cancelRegistration(registrationId: string) {
+export async function cancelRegistration(registrationId: string, reason?: string) {
+  if (!reason || !reason.trim()) {
+    return { error: 'กรุณากรอกเหตุผลในการสละสิทธิ์' }
+  }
+
   const session = await auth()
   const headersList = await headers()
   const ip = getClientIp(headersList)
@@ -187,7 +192,7 @@ export async function cancelRegistration(registrationId: string) {
     const result = await prisma.$transaction(async (tx) => {
       const reg = await tx.registration.findUnique({
         where: { id: registrationId },
-        include: { studentProfile: true }
+        include: { studentProfile: true, project: true }
       })
 
       if (!reg || reg.status === 'CANCELLED') {
@@ -206,9 +211,37 @@ export async function cancelRegistration(registrationId: string) {
         throw new Error("Unauthorized to cancel this registration")
       }
 
-      // 2. Delete Registration Completely
-      await tx.registration.delete({
-        where: { id: registrationId }
+      // Verify cancellation window rules strictly (no admin override)
+      const now = new Date()
+      const proj = reg.project
+      let isTimeOpen = true
+      if (proj.registrationStartDate && now < proj.registrationStartDate) {
+        isTimeOpen = false
+      }
+      if (proj.registrationEndDate && now > proj.registrationEndDate) {
+        isTimeOpen = false
+      }
+      const isRegistrationOpen = proj.isRegistrationOpen && isTimeOpen
+
+      let isWithin48Hours = false
+      if (proj.registrationEndDate) {
+        const cutoff = new Date(proj.registrationEndDate.getTime() - 48 * 60 * 60 * 1000)
+        if (now >= cutoff) {
+          isWithin48Hours = true
+        }
+      }
+
+      if (!isRegistrationOpen || isWithin48Hours) {
+        throw new Error("ไม่สามารถสละสิทธิ์ได้เนื่องจากเลยเวลาเปิดลงทะเบียน หรือเข้าสู่ช่วงก่อนปิดลงทะเบียน 48 ชั่วโมง หากต้องการสละสิทธิ์ติดต่อครูปูนาเท่านั้น")
+      }
+
+      // 2. Update Registration status instead of deleting so admin can read reason and student name stays in DB
+      await tx.registration.update({
+        where: { id: registrationId },
+        data: {
+          status: 'CANCELLED',
+          cancelReason: reason.trim()
+        }
       })
 
       // Create Audit Log and Registration Log for Cancellation
@@ -219,7 +252,7 @@ export async function cancelRegistration(registrationId: string) {
           studentId: reg.studentId,
           ipAddress: ip,
           userAgent: userAgent,
-          payload: JSON.stringify({ registrationId })
+          payload: JSON.stringify({ registrationId, reason: reason.trim() })
         }
       })
 
@@ -234,10 +267,10 @@ export async function cancelRegistration(registrationId: string) {
           gradeRoom: `ม.${reg.studentProfile.grade}/${reg.studentProfile.room}`,
           previousStatus: reg.status,
           newStatus: "CANCELLED",
-          performedBy: `STUDENT:${reg.studentId}`,
+          performedBy: isAdmin ? `ADMIN:${session?.user?.email || "Unknown"}` : `STUDENT:${reg.studentId}`,
           ipAddress: ip,
           userAgent: userAgent,
-          details: JSON.stringify({ registrationId })
+          details: JSON.stringify({ registrationId, reason: reason.trim() })
         }
       })
 
