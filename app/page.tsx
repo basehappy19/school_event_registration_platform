@@ -3,7 +3,8 @@ import prisma from "@/lib/prisma"
 
 export const revalidate = 60
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams?: Promise<{ cancelled?: string }> }) {
+  const resolvedParams = searchParams ? await searchParams : {}
   let project = await prisma.project.findFirst({
     where: { isPublished: true },
     orderBy: [
@@ -21,6 +22,9 @@ export default async function Home() {
   }
 
   if (project) {
+    if (resolvedParams.cancelled === '1') {
+      redirect(`/detail/${project.id}?cancelled=1`)
+    }
     redirect(`/detail/${project.id}`)
   }
 

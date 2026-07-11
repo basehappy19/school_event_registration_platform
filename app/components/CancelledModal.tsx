@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { CheckCircle2 } from "lucide-react"
 
 function CancelledModalContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -17,7 +18,7 @@ function CancelledModalContent() {
 
   const handleClose = () => {
     setIsOpen(false)
-    router.replace("/")
+    router.replace(pathname || "/")
   }
 
   if (!isOpen) return null

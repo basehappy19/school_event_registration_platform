@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma"
 import RegistrationWizard from "./components/RegistrationWizard"
 import ViewerTracker from "./components/ViewerTracker"
 import AppNavbar from "@/app/components/AppNavbar"
+import CancelledModal from "@/app/components/CancelledModal"
 import { auth } from "@/auth"
 import { unstable_cache } from "next/cache"
 
@@ -95,6 +96,7 @@ export default async function ProjectDetail({ params, searchParams }: { params: 
   return (
     <>
       <AppNavbar />
+      <CancelledModal />
       <div className="min-h-screen bg-transparent font-sans selection:bg-indigo-100 selection:text-indigo-900 py-0 sm:py-12 px-0 sm:px-6 lg:px-8">
         <ViewerTracker projectId={project.id} />
         <div className="max-w-5xl mx-auto">

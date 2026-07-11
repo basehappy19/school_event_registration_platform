@@ -48,7 +48,7 @@ export default function CancelRegistrationButton({
       showToast("เกิดข้อผิดพลาด: " + res.error, 'error')
       setLoading(false)
     } else {
-      router.push("/?cancelled=1")
+      router.push(res && 'projectId' in res && res.projectId ? `/detail/${res.projectId}?cancelled=1` : "/?cancelled=1")
       router.refresh()
     }
   }

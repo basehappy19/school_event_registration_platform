@@ -608,7 +608,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                     {reg.status === 'CANCELLED' && (
                       <div className="mt-2 pt-2 border-t border-rose-200 flex items-center justify-between gap-2 bg-rose-50/90 px-2.5 py-1.5 rounded-xl border">
                         <div className="text-xs text-rose-800 font-medium truncate max-w-[220px]">
-                          <span className="font-bold">💬 เหตุผลสละสิทธิ์: </span>
+                          <span className="font-bold">เหตุผลสละสิทธิ์: </span>
                           <span>{reg.cancelReason || "ไม่ระบุเหตุผล"}</span>
                         </div>
                         <button
@@ -760,7 +760,7 @@ export default function AdminRegistrationList({ project }: { project: ProjectWit
                 {reg.status === 'CANCELLED' && (
                   <div className="mt-2 pt-2 border-t border-rose-200 flex items-center justify-between gap-2 bg-rose-50/90 p-2.5 rounded-xl border">
                     <div className="text-xs text-rose-800 font-medium truncate flex-1">
-                      <span className="font-bold">💬 เหตุผลสละสิทธิ์: </span>
+                      <span className="font-bold">เหตุผลสละสิทธิ์: </span>
                       <span>{reg.cancelReason || "ไม่ระบุเหตุผล"}</span>
                     </div>
                     <button

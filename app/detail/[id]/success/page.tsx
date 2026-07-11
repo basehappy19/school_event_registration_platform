@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, AlertCircle, Megaphone } from "lucide-react"
+import { CheckCircle2, Clock, ArrowLeft, User, Calendar, Hash, BookOpen, AlertCircle, Megaphone, XCircle } from "lucide-react"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
@@ -91,6 +91,11 @@ export default async function SuccessPage({
 
   const isApproved = registration.status === "APPROVED"
   const isRejected = registration.status === "REJECTED"
+  const isCancelled = registration.status === "CANCELLED"
+
+  if (!isAdmin && isCancelled) {
+    redirect(`/detail/${id}`)
+  }
 
   const now = new Date()
   const isAnnouncementOpen = registration.project.isAnnouncementOpen &&
@@ -165,6 +170,10 @@ export default async function SuccessPage({
             <div className="w-24 h-24 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white">
               <AlertCircle className="w-12 h-12" />
             </div>
+          ) : isCancelled ? (
+            <div className="w-24 h-24 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white">
+              <XCircle className="w-12 h-12" />
+            </div>
           ) : (
             <div className="w-24 h-24 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white">
               <Clock className="w-12 h-12" />
@@ -172,7 +181,7 @@ export default async function SuccessPage({
           )}
 
           <h1 className="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">
-            {isApproved ? "การลงทะเบียนเสร็จสมบูรณ์" : isRejected ? "ไม่ได้รับสิทธิ์เข้าร่วมโครงการ" : "นักเรียนอยู่ในรายชื่อสำรอง"}
+            {isApproved ? "การลงทะเบียนเสร็จสมบูรณ์" : isRejected ? "ไม่ได้รับสิทธิ์เข้าร่วมโครงการ" : isCancelled ? "นักเรียนสละสิทธิ์การเข้าร่วมโครงการแล้ว" : "นักเรียนอยู่ในรายชื่อสำรอง"}
           </h1>
           
           <div className="text-slate-600 text-base sm:text-lg leading-relaxed">
@@ -183,6 +192,18 @@ export default async function SuccessPage({
               </div>
             ) : isRejected ? (
               <p className="mt-2">เนื่องจากโควตารับลงทะเบียนเต็มแล้ว จึงไม่สามารถมอบสิทธิ์เข้าร่วมโครงการให้ได้ในครั้งนี้</p>
+            ) : isCancelled ? (
+              <div className="space-y-3 mt-2">
+                <p className="font-medium text-rose-700">นักเรียนได้ทำการสละสิทธิ์การเข้าร่วมโครงการนี้เรียบร้อยแล้ว</p>
+                {registration.cancelReason && (
+                  <div className="mt-3 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-sm font-medium max-w-md mx-auto text-left shadow-2xs">
+                    <span className="font-bold flex items-center gap-1.5 mb-1 text-rose-900">
+                      เหตุผลที่สละสิทธิ์:
+                    </span>
+                    <span className="leading-relaxed block text-slate-700">{registration.cancelReason}</span>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="space-y-1.5 mt-2">
                 <p>ตอนนี้จำนวนที่นั่งเต็มแล้ว ระบบได้บันทึกรายชื่อไว้ในลำดับสำรอง</p>
@@ -225,13 +246,13 @@ export default async function SuccessPage({
                 <p className="text-sm text-slate-500 mb-1 flex items-center">
                   <CheckCircle2 className="w-4 h-4 mr-2" /> สถานะการได้รับสิทธิ์
                 </p>
-                <p className={`font-semibold ${isApproved ? 'text-emerald-600' : isRejected ? 'text-rose-600' : 'text-amber-600'}`}>
-                  {isApproved ? "ได้รับสิทธิ์ (ตัวจริง)" : isRejected ? "ไม่ได้รับสิทธิ์" : "รอเรียกสิทธิ์ (สำรอง)"}
+                <p className={`font-semibold ${isApproved ? 'text-emerald-600' : isRejected || isCancelled ? 'text-rose-600' : 'text-amber-600'}`}>
+                  {isApproved ? "ได้รับสิทธิ์ (ตัวจริง)" : isRejected ? "ไม่ได้รับสิทธิ์" : isCancelled ? "สละสิทธิ์" : "รอเรียกสิทธิ์ (สำรอง)"}
                 </p>
               </div>
             </div>
 
-            {!isRejected && (
+            {!isRejected && !isCancelled && (
               <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-slate-500 mb-1 flex items-center">
@@ -257,7 +278,7 @@ export default async function SuccessPage({
         {/* Support Contact Card */}
         <div className="mt-8 mb-6 bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center shadow-2xs">
           <p className="text-xs sm:text-sm font-semibold text-slate-700 mb-3.5">
-            💬 มีข้อสงสัยหรือเจอปัญหาในการลงทะเบียน?
+            มีข้อสงสัยหรือเจอปัญหาในการลงทะเบียน?
           </p>
           <a 
             href="https://www.instagram.com/base_happy19/" 
@@ -283,7 +304,7 @@ export default async function SuccessPage({
           </div>
         )}
 
-        {!isRejected && (
+        {!isRejected && !isCancelled && (
           <CancelRegistrationButton 
             registrationId={registration.id} 
             canStudentCancel={canStudentCancel} 
